@@ -19,6 +19,9 @@ app.use(cookieParser())
 
 // Routes
 import authRouter from "./route/auth.route.js";
+import studentRouter from "./route/student.route.js";
+
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/students", studentRouter);
 
 export { app }
