@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import axios from 'axios'
 
 const AuthContext = createContext(null)
 
 // Mock credentials — replace with API call when backend is ready
 const MOCK_USERS = [
-    { username: 'receptionist', password: 'mind123', role: 'receptionist', name: 'Receptionist' },
+    { username: 'receptionist', password: 'Recept@123', role: 'receptionist', name: 'Receptionist' },
 ]
 
 export function AuthProvider({ children }) {
@@ -24,17 +25,51 @@ export function AuthProvider({ children }) {
         setLoading(false)
     }, [])
 
-    const login = (username, password) => {
-        const user = MOCK_USERS.find(
-            (u) => u.username === username && u.password === password
-        )
-        if (!user) {
-            return { success: false, message: 'Invalid username or password' }
+    const login = async (username, password) => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/v1/auth/login', {
+                username,
+                password
+            })
+
+            const { data } = response
+            // Assuming backend returns user object with token/role etc.
+            // Adjust based on typical backend response: { success: true, user: { ... } }
+            const userData = {
+                username: data.user.username,
+                role: data.user.role,
+                name: data.user.name,
+                token: data.token // Store token for future API calls
+            }
+
+            setCurrentUser(userData)
+            localStorage.setItem('mindseeds_user', JSON.stringify(userData))
+            return { success: true, role: data.user.role }
+        } catch (error) {
+            console.error('Login error:', error)
+
+            if (!error.response) {
+                // Connection error — Check mock fallback for easier development
+                const mockUser = MOCK_USERS.find(
+                    (u) => u.username === username && u.password === password
+                )
+
+                if (mockUser) {
+                    const userData = { username: mockUser.username, role: mockUser.role, name: mockUser.name }
+                    setCurrentUser(userData)
+                    localStorage.setItem('mindseeds_user', JSON.stringify(userData))
+                    return { success: true, role: mockUser.role, isMock: true }
+                }
+
+                return {
+                    success: false,
+                    message: 'Cannot connect to server (ERR_CONNECTION_REFUSED). Please ensure Backend is running on port 8000.'
+                }
+            }
+
+            const message = error.response.data?.message || 'Invalid username or password'
+            return { success: false, message }
         }
-        const userData = { username: user.username, role: user.role, name: user.name }
-        setCurrentUser(userData)
-        localStorage.setItem('mindseeds_user', JSON.stringify(userData))
-        return { success: true, role: user.role }
     }
 
     const logout = () => {
