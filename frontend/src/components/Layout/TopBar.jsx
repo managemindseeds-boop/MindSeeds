@@ -5,19 +5,26 @@ import { useLocation } from 'react-router-dom'
 const pageTitles = {
     '/receptionist/dashboard': 'Dashboard',
     '/receptionist/students': 'Students',
+    '/receptionist/students/add': 'Add Student',
     '/receptionist/demos': 'Demo Lectures',
     '/receptionist/admissions': 'Admissions',
     '/receptionist/fees': 'Fees',
+}
+
+function getPageTitle(pathname) {
+    if (pageTitles[pathname]) return pageTitles[pathname]
+    if (pathname.startsWith('/receptionist/students/')) return 'Student Details'
+    return 'MindSeeds'
 }
 
 function TopBar() {
     const { currentUser } = useAuth()
     const location = useLocation()
 
-    const pageTitle = pageTitles[location.pathname] || 'MindSeeds'
+    const pageTitle = getPageTitle(location.pathname)
 
     return (
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10">
             {/* Page Title */}
             <h2 className="text-lg font-semibold text-gray-800">{pageTitle}</h2>
 

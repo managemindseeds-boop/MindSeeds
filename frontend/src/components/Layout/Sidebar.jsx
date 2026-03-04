@@ -33,7 +33,7 @@ function Sidebar() {
     return (
         <aside
             className={`${collapsed ? 'w-20' : 'w-64'} 
-                min-h-screen bg-black text-white flex flex-col transition-all duration-300 ease-in-out`}
+                h-screen sticky top-0 bg-black text-white flex flex-col transition-all duration-300 ease-in-out`}
         >
             {/* Logo / Brand */}
             <div className="flex items-center justify-between px-5 py-6 border-b border-gray-800">

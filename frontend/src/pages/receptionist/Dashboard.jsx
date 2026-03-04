@@ -1,4 +1,5 @@
 import { Users, CalendarCheck, ClipboardCheck, IndianRupee, UserPlus, CalendarPlus } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 const kpiCards = [
     { label: 'Total Enquiries', value: 48, icon: Users, color: 'bg-blue-50 text-blue-600', iconBg: 'bg-blue-100' },
@@ -24,6 +25,8 @@ const activityColors = {
 }
 
 function Dashboard() {
+    const navigate = useNavigate()
+
     return (
         <div className="space-y-6">
             {/* KPI Cards */}
@@ -68,11 +71,17 @@ function Dashboard() {
                 <div className="bg-white rounded-xl border border-gray-200 p-6">
                     <h3 className="text-base font-semibold text-gray-800 mb-4">Quick Actions</h3>
                     <div className="space-y-3">
-                        <button className="w-full flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer">
+                        <button
+                            onClick={() => navigate('/receptionist/students/add')}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer"
+                        >
                             <UserPlus size={18} />
                             Add New Student
                         </button>
-                        <button className="w-full flex items-center gap-3 px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium cursor-pointer">
+                        <button
+                            onClick={() => navigate('/receptionist/demos')}
+                            className="w-full flex items-center gap-3 px-4 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-sm font-medium cursor-pointer"
+                        >
                             <CalendarPlus size={18} />
                             Schedule Demo
                         </button>
