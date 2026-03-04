@@ -13,6 +13,7 @@ import AddStudent from './pages/receptionist/AddStudent'
 import StudentDetail from './pages/receptionist/StudentDetail'
 import DemoList from './pages/receptionist/DemoList'
 import MarkAttendance from './pages/receptionist/MarkAttendance'
+import AdminDashboard from './pages/admin/Dashboard'
 
 function App() {
   return (
@@ -40,6 +41,16 @@ function App() {
                 <Route path="demos" element={<DemoList />} />
                 <Route path="demos/:studentId" element={<MarkAttendance />} />
               </Route>
+
+              {/* Protected admin route */}
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
 
               {/* Catch-all → redirect to login */}
               <Route path="*" element={<Navigate to="/login" replace />} />

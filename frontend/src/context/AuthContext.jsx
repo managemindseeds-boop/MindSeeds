@@ -6,6 +6,7 @@ const AuthContext = createContext(null)
 // Mock credentials — replace with API call when backend is ready
 const MOCK_USERS = [
     { username: 'receptionist', password: 'Recept@123', role: 'receptionist', name: 'Receptionist' },
+    { username: 'admin', password: 'Admin@123', role: 'admin', name: 'Admin' },
 ]
 
 export function AuthProvider({ children }) {
