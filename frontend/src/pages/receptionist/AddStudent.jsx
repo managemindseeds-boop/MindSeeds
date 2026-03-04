@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStudents } from '../../context/StudentContext'
+import { useAuth } from '../../context/AuthContext'
 import { ArrowLeft, Save } from 'lucide-react'
+
+const genders = [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' },
+    { label: 'Other', value: 'other' },
+]
 
 const classes = ['8th', '9th', '10th', '11th', '12th']
 const branches = ['Vijay Nagar', 'Palasia', 'Sapna Sangeeta', 'AB Road', 'Bhawarkuan']
@@ -9,17 +16,22 @@ const branches = ['Vijay Nagar', 'Palasia', 'Sapna Sangeeta', 'AB Road', 'Bhawar
 function AddStudent() {
     const navigate = useNavigate()
     const { addStudent } = useStudents()
+    const { currentUser } = useAuth()
 
     const [form, setForm] = useState({
         name: '',
         phone: '',
         email: '',
+        gender: '',
         parentName: '',
         parentPhone: '',
         studentClass: '',
         address: '',
         branch: '',
     })
+
+    const [loading, setLoading] = useState(false)
+    const [apiError, setApiError] = useState('')
 
     const [errors, setErrors] = useState({})
 
@@ -43,18 +55,49 @@ function AddStudent() {
         if (!form.studentClass) newErrors.studentClass = 'Select a class'
         if (!form.address.trim()) newErrors.address = 'Address is required'
         if (!form.branch) newErrors.branch = 'Select a branch'
+        if (!form.gender) newErrors.gender = 'Select a gender'
         return newErrors
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         const newErrors = validate()
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors)
             return
         }
-        addStudent(form)
-        navigate('/receptionist/students')
+        setLoading(true)
+        setApiError('')
+        try {
+            const res = await fetch('/api/v1/students/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentUser?.token}`
+                },
+                body: JSON.stringify({
+                    fullName: form.name,
+                    phone: form.phone,
+                    email: form.email,
+                    gender: form.gender,
+                    address: form.address,
+                    parentName: form.parentName,
+                    parentPhone: form.parentPhone,
+                    class: form.studentClass,
+                    branch: form.branch,
+                }),
+            })
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}))
+                throw new Error(data.message || 'Failed to register student')
+            }
+            addStudent(form)
+            navigate('/receptionist/students')
+        } catch (err) {
+            setApiError(err.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -74,13 +117,19 @@ function AddStudent() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                {apiError && (
+                    <div className="px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                        {apiError}
+                    </div>
+                )}
                 {/* Student Info */}
                 <div>
                     <h3 className="text-sm font-semibold text-gray-800 mb-2 uppercase tracking-wide">Student Information</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <FieldInput label="Full Name" name="name" value={form.name} onChange={handleChange} error={errors.name} placeholder="Enter student name" required />
                         <FieldInput label="Phone" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="10-digit number" required />
-                        <FieldInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} placeholder="student@email.com" className="sm:col-span-2" />
+                        <FieldInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} placeholder="student@email.com" />
+                        <FieldSelect label="Gender" name="gender" value={form.gender} onChange={handleChange} error={errors.gender} options={genders} placeholder="Select gender" required />
                         <FieldInput label="Address" name="address" value={form.address} onChange={handleChange} error={errors.address} placeholder="Enter full address" className="sm:col-span-2" required />
                     </div>
                 </div>
@@ -114,10 +163,11 @@ function AddStudent() {
                     </button>
                     <button
                         type="submit"
-                        className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors cursor-pointer"
+                        disabled={loading}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         <Save size={16} />
-                        Register Student
+                        {loading ? 'Registering...' : 'Register Student'}
                     </button>
                 </div>
             </form>
@@ -160,12 +210,14 @@ function FieldSelect({ label, name, value, onChange, error, options, placeholder
                     ${!value ? 'text-gray-400' : 'text-gray-900'}`}
             >
                 <option value="">{placeholder}</option>
-                {options.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                ))}
+                {options.map((opt) => {
+                    const val = typeof opt === 'object' ? opt.value : opt
+                    const lbl = typeof opt === 'object' ? opt.label : opt
+                    return <option key={val} value={val}>{lbl}</option>
+                })}
             </select>
             {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-        </div >
+        </div>
     )
 }
 

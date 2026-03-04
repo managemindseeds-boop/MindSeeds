@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, EyeClosed } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+
+const REMEMBER_KEY = 'mindseeds_remember'
+const SAVED_USERS_KEY = 'mindseeds_saved_usernames'
 
 function Login() {
     const [username, setUsername] = useState('')
@@ -9,9 +12,35 @@ function Login() {
     const [showPass, setShowPass] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [rememberMe, setRememberMe] = useState(false)
+    const [savedUsernames, setSavedUsernames] = useState([])
 
     const navigate = useNavigate()
     const { login } = useAuth()
+
+    // On mount: restore remembered credentials & saved username list
+    useEffect(() => {
+        const remembered = localStorage.getItem(REMEMBER_KEY)
+        if (remembered) {
+            try {
+                const { username: u, password: p } = JSON.parse(remembered)
+                setUsername(u || '')
+                setPassword(p || '')
+                setRememberMe(true)
+            } catch {
+                localStorage.removeItem(REMEMBER_KEY)
+            }
+        }
+
+        const saved = localStorage.getItem(SAVED_USERS_KEY)
+        if (saved) {
+            try {
+                setSavedUsernames(JSON.parse(saved))
+            } catch {
+                localStorage.removeItem(SAVED_USERS_KEY)
+            }
+        }
+    }, [])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -26,6 +55,20 @@ function Login() {
         try {
             const result = await login(username, password)
             if (result.success) {
+                // Save or clear remembered credentials
+                if (rememberMe) {
+                    localStorage.setItem(REMEMBER_KEY, JSON.stringify({ username, password }))
+                } else {
+                    localStorage.removeItem(REMEMBER_KEY)
+                }
+
+                // Add username to saved list for autocomplete
+                const existing = JSON.parse(localStorage.getItem(SAVED_USERS_KEY) || '[]')
+                if (!existing.includes(username)) {
+                    const updated = [username, ...existing].slice(0, 5) // keep last 5
+                    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(updated))
+                }
+
                 navigate(`/${result.role}/dashboard`)
             } else {
                 setError(result.message)
@@ -57,19 +100,28 @@ function Login() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Username with autocomplete datalist */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                 Username
                             </label>
                             <input
+                                list="username-suggestions"
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 type="text"
                                 placeholder="Enter your username"
+                                autoComplete="username"
                             />
+                            <datalist id="username-suggestions">
+                                {savedUsernames.map((u) => (
+                                    <option key={u} value={u} />
+                                ))}
+                            </datalist>
                         </div>
 
+                        {/* Password */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                 Password
@@ -81,6 +133,7 @@ function Login() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     type={showPass ? 'text' : 'password'}
                                     placeholder="Enter your password"
+                                    autoComplete={rememberMe ? 'current-password' : 'off'}
                                 />
                                 <button
                                     type="button"
@@ -90,6 +143,23 @@ function Login() {
                                     {showPass ? <Eye size={20} /> : <EyeClosed size={20} />}
                                 </button>
                             </div>
+                        </div>
+
+                        {/* Remember Me */}
+                        <div className="flex items-center gap-2">
+                            <input
+                                id="remember-me"
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="w-4 h-4 rounded border-gray-300 text-emerald-500 accent-emerald-500 cursor-pointer"
+                            />
+                            <label
+                                htmlFor="remember-me"
+                                className="text-sm text-gray-600 cursor-pointer select-none"
+                            >
+                                Remember me
+                            </label>
                         </div>
 
                         <button

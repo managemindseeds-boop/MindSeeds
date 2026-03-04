@@ -32,19 +32,18 @@ export function AuthProvider({ children }) {
                 password
             })
 
-            const { data } = response
-            // Assuming backend returns user object with token/role etc.
-            // Adjust based on typical backend response: { success: true, user: { ... } }
+            // Backend uses ApiResponse wrapper: { statusCode, data: { token, role, username }, message }
+            const payload = response.data.data
             const userData = {
-                username: data.user.username,
-                role: data.user.role,
-                name: data.user.name,
-                token: data.token // Store token for future API calls
+                username: payload.username,
+                role: payload.role,
+                name: payload.username, // backend doesn't return name separately
+                token: payload.token
             }
 
             setCurrentUser(userData)
             localStorage.setItem('mindseeds_user', JSON.stringify(userData))
-            return { success: true, role: data.user.role }
+            return { success: true, role: payload.role }
         } catch (error) {
             console.error('Login error:', error)
 
