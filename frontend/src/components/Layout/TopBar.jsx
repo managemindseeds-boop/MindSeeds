@@ -14,6 +14,7 @@ const pageTitles = {
 function getPageTitle(pathname) {
     if (pageTitles[pathname]) return pageTitles[pathname]
     if (pathname.startsWith('/receptionist/students/')) return 'Student Details'
+    if (pathname.startsWith('/receptionist/demos/')) return 'Mark Attendance'
     return 'MindSeeds'
 }
 

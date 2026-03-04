@@ -77,6 +77,49 @@ function StudentDetail() {
                 </span>
             </div>
 
+            {/* Horizontal Journey Timeline */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-5">Student Journey</h3>
+                <div className="flex items-start justify-between relative">
+                    {/* Connecting line */}
+                    <div className="absolute top-2 left-0 right-0 h-0.5 bg-gray-200 z-0" />
+                    <div
+                        className="absolute top-2 left-0 h-0.5 bg-emerald-500 z-0 transition-all duration-300"
+                        style={{ width: `${(currentStepIndex / (timelineSteps.length - 1)) * 100}%` }}
+                    />
+
+                    {timelineSteps.map((step, index) => {
+                        const isCompleted = index <= currentStepIndex
+                        const isCurrent = index === currentStepIndex
+
+                        return (
+                            <div key={step.key} className="flex flex-col items-center text-center relative z-10 flex-1">
+                                {/* Dot */}
+                                <div
+                                    className={`w-4 h-4 rounded-full border-2 flex-shrink-0
+                                        ${isCompleted
+                                            ? 'bg-emerald-500 border-emerald-500'
+                                            : 'bg-white border-gray-300'
+                                        }`}
+                                />
+                                {/* Label */}
+                                <p className={`text-xs font-medium mt-2 ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
+                                    {step.label}
+                                </p>
+                                <p className={`text-[10px] mt-0.5 ${isCompleted ? 'text-gray-500' : 'text-gray-300'}`}>
+                                    {step.description}
+                                </p>
+                                {isCurrent && (
+                                    <span className="mt-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-medium">
+                                        Current Stage
+                                    </span>
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+
             {/* Info Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Student Info */}
@@ -95,55 +138,6 @@ function StudentDetail() {
                     <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Parent / Guardian</h3>
                     <InfoRow icon={User} label="Name" value={student.parentName} />
                     <InfoRow icon={Phone} label="Phone" value={student.parentPhone} />
-                </div>
-            </div>
-
-            {/* Journey Timeline */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-5">Student Journey</h3>
-                <div className="space-y-0">
-                    {timelineSteps.map((step, index) => {
-                        const isCompleted = index <= currentStepIndex
-                        const isCurrent = index === currentStepIndex
-                        const isLast = index === timelineSteps.length - 1
-
-                        return (
-                            <div key={step.key} className="flex gap-4">
-                                {/* Timeline line & dot */}
-                                <div className="flex flex-col items-center">
-                                    <div
-                                        className={`w-4 h-4 rounded-full border-2 flex-shrink-0
-                                            ${isCurrent
-                                                ? 'bg-emerald-500 border-emerald-500'
-                                                : isCompleted
-                                                    ? 'bg-emerald-500 border-emerald-500'
-                                                    : 'bg-white border-gray-300'
-                                            }`}
-                                    />
-                                    {!isLast && (
-                                        <div
-                                            className={`w-0.5 h-14 ${isCompleted && index < currentStepIndex ? 'bg-emerald-500' : 'bg-gray-200'}`}
-                                        />
-                                    )}
-                                </div>
-
-                                {/* Content */}
-                                <div className="pb-6">
-                                    <p className={`text-sm font-medium ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
-                                        {step.label}
-                                    </p>
-                                    <p className={`text-xs mt-0.5 ${isCompleted ? 'text-gray-500' : 'text-gray-300'}`}>
-                                        {step.description}
-                                    </p>
-                                    {isCurrent && (
-                                        <span className="inline-block mt-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs font-medium">
-                                            Current Stage
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    })}
                 </div>
             </div>
         </div>
