@@ -7,7 +7,7 @@ const DemoContext = createContext(null)
 
 export function DemoProvider({ children }) {
     const { currentUser } = useAuth()
-    const { students } = useStudents()
+    const { students, refetch: refetchStudents } = useStudents()
     const [todayDemos, setTodayDemos] = useState([])
     const [upcomingDemos, setUpcomingDemos] = useState([])
     const [absentDemos, setAbsentDemos] = useState([])
@@ -73,6 +73,7 @@ export function DemoProvider({ children }) {
             )
             // Refresh counts/lists
             fetchAllDemos()
+            refetchStudents() // Also refresh student status
         } catch (err) {
             console.error('Error marking attendance:', err)
             throw new Error(err.response?.data?.message || 'Failed to mark attendance')
@@ -88,6 +89,7 @@ export function DemoProvider({ children }) {
             )
             // Refresh counts/lists
             fetchAllDemos()
+            refetchStudents()
         } catch (err) {
             console.error('Error rescheduling demo:', err)
             throw new Error(err.response?.data?.message || 'Failed to reschedule demo')

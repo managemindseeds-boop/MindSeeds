@@ -24,7 +24,7 @@ const ensureCurrentMonthRecords = async () => {
 
     // Get all admitted/active students with a feeDate set
     const students = await Student.find({
-        status: { $in: ["admitted", "active"] },
+        status: { $in: ["admitted"] },
         feeDate: { $exists: true, $ne: null },
     });
 

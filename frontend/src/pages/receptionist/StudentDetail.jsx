@@ -6,24 +6,21 @@ const statusLabels = {
     enquiry: 'Enquiry',
     demo_scheduled: 'Demo Completed',
     admitted: 'Admitted',
-    active: 'Active',
 }
 
 const statusColors = {
     enquiry: 'bg-blue-50 text-blue-600 border-blue-200',
     demo_scheduled: 'bg-amber-50 text-amber-600 border-amber-200',
     admitted: 'bg-purple-50 text-purple-600 border-purple-200',
-    active: 'bg-emerald-50 text-emerald-600 border-emerald-200',
 }
 
 const timelineSteps = [
     { key: 'enquiry', label: 'Enquiry Registered', description: 'Student registered by receptionist' },
     { key: 'demo_scheduled', label: 'Demo Lecture Completed', description: '4 demo lectures completed' },
     { key: 'admitted', label: 'Admission Confirmed', description: 'Fees discussed and admission confirmed' },
-    { key: 'active', label: 'Active Student', description: 'Registration fee paid, monthly fee date set' },
 ]
 
-const statusOrder = ['enquiry', 'demo_scheduled', 'admitted', 'active']
+const statusOrder = ['enquiry', 'demo_scheduled', 'admitted']
 
 function StudentDetail() {
     const { id } = useParams()

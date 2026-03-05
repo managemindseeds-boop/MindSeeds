@@ -57,7 +57,7 @@ const studentSchema = new mongoose.Schema(
         // JOURNEY STATUS
         status: {
             type: String,
-            enum: ["enquiry", "demo_scheduled", "admitted", "active"],
+            enum: ["enquiry", "demo_scheduled", "admitted"],
             default: "enquiry",
         },
 

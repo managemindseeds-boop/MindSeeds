@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
+import { Student } from "../models/student.model.js";
 
 const todayRange = () => {
     const start = new Date();
@@ -65,6 +66,21 @@ export const markAttendance = asyncHandler(async (req, res) => {
     );
 
     if (!demo) throw new ApiError(404, "Demo not found");
+
+    // Auto-update student status if all 4 demos are attended
+    if (attended === true) {
+        const studentId = demo.student;
+        const allDemos = await DemoLecture.find({ student: studentId });
+        const attendedCount = allDemos.filter(d => d.attended === true).length;
+
+        if (attendedCount === 4) {
+            const student = await Student.findById(studentId);
+            if (student && student.status === 'enquiry') {
+                student.status = 'demo_scheduled';
+                await student.save();
+            }
+        }
+    }
 
     return res.status(200).json(new ApiResponse(200, demo, "Attendance marked"));
 });

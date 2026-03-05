@@ -7,14 +7,12 @@ const statusLabels = {
     enquiry: 'Enquiry',
     demo_scheduled: 'Demo Completed',
     admitted: 'Admitted',
-    active: 'Active',
 }
 
 const statusColors = {
     enquiry: 'bg-blue-50 text-blue-600',
     demo_scheduled: 'bg-amber-50 text-amber-600',
     admitted: 'bg-purple-50 text-purple-600',
-    active: 'bg-emerald-50 text-emerald-600',
 }
 
 function StudentList() {
@@ -76,7 +74,6 @@ function StudentList() {
                         <option value="enquiry">Enquiry</option>
                         <option value="demo_scheduled">Demo Completed</option>
                         <option value="admitted">Admitted</option>
-                        <option value="active">Active</option>
                     </select>
                 </div>
             </div>

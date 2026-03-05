@@ -99,7 +99,7 @@ export const updateStudentStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ["enquiry", "demo_scheduled", "admitted", "active"];
+    const validStatuses = ["enquiry", "demo_scheduled", "admitted"];
     if (!validStatuses.includes(status)) {
         throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
     }
