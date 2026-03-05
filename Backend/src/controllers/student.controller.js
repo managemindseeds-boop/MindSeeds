@@ -4,17 +4,20 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Student } from "../models/student.model.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 
-// Helper: schedule 4 demo lectures starting from registrationDate
-const scheduleDefaultDemos = async (studentId, registrationDate) => {
+// Helper: schedule 4 demo lectures starting from tomorrow
+const scheduleDefaultDemos = async (student) => {
     const lectures = [];
     for (let i = 0; i < 4; i++) {
-        const date = new Date(registrationDate);
+        const date = new Date();
         date.setDate(date.getDate() + i + 1); // Day 1, 2, 3, 4 (starting tomorrow)
         lectures.push({
-            student: studentId,
+            student: student._id,
+            studentName: student.fullName,
+            studentClass: student.class,
+            branch: student.branch,
             lectureNumber: i + 1,
             scheduledDate: date,
-            status: "scheduled",
+            attended: null,
         });
     }
     await DemoLecture.insertMany(lectures);
@@ -52,9 +55,8 @@ export const addStudent = asyncHandler(async (req, res) => {
         addedBy: req.user._id,
     });
 
-    // Auto-schedule 4 demo lectures starting from today
-    const registrationDate = new Date();
-    await scheduleDefaultDemos(student._id, registrationDate);
+    // Auto-schedule 4 demo lectures starting from tomorrow
+    await scheduleDefaultDemos(student);
 
     return res.status(201).json(
         new ApiResponse(201, { student }, "Student registered and 4 demo lectures scheduled successfully")
