@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDemos } from '../../context/DemoContext'
 import { useStudents } from '../../context/StudentContext'
@@ -15,37 +15,21 @@ import {
 
 function DemoList() {
     const navigate = useNavigate()
-    const { getTodaysDemos, getUpcomingDemos, getAbsentDemos, scheduleDemos, hasStudentDemos } =
-        useDemos()
-    const { students, updateStudent } = useStudents()
+    const { todayDemos, upcomingDemos, absentDemos, loading, error, refreshDemos } = useDemos()
+    const { students } = useStudents()
     const [showSchedule, setShowSchedule] = useState(false)
 
-    const todayDemos = getTodaysDemos()
-    const upcomingDemos = getUpcomingDemos()
-    const absentDemos = getAbsentDemos()
-
-    const schedulableStudents = students.filter(
-        (s) => s.status === 'enquiry' && !hasStudentDemos(s.id)
-    )
-
-    const handleSchedule = (student) => {
-        scheduleDemos(student)
-        updateStudent(student.id, { status: 'demo_scheduled' })
-        setShowSchedule(false)
-    }
+    // Optional: Refresh on mount
+    useEffect(() => {
+        refreshDemos()
+    }, [refreshDemos])
 
     const formatDate = (dateStr) => {
+        if (!dateStr) return ''
         return new Date(dateStr).toLocaleDateString('en-IN', {
             day: 'numeric',
             month: 'short',
             year: 'numeric',
-        })
-    }
-
-    const formatShortDate = (dateStr) => {
-        return new Date(dateStr).toLocaleDateString('en-IN', {
-            day: 'numeric',
-            month: 'short',
         })
     }
 
@@ -56,6 +40,22 @@ function DemoList() {
         year: 'numeric',
     })
 
+    if (loading && todayDemos.length === 0) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+                Error: {error}
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-6 max-w-3xl mx-auto">
 
@@ -65,50 +65,8 @@ function DemoList() {
                     <h1 className="text-xl font-bold text-gray-900">Demo Lectures</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Manage demo schedules and attendance</p>
                 </div>
-                <button
-                    onClick={() => setShowSchedule(!showSchedule)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer"
-                >
-                    <UserPlus size={16} />
-                    Schedule Demo
-                </button>
+                {/* Manual scheduling is handled by backend on student registration now */}
             </div>
-
-            {/* Schedule Student Selector */}
-            {showSchedule && (
-                <div className="bg-white rounded-xl border border-gray-200 p-5">
-                    <h3 className="text-sm font-semibold text-gray-800 mb-3">
-                        Select Student to Schedule Demos
-                    </h3>
-                    {schedulableStudents.length === 0 ? (
-                        <p className="text-sm text-gray-400">
-                            No students available for scheduling. Students must be in "Enquiry" status.
-                        </p>
-                    ) : (
-                        <div className="space-y-2">
-                            {schedulableStudents.map((student) => (
-                                <div
-                                    key={student.id}
-                                    className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
-                                >
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">{student.name}</p>
-                                        <p className="text-xs text-gray-500">
-                                            {student.studentClass} • {student.branch}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => handleSchedule(student)}
-                                        className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors cursor-pointer"
-                                    >
-                                        Schedule 4 Demos
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            )}
 
             {/* ── STEP 1: Urgent Action Required ── */}
             {absentDemos.length > 0 && (
@@ -126,26 +84,28 @@ function DemoList() {
                                 <div className="flex items-start gap-3">
                                     <AlertCircle size={20} className="text-red-500 mt-0.5 shrink-0" />
                                     <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">{demo.studentName} was absent</p>
-                                        <p className="text-xs text-gray-500 mt-0.5">
-                                            Lecture {demo.lectureNumber} •{' '}
-                                            {formatDate(demo.scheduledDate)}
-                                            {demo.notes && ` • ${demo.notes}`}
-                                        </p>
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">{demo.studentName} was absent</p>
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    Lecture {demo.lectureNumber} •{' '}
+                                                    {formatDate(demo.scheduledDate)}
+                                                    {demo.notes && ` • ${demo.notes}`}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-medium text-red-600 bg-red-100 px-2 py-0.5 rounded-full inline-block">
+                                                    ABSENT
+                                                </p>
+                                            </div>
+                                        </div>
                                         <div className="flex gap-2 mt-3">
                                             <button
                                                 onClick={() => navigate(`/receptionist/demos/${demo.studentId}`)}
                                                 className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600 transition-colors cursor-pointer"
                                             >
                                                 <Phone size={12} />
-                                                Call Now
-                                            </button>
-                                            <button
-                                                onClick={() => navigate(`/receptionist/demos/${demo.studentId}`)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 border border-red-400 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors cursor-pointer"
-                                            >
-                                                <CalendarClock size={12} />
-                                                Reschedule
+                                                Action / Reschedule
                                             </button>
                                         </div>
                                     </div>
@@ -248,5 +208,6 @@ function DemoList() {
         </div>
     )
 }
+
 
 export default DemoList

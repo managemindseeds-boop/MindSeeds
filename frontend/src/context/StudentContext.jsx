@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import axios from 'axios'
 import { useAuth } from './AuthContext'
 
 const StudentContext = createContext(null)
@@ -32,21 +33,17 @@ export function StudentProvider({ children }) {
         setLoading(true)
         setError(null)
         try {
-            const res = await fetch('/api/v1/students', {
+            const res = await axios.get('/api/v1/students', {
                 headers: {
                     Authorization: `Bearer ${currentUser.token}`,
                 },
             })
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}))
-                throw new Error(data.message || 'Failed to load students')
-            }
-            const data = await res.json()
-            // ApiResponse wrapper: { statusCode, data: [...], message }
-            const raw = Array.isArray(data.data) ? data.data : []
+            // res.data is the ApiResponse: { statusCode, data, message }
+            const raw = Array.isArray(res.data.data) ? res.data.data : []
             setStudents(raw.map(normalize))
         } catch (err) {
-            setError(err.message)
+            console.error('Error fetching students:', err)
+            setError(err.response?.data?.message || err.message)
         } finally {
             setLoading(false)
         }
@@ -60,13 +57,8 @@ export function StudentProvider({ children }) {
     const addStudent = async (formData) => {
         if (!currentUser?.token) throw new Error('Not authenticated')
 
-        const res = await fetch('/api/v1/students/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${currentUser.token}`,
-            },
-            body: JSON.stringify({
+        try {
+            const res = await axios.post('/api/v1/students/add', {
                 fullName: formData.name,
                 phone: formData.phone,
                 email: formData.email,
@@ -76,16 +68,19 @@ export function StudentProvider({ children }) {
                 parentPhone: formData.parentPhone,
                 class: formData.studentClass,
                 branch: formData.branch,
-            }),
-        })
+            }, {
+                headers: {
+                    Authorization: `Bearer ${currentUser.token}`,
+                },
+            })
 
-        if (!res.ok) {
-            const data = await res.json().catch(() => ({}))
-            throw new Error(data.message || 'Failed to register student')
+            // Re-fetch the full list so the new student appears with its real _id
+            await fetchStudents()
+            return res.data
+        } catch (err) {
+            console.error('Error adding student:', err)
+            throw new Error(err.response?.data?.message || 'Failed to register student')
         }
-
-        // Re-fetch the full list so the new student appears with its real _id
-        await fetchStudents()
     }
 
     const updateStudent = (id, updates) => {
@@ -104,6 +99,7 @@ export function StudentProvider({ children }) {
         </StudentContext.Provider>
     )
 }
+
 
 export function useStudents() {
     const context = useContext(StudentContext)

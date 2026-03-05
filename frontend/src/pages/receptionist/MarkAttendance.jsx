@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDemos } from '../../context/DemoContext'
 import { ArrowLeft, Check, X, RotateCcw } from 'lucide-react'
@@ -8,9 +8,64 @@ function MarkAttendance() {
     const { studentId } = useParams()
     const navigate = useNavigate()
     const { getDemosByStudent, markAttendance, rescheduleDemo } = useDemos()
+    const [demos, setDemos] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
     const [rescheduleTarget, setRescheduleTarget] = useState(null)
 
-    const demos = getDemosByStudent(studentId)
+    const fetchStudentDemos = useCallback(async () => {
+        setLoading(true)
+        try {
+            const data = await getDemosByStudent(studentId)
+            setDemos(data)
+        } catch (err) {
+            setError('Failed to load demos')
+        } finally {
+            setLoading(false)
+        }
+    }, [studentId, getDemosByStudent])
+
+    useEffect(() => {
+        fetchStudentDemos()
+    }, [fetchStudentDemos])
+
+    const handleMarkPresent = async (demoId) => {
+        try {
+            await markAttendance(demoId, true)
+            fetchStudentDemos() // Refresh local list
+        } catch (err) {
+            alert(err.message)
+        }
+    }
+
+    const handleMarkAbsent = async (demoId) => {
+        try {
+            await markAttendance(demoId, false)
+            fetchStudentDemos() // Refresh local list
+            const demo = demos.find((d) => d.id === demoId)
+            setRescheduleTarget(demo)
+        } catch (err) {
+            alert(err.message)
+        }
+    }
+
+    const handleReschedule = async (demoId, newDate, notes) => {
+        try {
+            await rescheduleDemo(demoId, newDate, notes)
+            fetchStudentDemos()
+            setRescheduleTarget(null)
+        } catch (err) {
+            alert(err.message)
+        }
+    }
+
+    if (loading && demos.length === 0) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+            </div>
+        )
+    }
 
     if (demos.length === 0) {
         return (
@@ -26,21 +81,12 @@ function MarkAttendance() {
         )
     }
 
-    const studentName = demos[0].studentName
-    const studentClass = demos[0].studentClass
+    const studentName = demos[0]?.studentName || 'Student'
+    const studentClass = demos[0]?.studentClass || ''
     const today = new Date().toISOString().split('T')[0]
 
-    const handleMarkPresent = (demoId) => {
-        markAttendance(demoId, true)
-    }
-
-    const handleMarkAbsent = (demoId) => {
-        markAttendance(demoId, false)
-        const demo = demos.find((d) => d.id === demoId)
-        setRescheduleTarget(demo)
-    }
-
     const formatDate = (dateStr) => {
+        if (!dateStr) return ''
         return new Date(dateStr).toLocaleDateString('en-IN', {
             weekday: 'short',
             day: 'numeric',
@@ -190,12 +236,13 @@ function MarkAttendance() {
             {rescheduleTarget && (
                 <RescheduleModal
                     demo={rescheduleTarget}
-                    onConfirm={rescheduleDemo}
+                    onConfirm={(id, date, notes) => handleReschedule(id, date, notes)}
                     onClose={() => setRescheduleTarget(null)}
                 />
             )}
         </div>
     )
 }
+
 
 export default MarkAttendance

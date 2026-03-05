@@ -28,10 +28,11 @@ export function AuthProvider({ children }) {
 
     const login = async (username, password) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/v1/auth/login', {
+            const response = await axios.post('/api/v1/auth/login', {
                 username,
                 password
             })
+
 
             // Backend uses ApiResponse wrapper: { statusCode, data: { token, role, username }, message }
             const payload = response.data.data
