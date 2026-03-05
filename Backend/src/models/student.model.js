@@ -61,6 +61,13 @@ const studentSchema = new mongoose.Schema(
             default: "enquiry",
         },
 
+        // Set when status → admitted
+        admissionDate: { type: Date, default: null },
+        feeDate: {
+            type: Number, // Day of month: 1–28
+            default: null,
+        },
+
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",

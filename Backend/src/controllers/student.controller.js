@@ -104,13 +104,32 @@ export const updateStudentStatus = asyncHandler(async (req, res) => {
         throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
     }
 
-    const student = await Student.findByIdAndUpdate(
-        id,
-        { status },
-        { new: true }
-    );
-
+    const student = await Student.findById(id);
     if (!student) throw new ApiError(404, "Student not found");
+
+    student.status = status;
+
+    // When admitted → lock in admission date & monthly fee date
+    if (status === "admitted" && !student.admissionDate) {
+        const today = new Date();
+        student.admissionDate = today;
+        student.feeDate = today.getDate(); // day of month (e.g. 5)
+
+        // Create the first FeeRecord for this month
+        const { FeeRecord } = await import("../models/feeRecord.model.js");
+        await FeeRecord.create({
+            student: student._id,
+            studentName: student.fullName,
+            branch: student.branch,
+            month: today.getMonth() + 1,
+            year: today.getFullYear(),
+            originalFeeDay: today.getDate(),
+            dueDate: today,
+            status: "pending",
+        });
+    }
+
+    await student.save();
 
     return res.status(200).json(
         new ApiResponse(200, student, `Student status updated to "${status}"`)
