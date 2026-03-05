@@ -58,10 +58,6 @@ export const addStudent = asyncHandler(async (req, res) => {
     // Auto-schedule 4 demo lectures starting from tomorrow
     await scheduleDefaultDemos(student);
 
-    // Auto-advance status to demo_scheduled
-    student.status = "demo_scheduled";
-    await student.save();
-
     return res.status(201).json(
         new ApiResponse(201, { student }, "Student registered and 4 demo lectures scheduled successfully")
     );

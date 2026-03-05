@@ -108,11 +108,31 @@ export function StudentProvider({ children }) {
         }
     }
 
-    const updateStudentStatus = (id, newStatus) => {
-        setLocalStatuses(prev => ({
-            ...prev,
-            [id]: newStatus
-        }))
+    const updateStudentStatus = async (id, newStatus) => {
+        if (!currentUser?.token) throw new Error('Not authenticated')
+
+        try {
+            await axios.patch(`/api/v1/students/${id}/status`,
+                { status: newStatus },
+                {
+                    headers: {
+                        Authorization: `Bearer ${currentUser.token}`,
+                    },
+                }
+            )
+
+            // Update local state for immediate feedback
+            setLocalStatuses(prev => ({
+                ...prev,
+                [id]: newStatus
+            }))
+
+            // Optionally refetch to ensure source of truth
+            await fetchStudents()
+        } catch (err) {
+            console.error('Error updating student status:', err)
+            throw new Error(err.response?.data?.message || 'Failed to update status')
+        }
     }
 
     const getStudentById = (id) => {
