@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useStudents } from '../../context/StudentContext'
-import { Search, Plus, Eye, Filter } from 'lucide-react'
+import { Search, Plus, Eye, Filter, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const statusLabels = {
     enquiry: 'Enquiry',
-    demo_scheduled: 'Demo Scheduled',
+    demo_scheduled: 'Demo Completed',
     admitted: 'Admitted',
     active: 'Active',
 }
@@ -74,7 +74,7 @@ function StudentList() {
                     >
                         <option value="all">All Status</option>
                         <option value="enquiry">Enquiry</option>
-                        <option value="demo_scheduled">Demo Scheduled</option>
+                        <option value="demo_scheduled">Demo Completed</option>
                         <option value="admitted">Admitted</option>
                         <option value="active">Active</option>
                     </select>
@@ -140,13 +140,24 @@ function StudentList() {
                                                 {statusLabels[student.status]}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-3.5">
+                                        <td className="px-5 py-3.5 flex items-center gap-2">
                                             <button
                                                 onClick={() => navigate(`/receptionist/students/${student.id}`)}
                                                 className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                                title="View Details"
                                             >
                                                 <Eye size={16} />
                                             </button>
+
+                                            {student.status === 'demo_scheduled' && (
+                                                <button
+                                                    onClick={() => navigate('/receptionist/admissions')}
+                                                    className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
+                                                    title="Process Admission"
+                                                >
+                                                    <ArrowRight size={16} />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

@@ -27,6 +27,33 @@ export function StudentProvider({ children }) {
     const [students, setStudents] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [localStatuses, setLocalStatuses] = useState(() => {
+        const saved = localStorage.getItem('mindseeds_student_statuses')
+        return saved ? JSON.parse(saved) : {}
+    })
+
+    // Save local statuses to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('mindseeds_student_statuses', JSON.stringify(localStatuses))
+    }, [localStatuses])
+
+    const normalize = useCallback((s) => {
+        return {
+            id: s._id,
+            name: s.fullName,
+            phone: s.phone,
+            email: s.email || '',
+            gender: s.gender || '',
+            parentName: s.parentName,
+            parentPhone: s.parentPhone,
+            studentClass: s.class,
+            address: s.address,
+            branch: s.branch,
+            // Priority: local override > server status > default 'enquiry'
+            status: localStatuses[s._id] || s.status || 'enquiry',
+            createdAt: s.createdAt,
+        }
+    }, [localStatuses])
 
     const fetchStudents = useCallback(async () => {
         if (!currentUser?.token) return
@@ -38,7 +65,6 @@ export function StudentProvider({ children }) {
                     Authorization: `Bearer ${currentUser.token}`,
                 },
             })
-            // res.data is the ApiResponse: { statusCode, data, message }
             const raw = Array.isArray(res.data.data) ? res.data.data : []
             setStudents(raw.map(normalize))
         } catch (err) {
@@ -47,9 +73,9 @@ export function StudentProvider({ children }) {
         } finally {
             setLoading(false)
         }
-    }, [currentUser?.token])
+    }, [currentUser?.token, normalize])
 
-    // Fetch whenever the logged-in user changes
+    // Fetch whenever the logged-in user changes or normalize changes (localStatuses)
     useEffect(() => {
         fetchStudents()
     }, [fetchStudents])
@@ -74,7 +100,6 @@ export function StudentProvider({ children }) {
                 },
             })
 
-            // Re-fetch the full list so the new student appears with its real _id
             await fetchStudents()
             return res.data
         } catch (err) {
@@ -83,10 +108,11 @@ export function StudentProvider({ children }) {
         }
     }
 
-    const updateStudent = (id, updates) => {
-        setStudents((prev) =>
-            prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
-        )
+    const updateStudentStatus = (id, newStatus) => {
+        setLocalStatuses(prev => ({
+            ...prev,
+            [id]: newStatus
+        }))
     }
 
     const getStudentById = (id) => {
@@ -94,7 +120,15 @@ export function StudentProvider({ children }) {
     }
 
     return (
-        <StudentContext.Provider value={{ students, loading, error, addStudent, updateStudent, getStudentById, refetch: fetchStudents }}>
+        <StudentContext.Provider value={{
+            students,
+            loading,
+            error,
+            addStudent,
+            updateStudentStatus,
+            getStudentById,
+            refetch: fetchStudents
+        }}>
             {children}
         </StudentContext.Provider>
     )

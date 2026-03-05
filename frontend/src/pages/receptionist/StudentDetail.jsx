@@ -4,7 +4,7 @@ import { ArrowLeft, Phone, Mail, User, GraduationCap, MapPin, Building2, Clock }
 
 const statusLabels = {
     enquiry: 'Enquiry',
-    demo_scheduled: 'Demo Scheduled',
+    demo_scheduled: 'Demo Completed',
     admitted: 'Admitted',
     active: 'Active',
 }
@@ -18,7 +18,7 @@ const statusColors = {
 
 const timelineSteps = [
     { key: 'enquiry', label: 'Enquiry Registered', description: 'Student registered by receptionist' },
-    { key: 'demo_scheduled', label: 'Demo Lectures Scheduled', description: '4 demo lectures arranged' },
+    { key: 'demo_scheduled', label: 'Demo Lecture Completed', description: '4 demo lectures completed' },
     { key: 'admitted', label: 'Admission Confirmed', description: 'Fees discussed and admission confirmed' },
     { key: 'active', label: 'Active Student', description: 'Registration fee paid, monthly fee date set' },
 ]
