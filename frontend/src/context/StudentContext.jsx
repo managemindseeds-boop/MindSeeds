@@ -1,94 +1,91 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { useAuth } from './AuthContext'
 
 const StudentContext = createContext(null)
 
-// Mock student data
-const initialStudents = [
-    {
-        id: 1,
-        name: 'Aarav Sharma',
-        phone: '9876543210',
-        email: 'aarav@email.com',
-        parentName: 'Rajesh Sharma',
-        parentPhone: '9876543200',
-        studentClass: '10th',
-        address: '12, MG Road, Indore',
-        branch: 'Vijay Nagar',
-        status: 'enquiry',
-        registeredBy: 'receptionist',
-        createdAt: '2026-03-01T10:30:00',
-    },
-    {
-        id: 2,
-        name: 'Priya Patel',
-        phone: '9123456789',
-        email: 'priya@email.com',
-        parentName: 'Amit Patel',
-        parentPhone: '9123456780',
-        studentClass: '12th',
-        address: '45, Palasia, Indore',
-        branch: 'Palasia',
-        status: 'demo_scheduled',
-        registeredBy: 'receptionist',
-        createdAt: '2026-03-02T11:00:00',
-    },
-    {
-        id: 3,
-        name: 'Rahul Verma',
-        phone: '9988776655',
-        email: 'rahul@email.com',
-        parentName: 'Suresh Verma',
-        parentPhone: '9988776600',
-        studentClass: '9th',
-        address: '78, Sapna Sangeeta, Indore',
-        branch: 'Sapna Sangeeta',
-        status: 'admitted',
-        registeredBy: 'receptionist',
-        createdAt: '2026-02-25T09:15:00',
-    },
-    {
-        id: 4,
-        name: 'Sneha Gupta',
-        phone: '9876012345',
-        email: 'sneha@email.com',
-        parentName: 'Manoj Gupta',
-        parentPhone: '9876012300',
-        studentClass: '11th',
-        address: '23, Scheme No 54, Indore',
-        branch: 'Vijay Nagar',
-        status: 'active',
-        registeredBy: 'receptionist',
-        createdAt: '2026-02-20T14:45:00',
-    },
-    {
-        id: 5,
-        name: 'Arjun Kumar',
-        phone: '9012345678',
-        email: 'arjun@email.com',
-        parentName: 'Vikram Kumar',
-        parentPhone: '9012345600',
-        studentClass: '8th',
-        address: '56, AB Road, Indore',
-        branch: 'Palasia',
-        status: 'demo_scheduled',
-        registeredBy: 'receptionist',
-        createdAt: '2026-03-03T16:20:00',
-    },
-]
+// Normalize a raw MongoDB student doc to the shape the UI expects
+function normalize(s) {
+    return {
+        id: s._id,
+        name: s.fullName,
+        phone: s.phone,
+        email: s.email || '',
+        gender: s.gender || '',
+        parentName: s.parentName,
+        parentPhone: s.parentPhone,
+        studentClass: s.class,
+        address: s.address,
+        branch: s.branch,
+        status: s.status || 'enquiry',
+        createdAt: s.createdAt,
+    }
+}
 
 export function StudentProvider({ children }) {
-    const [students, setStudents] = useState(initialStudents)
+    const { currentUser } = useAuth()
+    const [students, setStudents] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
 
-    const addStudent = (studentData) => {
-        const newStudent = {
-            ...studentData,
-            id: Date.now(),
-            status: 'enquiry',
-            registeredBy: 'receptionist',
-            createdAt: new Date().toISOString(),
+    const fetchStudents = useCallback(async () => {
+        if (!currentUser?.token) return
+        setLoading(true)
+        setError(null)
+        try {
+            const res = await fetch('/api/v1/students', {
+                headers: {
+                    Authorization: `Bearer ${currentUser.token}`,
+                },
+            })
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}))
+                throw new Error(data.message || 'Failed to load students')
+            }
+            const data = await res.json()
+            // ApiResponse wrapper: { statusCode, data: [...], message }
+            const raw = Array.isArray(data.data) ? data.data : []
+            setStudents(raw.map(normalize))
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
         }
-        setStudents((prev) => [newStudent, ...prev])
-        return newStudent
+    }, [currentUser?.token])
+
+    // Fetch whenever the logged-in user changes
+    useEffect(() => {
+        fetchStudents()
+    }, [fetchStudents])
+
+    const addStudent = async (formData) => {
+        if (!currentUser?.token) throw new Error('Not authenticated')
+
+        const res = await fetch('/api/v1/students/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${currentUser.token}`,
+            },
+            body: JSON.stringify({
+                fullName: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                gender: formData.gender,
+                address: formData.address,
+                parentName: formData.parentName,
+                parentPhone: formData.parentPhone,
+                class: formData.studentClass,
+                branch: formData.branch,
+            }),
+        })
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.message || 'Failed to register student')
+        }
+
+        // Re-fetch the full list so the new student appears with its real _id
+        await fetchStudents()
     }
 
     const updateStudent = (id, updates) => {
@@ -98,11 +95,11 @@ export function StudentProvider({ children }) {
     }
 
     const getStudentById = (id) => {
-        return students.find((s) => s.id === Number(id))
+        return students.find((s) => String(s.id) === String(id))
     }
 
     return (
-        <StudentContext.Provider value={{ students, addStudent, updateStudent, getStudentById }}>
+        <StudentContext.Provider value={{ students, loading, error, addStudent, updateStudent, getStudentById, refetch: fetchStudents }}>
             {children}
         </StudentContext.Provider>
     )

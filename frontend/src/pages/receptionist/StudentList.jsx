@@ -18,7 +18,7 @@ const statusColors = {
 }
 
 function StudentList() {
-    const { students } = useStudents()
+    const { students, loading, error } = useStudents()
     const navigate = useNavigate()
     const [search, setSearch] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
@@ -31,6 +31,7 @@ function StudentList() {
         const matchesStatus = statusFilter === 'all' || s.status === statusFilter
         return matchesSearch && matchesStatus
     })
+
 
     return (
         <div className="space-y-5">
@@ -95,7 +96,28 @@ function StudentList() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {filtered.length === 0 ? (
+                            {loading ? (
+                                // Loading skeleton rows
+                                Array.from({ length: 4 }).map((_, i) => (
+                                    <tr key={i} className="animate-pulse">
+                                        <td className="px-5 py-3.5">
+                                            <div className="h-3.5 bg-gray-100 rounded w-32 mb-1.5" />
+                                            <div className="h-2.5 bg-gray-100 rounded w-24" />
+                                        </td>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-24" /></td>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-10" /></td>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-20" /></td>
+                                        <td className="px-5 py-3.5"><div className="h-5 bg-gray-100 rounded-full w-16" /></td>
+                                        <td className="px-5 py-3.5"><div className="h-7 w-7 bg-gray-100 rounded-lg" /></td>
+                                    </tr>
+                                ))
+                            ) : error ? (
+                                <tr>
+                                    <td colSpan={6} className="px-5 py-10 text-center text-red-500">
+                                        ⚠️ {error}
+                                    </td>
+                                </tr>
+                            ) : filtered.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-5 py-10 text-center text-gray-400">
                                         No students found
