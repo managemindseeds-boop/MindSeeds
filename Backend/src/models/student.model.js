@@ -54,6 +54,13 @@ const studentSchema = new mongoose.Schema(
             trim: true,
         },
 
+        // JOURNEY STATUS
+        status: {
+            type: String,
+            enum: ["enquiry", "demo_scheduled", "admitted", "active"],
+            default: "enquiry",
+        },
+
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",

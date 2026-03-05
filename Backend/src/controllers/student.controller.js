@@ -58,6 +58,10 @@ export const addStudent = asyncHandler(async (req, res) => {
     // Auto-schedule 4 demo lectures starting from tomorrow
     await scheduleDefaultDemos(student);
 
+    // Auto-advance status to demo_scheduled
+    student.status = "demo_scheduled";
+    await student.save();
+
     return res.status(201).json(
         new ApiResponse(201, { student }, "Student registered and 4 demo lectures scheduled successfully")
     );
@@ -80,5 +84,39 @@ export const getStudentDemos = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, demos, "Demo lectures fetched successfully")
+    );
+});
+
+// GET /api/v1/students/:id
+export const getStudentById = asyncHandler(async (req, res) => {
+    const student = await Student.findById(req.params.id);
+    if (!student) throw new ApiError(404, "Student not found");
+
+    return res.status(200).json(
+        new ApiResponse(200, student, "Student fetched successfully")
+    );
+});
+
+// PATCH /api/v1/students/:id/status
+// Body: { status: "enquiry" | "demo_scheduled" | "admitted" | "active" }
+export const updateStudentStatus = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["enquiry", "demo_scheduled", "admitted", "active"];
+    if (!validStatuses.includes(status)) {
+        throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
+    }
+
+    const student = await Student.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true }
+    );
+
+    if (!student) throw new ApiError(404, "Student not found");
+
+    return res.status(200).json(
+        new ApiResponse(200, student, `Student status updated to "${status}"`)
     );
 });
