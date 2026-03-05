@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStudents } from '../../context/StudentContext'
-import { useAuth } from '../../context/AuthContext'
 import { ArrowLeft, Save } from 'lucide-react'
 
 const genders = [
@@ -16,7 +15,6 @@ const branches = ['Vijay Nagar', 'Palasia', 'Sapna Sangeeta', 'AB Road', 'Bhawar
 function AddStudent() {
     const navigate = useNavigate()
     const { addStudent } = useStudents()
-    const { currentUser } = useAuth()
 
     const [form, setForm] = useState({
         name: '',
@@ -69,29 +67,8 @@ function AddStudent() {
         setLoading(true)
         setApiError('')
         try {
-            const res = await fetch('/api/v1/students/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${currentUser?.token}`
-                },
-                body: JSON.stringify({
-                    fullName: form.name,
-                    phone: form.phone,
-                    email: form.email,
-                    gender: form.gender,
-                    address: form.address,
-                    parentName: form.parentName,
-                    parentPhone: form.parentPhone,
-                    class: form.studentClass,
-                    branch: form.branch,
-                }),
-            })
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}))
-                throw new Error(data.message || 'Failed to register student')
-            }
-            addStudent(form)
+            // addStudent in context handles the POST and re-fetches the list
+            await addStudent(form)
             navigate('/receptionist/students')
         } catch (err) {
             setApiError(err.message)
