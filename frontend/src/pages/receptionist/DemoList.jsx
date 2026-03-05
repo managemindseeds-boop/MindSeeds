@@ -114,7 +114,7 @@ function DemoList() {
             {absentDemos.length > 0 && (
                 <section>
                     <div className="flex items-center gap-2 mb-3">
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500 text-white text-xs font-bold">1</span>
+                        <span className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
                         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Action Required</h2>
                     </div>
                     <div className="space-y-3">
@@ -159,9 +159,7 @@ function DemoList() {
             {/* ── STEP 2: Today's Demos ── */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-white text-xs font-bold">
-                        {absentDemos.length > 0 ? '2' : '1'}
-                    </span>
+                    <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
                     <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Today's Demos</h2>
                     <span className="ml-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-medium">
                         {todayDemos.length}
@@ -204,9 +202,7 @@ function DemoList() {
             {/* ── STEP 3: Upcoming Demos ── */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold">
-                        {absentDemos.length > 0 ? '3' : '2'}
-                    </span>
+                    <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0" />
                     <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Upcoming</h2>
                     <span className="ml-1 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-medium">
                         {upcomingDemos.length}
