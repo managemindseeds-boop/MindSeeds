@@ -2,6 +2,23 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Student } from "../models/student.model.js";
+import { DemoLecture } from "../models/demoLecture.model.js";
+
+// Helper: schedule 4 demo lectures starting from registrationDate
+const scheduleDefaultDemos = async (studentId, registrationDate) => {
+    const lectures = [];
+    for (let i = 0; i < 4; i++) {
+        const date = new Date(registrationDate);
+        date.setDate(date.getDate() + i + 1); // Day 1, 2, 3, 4 (starting tomorrow)
+        lectures.push({
+            student: studentId,
+            lectureNumber: i + 1,
+            scheduledDate: date,
+            status: "scheduled",
+        });
+    }
+    await DemoLecture.insertMany(lectures);
+};
 
 // POST /api/v1/students/add
 export const addStudent = asyncHandler(async (req, res) => {
@@ -35,8 +52,12 @@ export const addStudent = asyncHandler(async (req, res) => {
         addedBy: req.user._id,
     });
 
+    // Auto-schedule 4 demo lectures starting from today
+    const registrationDate = new Date();
+    await scheduleDefaultDemos(student._id, registrationDate);
+
     return res.status(201).json(
-        new ApiResponse(201, student, "Student enquiry registered successfully")
+        new ApiResponse(201, { student }, "Student registered and 4 demo lectures scheduled successfully")
     );
 });
 
@@ -46,5 +67,16 @@ export const getAllStudents = asyncHandler(async (req, res) => {
 
     return res.status(200).json(
         new ApiResponse(200, students, "Students fetched successfully")
+    );
+});
+
+// GET /api/v1/students/:studentId/demos
+export const getStudentDemos = asyncHandler(async (req, res) => {
+    const { studentId } = req.params;
+
+    const demos = await DemoLecture.find({ student: studentId }).sort({ lectureNumber: 1 });
+
+    return res.status(200).json(
+        new ApiResponse(200, demos, "Demo lectures fetched successfully")
     );
 });
