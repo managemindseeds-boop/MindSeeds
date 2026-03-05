@@ -38,15 +38,25 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   const token = generateToken(user);
 
-  return res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        token,
-        role: user.role,
-        username: user.username,
-      },
-      "Login successful"
-    )
-  );
+  const cookieOptions = {
+    httpOnly: true,       // not accessible via JS — more secure
+    secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000, // 1 day in ms
+  };
+
+  return res
+    .status(200)
+    .cookie("token", token, cookieOptions)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          token,
+          role: user.role,
+          username: user.username,
+        },
+        "Login successful"
+      )
+    );
 });
