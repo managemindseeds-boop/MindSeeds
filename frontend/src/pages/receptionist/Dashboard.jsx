@@ -107,10 +107,10 @@ function Dashboard() {
         () => students.filter(s => s.status === 'demo_completed').length,
         [students]
     )
-    const overdueFees = useMemo(
-        () => monthFees.filter(f => f.status === 'overdue'),
-        [monthFees]
-    )
+    const overdueFees = useMemo(() => {
+        const now = new Date()
+        return monthFees.filter(f => f.status === 'pending' && new Date(f.dueDate) < now)
+    }, [monthFees])
 
     // ── Student Status Chart Data ──────────────────────────────────────────
     const statusChartData = useMemo(() => {
