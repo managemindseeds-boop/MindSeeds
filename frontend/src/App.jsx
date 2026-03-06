@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext'
 import { StudentProvider } from './context/StudentContext'
 import { DemoProvider } from './context/DemoContext'
 import { FeeProvider } from './context/FeeContext'
+import { NotificationProvider } from './context/NotificationContext'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute'
 import MainLayout from './components/Layout/MainLayout'
@@ -24,44 +25,46 @@ function App() {
       <StudentProvider>
         <DemoProvider>
           <FeeProvider>
-            <BrowserRouter>
-              <Routes>
-                {/* Public route */}
-                <Route path="/login" element={<Login />} />
+            <NotificationProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* Public route */}
+                  <Route path="/login" element={<Login />} />
 
-                {/* Protected receptionist routes */}
-                <Route
-                  path="/receptionist"
-                  element={
-                    <ProtectedRoute>
-                      <MainLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="students" element={<StudentList />} />
-                  <Route path="students/add" element={<AddStudent />} />
-                  <Route path="students/:id" element={<StudentDetail />} />
-                  <Route path="demos" element={<DemoList />} />
-                  <Route path="demos/:studentId" element={<MarkAttendance />} />
-                  <Route path="admissions" element={<Admissions />} />
-                  <Route path="fees" element={<Fees />} />
-                </Route>
+                  {/* Protected receptionist routes */}
+                  <Route
+                    path="/receptionist"
+                    element={
+                      <ProtectedRoute>
+                        <MainLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="students" element={<StudentList />} />
+                    <Route path="students/add" element={<AddStudent />} />
+                    <Route path="students/:id" element={<StudentDetail />} />
+                    <Route path="demos" element={<DemoList />} />
+                    <Route path="demos/:studentId" element={<MarkAttendance />} />
+                    <Route path="admissions" element={<Admissions />} />
+                    <Route path="fees" element={<Fees />} />
+                  </Route>
 
-                {/* Protected admin route */}
-                <Route
-                  path="/admin/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                  {/* Protected admin route */}
+                  <Route
+                    path="/admin/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
 
-                {/* Catch-all → redirect to login */}
-                <Route path="*" element={<Navigate to="/login" replace />} />
-              </Routes>
-            </BrowserRouter>
+                  {/* Catch-all → redirect to login */}
+                  <Route path="*" element={<Navigate to="/login" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </NotificationProvider>
           </FeeProvider>
         </DemoProvider>
       </StudentProvider>

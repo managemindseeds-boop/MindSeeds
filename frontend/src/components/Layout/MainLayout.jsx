@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
+import NotificationPanel from './NotificationPanel'
 
 function MainLayout() {
     return (
@@ -12,6 +13,8 @@ function MainLayout() {
                     <Outlet />
                 </main>
             </div>
+            {/* Global notification slide-out panel */}
+            <NotificationPanel />
         </div>
     )
 }
