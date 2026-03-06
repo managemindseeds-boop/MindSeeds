@@ -59,31 +59,43 @@ export const markAttendance = asyncHandler(async (req, res) => {
         throw new ApiError(400, "attended must be true or false");
     }
 
-    const demo = await DemoLecture.findByIdAndUpdate(
-        id,
-        { attended },
-        { new: true }
-    );
-
+    const demo = await DemoLecture.findById(id);
     if (!demo) throw new ApiError(404, "Demo not found");
 
-    // Auto-update student status if all 4 demos are attended
-    if (attended === true) {
-        const studentId = demo.student;
-        const allDemos = await DemoLecture.find({ student: studentId });
-        const attendedCount = allDemos.filter(d => d.attended === true).length;
+    demo.attended = attended;
 
-        if (attendedCount === 4) {
-            const student = await Student.findById(studentId);
-            if (student && student.status === 'enquiry') {
-                student.status = 'demo_scheduled';
-                await student.save();
-            }
+    if (attended === false) {
+        // Auto-reschedule: find the latest scheduledDate among all demos for this student
+        const allDemos = await DemoLecture.find({ student: demo.student });
+        const latestDate = allDemos.reduce((max, d) => {
+            return new Date(d.scheduledDate) > new Date(max) ? d.scheduledDate : max;
+        }, demo.scheduledDate);
+
+        const autoRescheduledDate = new Date(latestDate);
+        autoRescheduledDate.setDate(autoRescheduledDate.getDate() + 1); // lastDate + 1
+
+        demo.scheduledDate = autoRescheduledDate;
+        demo.notes = demo.notes || "Auto-rescheduled due to absence";
+    }
+
+    await demo.save();
+
+    // When present: check if all 4 demos attended → advance student to demo_scheduled
+    if (attended === true) {
+        const allDemos = await DemoLecture.find({ student: demo.student });
+        const allAttended = allDemos.length === 4 && allDemos.every(d => d.attended === true);
+        if (allAttended) {
+            await Student.findByIdAndUpdate(demo.student, { status: "demo_scheduled" });
         }
     }
 
-    return res.status(200).json(new ApiResponse(200, demo, "Attendance marked"));
+    return res.status(200).json(new ApiResponse(200, demo,
+        attended === false
+            ? `Marked absent — auto-rescheduled to ${demo.scheduledDate.toDateString()}`
+            : "Attendance marked as present"
+    ));
 });
+
 
 // PATCH /api/v1/demos/:id/reschedule
 // Body: { newDate: "YYYY-MM-DD", notes: "..." }
