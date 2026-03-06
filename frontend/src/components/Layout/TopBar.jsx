@@ -1,6 +1,7 @@
 import { useAuth } from '../../context/AuthContext'
 import { Bell, User } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
+import { useNotifications } from '../../context/NotificationContext'
 
 const pageTitles = {
     '/receptionist/dashboard': 'Dashboard',
@@ -21,6 +22,7 @@ function getPageTitle(pathname) {
 function TopBar() {
     const { currentUser } = useAuth()
     const location = useLocation()
+    const { unreadCount, notifications, isOpen, setIsOpen } = useNotifications()
 
     const pageTitle = getPageTitle(location.pathname)
 
@@ -32,9 +34,21 @@ function TopBar() {
             {/* Right Section */}
             <div className="flex items-center gap-4">
                 {/* Notification Bell */}
-                <button className="relative p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+                <button
+                    onClick={() => setIsOpen(prev => !prev)}
+                    className={`relative p-2 rounded-lg transition-colors cursor-pointer ${isOpen
+                            ? 'text-slate-800 bg-slate-100'
+                            : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                        }`}
+                    aria-label={`Notifications${notifications.length > 0 ? ` (${notifications.length})` : ''}`}
+                    aria-expanded={isOpen}
+                >
                     <Bell size={20} />
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                    {notifications.length > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none shadow-sm">
+                            {unreadCount > 0 ? (unreadCount > 99 ? '99+' : unreadCount) : notifications.length > 99 ? '99+' : notifications.length}
+                        </span>
+                    )}
                 </button>
 
                 {/* User Info */}
