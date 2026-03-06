@@ -10,12 +10,12 @@ import dotenv from "dotenv"
 import connectDB from "./db/index.js";
 
 dotenv.config({
-    path: './env'
+    path: './.env'
 })
 
 connectDB()  //ye async use kiye hai to promise bhi return karega isliye
     .then(() => {
-        app.listen(process.env.PORT || 8080, () => {
+        app.listen(process.env.PORT || 8000, () => {
             console.log(`Server is running at port :${process.env.PORT}`);
 
         })
