@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { FeeRecord } from "../models/feeRecord.model.js";
 import { Student } from "../models/student.model.js";
+import { scheduleFeeReminder } from "../utils/whatsapp.service.js";
 
 // Helper: build the due date for a given day and month/year
 const buildDueDate = (day, month, year) => {
@@ -42,6 +43,19 @@ const ensureCurrentMonthRecords = async () => {
                 dueDate,
                 status: "pending",
             });
+
+            // 📲 Schedule WhatsApp reminder via CHDS — will auto-send on dueDate at 9 AM
+            if (s.parentPhone) {
+                scheduleFeeReminder({
+                    studentName: s.fullName,
+                    parentPhone: s.parentPhone,
+                    month,
+                    year,
+                    dueDate,
+                }).catch((err) =>
+                    console.error(`[WhatsApp] Schedule error for ${s.fullName}:`, err.message)
+                );
+            }
         }
     }
 };
@@ -113,6 +127,20 @@ export const markFeePaid = asyncHandler(async (req, res) => {
         },
         { upsert: true, new: true }
     );
+
+    // 📲 Schedule WhatsApp reminder for next month via CHDS
+    const paidStudent = await Student.findById(fee.student).select("parentPhone");
+    if (paidStudent?.parentPhone) {
+        scheduleFeeReminder({
+            studentName: fee.studentName,
+            parentPhone: paidStudent.parentPhone,
+            month: nextMonth,
+            year: nextYear,
+            dueDate: nextDue,
+        }).catch((err) =>
+            console.error(`[WhatsApp] Schedule error (next month) for ${fee.studentName}:`, err.message)
+        );
+    }
 
     return res.status(200).json(new ApiResponse(200, fee, "Fee marked as paid and next month's record created"));
 });

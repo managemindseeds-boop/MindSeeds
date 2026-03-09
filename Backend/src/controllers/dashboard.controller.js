@@ -3,13 +3,17 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Student } from "../models/student.model.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { FeeRecord } from "../models/feeRecord.model.js";
+import { scheduleFeeReminder } from "../utils/whatsapp.service.js";
 
-// Helper: today ki start aur end time
+// Helper: today ki start aur end time — IST aware (UTC+5:30)
+// Server UTC mein run karta hai, isliye explicitly IST date calculate karte hain
 const todayRange = () => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // 5h 30m
+    const nowIST = new Date(Date.now() + IST_OFFSET_MS);
+    const dateStr = nowIST.toISOString().split('T')[0]; // e.g. "2026-03-10"
+    // IST midnight → UTC
+    const start = new Date(dateStr + 'T00:00:00+05:30');
+    const end = new Date(dateStr + 'T23:59:59.999+05:30');
     return { start, end };
 };
 
@@ -42,6 +46,19 @@ const ensureCurrentMonthRecords = async () => {
                 dueDate,
                 status: "pending",
             });
+
+            // 📲 WhatsApp reminder schedule karo via CHDS
+            if (s.parentPhone) {
+                scheduleFeeReminder({
+                    studentName: s.fullName,
+                    parentPhone: s.parentPhone,
+                    month,
+                    year,
+                    dueDate,
+                }).catch((err) =>
+                    console.error(`[WhatsApp] Dashboard schedule error for ${s.fullName}:`, err.message)
+                );
+            }
         }
     }
 };

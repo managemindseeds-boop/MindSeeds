@@ -24,6 +24,13 @@ function normalizeStudent(s, localStatuses = {}) {
 
 // Demo normalize helper
 function normalizeDemo(d) {
+    // UTC scheduledDate ko IST mein convert karo (UTC+5:30)
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const scheduledDateIST = d.scheduledDate
+        ? new Date(new Date(d.scheduledDate).getTime() + IST_OFFSET_MS)
+            .toISOString().split('T')[0]   // "2026-03-11" in IST
+        : null;
+
     return {
         id: d._id,
         studentId: d.student,
@@ -31,7 +38,7 @@ function normalizeDemo(d) {
         studentClass: d.studentClass || '',
         branch: d.branch || '',
         lectureNumber: d.lectureNumber,
-        scheduledDate: d.scheduledDate?.split('T')[0],
+        scheduledDate: scheduledDateIST,
         attended: d.attended,
         notes: d.notes || '',
     }

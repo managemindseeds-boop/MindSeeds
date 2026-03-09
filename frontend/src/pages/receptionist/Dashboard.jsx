@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Users, CalendarCheck, ClipboardList, IndianRupee,
     UserPlus, CalendarPlus, TrendingUp, AlertCircle,
-    Clock, BookOpen, ArrowRight, CheckCircle2
+    Clock, BookOpen, ArrowRight, CheckCircle2, MessageCircle, Loader2
 } from 'lucide-react'
 import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
@@ -100,6 +100,41 @@ function Dashboard() {
     const { todayDemos, upcomingDemos, absentDemos } = useDemos()
     const { monthFees } = useFees()
 
+    // ── WhatsApp Reminder State ────────────────────────────────────────────
+    const [reminderLoading, setReminderLoading] = useState(false)
+    const [reminderToast, setReminderToast] = useState(null) // { type: 'success'|'error', msg }
+
+    const showToast = (type, msg) => {
+        setReminderToast({ type, msg })
+        setTimeout(() => setReminderToast(null), 5000)
+    }
+
+    const handleSendReminders = async () => {
+        setReminderLoading(true)
+        try {
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('accessToken='))
+                ?.split('=')?.[1]
+            const res = await fetch('/api/v1/notifications/send-monthly-reminders', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+            })
+            const data = await res.json()
+            if (res.ok) {
+                const { sent, failed, skipped } = data.data
+                showToast('success', `✅ ${sent} reminders sent, ${failed} failed, ${skipped} skipped`)
+            } else {
+                showToast('error', `❌ ${data.message || 'Failed to send reminders'}`)
+            }
+        } catch (err) {
+            showToast('error', `❌ Network error: ${err.message}`)
+        } finally {
+            setReminderLoading(false)
+        }
+    }
+
     // ── Computed KPIs ──────────────────────────────────────────────────────
     const totalStudents = students.length
     const demosToday = todayDemos.length
@@ -143,7 +178,7 @@ function Dashboard() {
                     <h1 className="text-xl font-bold text-gray-900">Good morning 👋</h1>
                     <p className="text-sm text-gray-400 mt-0.5">{todayLabel()}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                     <button
                         onClick={() => navigate('/receptionist/students/add')}
                         className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
@@ -156,8 +191,28 @@ function Dashboard() {
                     >
                         <CalendarPlus size={15} /> View Demos
                     </button>
+                    <button
+                        id="btn-send-wa-reminders"
+                        onClick={handleSendReminders}
+                        disabled={reminderLoading}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
+                        {reminderLoading
+                            ? <><Loader2 size={15} className="animate-spin" /> Sending...</>
+                            : <><MessageCircle size={15} /> Fee Reminders</>}
+                    </button>
                 </div>
             </div>
+
+            {/* ── WhatsApp Toast ────────────────────────────────────────────── */}
+            {reminderToast && (
+                <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${reminderToast.type === 'success'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-rose-50 border-rose-200 text-rose-800'
+                    }`}>
+                    {reminderToast.msg}
+                </div>
+            )}
 
             {/* ── KPI Cards ────────────────────────────────────────────────── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

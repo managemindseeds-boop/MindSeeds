@@ -83,7 +83,8 @@ function MarkAttendance() {
 
     const studentName = demos[0]?.studentName || 'Student'
     const studentClass = demos[0]?.studentClass || ''
-    const today = new Date().toISOString().split('T')[0]
+    // IST mein aaj ki date (UTC+5:30) — demo scheduledDate bhi IST mein hai
+    const today = new Date(Date.now() + 5.5 * 60 * 60 * 1000).toISOString().split('T')[0]
 
     const formatDate = (dateStr) => {
         if (!dateStr) return ''

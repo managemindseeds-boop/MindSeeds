@@ -4,11 +4,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { Student } from "../models/student.model.js";
 
+// Helper: today ki start aur end time — IST aware (UTC+5:30)
 const todayRange = () => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const nowIST = new Date(Date.now() + IST_OFFSET_MS);
+    const dateStr = nowIST.toISOString().split('T')[0]; // "2026-03-10"
+    const start = new Date(dateStr + 'T00:00:00+05:30');
+    const end = new Date(dateStr + 'T23:59:59.999+05:30');
     return { start, end };
 };
 
