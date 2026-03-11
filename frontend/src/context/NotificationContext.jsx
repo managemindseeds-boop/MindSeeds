@@ -1,7 +1,6 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 import { useStudents } from './StudentContext'
 import { useDemos } from './DemoContext'
-import { useFees } from './FeeContext'
 
 const NotificationContext = createContext(null)
 
@@ -9,93 +8,74 @@ export function NotificationProvider({ children }) {
     const [isOpen, setIsOpen] = useState(false)
     const { students } = useStudents()
     const { todayDemos, absentDemos, upcomingDemos } = useDemos()
-    const { todayFees } = useFees()
 
     const notifications = useMemo(() => {
         const items = []
 
-        // --- Demo Notifications ---
-        // Today's demos that haven't been attended yet
-        todayDemos.forEach(demo => {
-            if (!demo.attended) {
-                items.push({
-                    id: `demo-today-${demo.id}`,
-                    type: 'demo',
-                    priority: 'high',
-                    title: 'Demo Scheduled Today',
-                    message: `${demo.studentName} – Lecture ${demo.lectureNumber}`,
-                    meta: demo.branch || '',
-                    time: demo.scheduledDate,
-                    link: `/receptionist/demos/${demo.studentId}`,
-                })
-            }
-        })
+        // ── 1. TODAY'S DEMOS (grouped summary) ─────────────────────────────
+        const pendingToday = todayDemos.filter(d => !d.attended)
+        if (pendingToday.length > 0) {
+            items.push({
+                id: 'group-demos-today',
+                type: 'demo',
+                priority: 'high',
+                title: `${pendingToday.length} Demo${pendingToday.length > 1 ? 's' : ''} Scheduled Today`,
+                message: pendingToday.map(d => d.studentName).join(', '),
+                count: pendingToday.length,
+                link: '/receptionist/demos',
+            })
+        }
 
-        // Absent (missed) demo sessions
+        // ── 2. ABSENT / MISSED DEMOS (individual — each needs action) ──────
         absentDemos.forEach(demo => {
             items.push({
                 id: `demo-absent-${demo.id}`,
                 type: 'absent',
-                priority: 'medium',
-                title: 'Missed Demo Session',
-                message: `${demo.studentName} – Lecture ${demo.lectureNumber}`,
-                meta: demo.branch || '',
-                time: demo.scheduledDate,
+                priority: 'high',
+                title: 'Missed Demo — Action Needed',
+                message: `${demo.studentName} — Lecture ${demo.lectureNumber}`,
+                count: null,
                 link: `/receptionist/demos/${demo.studentId}`,
             })
         })
 
-        // Upcoming demos (next 7 days, not today)
-        upcomingDemos.forEach(demo => {
+
+        // ── 5. UPCOMING DEMOS (grouped summary) ─────────────────────────────
+        if (upcomingDemos.length > 0) {
+            // Group by unique student
+            const uniqueStudents = [...new Set(upcomingDemos.map(d => d.studentName))]
+            const nextDate = upcomingDemos[0]?.scheduledDate
             items.push({
-                id: `demo-upcoming-${demo.id}`,
+                id: 'group-demos-upcoming',
                 type: 'upcoming',
                 priority: 'low',
-                title: 'Upcoming Demo',
-                message: `${demo.studentName} – Lecture ${demo.lectureNumber}`,
-                meta: demo.branch || '',
-                time: demo.scheduledDate,
-                link: `/receptionist/demos`,
+                title: `${upcomingDemos.length} Upcoming Demo Lecture${upcomingDemos.length > 1 ? 's' : ''}`,
+                message: uniqueStudents.length === 1
+                    ? `${uniqueStudents[0]} — next on ${nextDate}`
+                    : `${uniqueStudents.length} students — next on ${nextDate}`,
+                count: upcomingDemos.length,
+                link: '/receptionist/demos',
             })
-        })
+        }
 
-        // --- Fee Notifications ---
-        todayFees.forEach(fee => {
-            if (fee.status !== 'paid') {
-                items.push({
-                    id: `fee-due-${fee._id || fee.id}`,
-                    type: 'fee',
-                    priority: fee.status === 'overdue' ? 'high' : 'medium',
-                    title: fee.status === 'overdue' ? 'Overdue Fee' : 'Fee Due Today',
-                    message: `${fee.studentName || fee.student?.fullName || 'Student'} – ₹${fee.amount?.toLocaleString('en-IN') ?? ''}`,
-                    meta: fee.month || '',
-                    time: fee.dueDate?.split('T')[0] || '',
-                    link: `/receptionist/fees`,
-                })
-            }
-        })
+        // ── 6. PENDING ADMISSIONS (grouped summary) ──────────────────────────
+        const pendingAdmissions = students.filter(s => s.status === 'demo_completed')
+        if (pendingAdmissions.length > 0) {
+            items.push({
+                id: 'group-admissions',
+                type: 'admission',
+                priority: 'medium',
+                title: `${pendingAdmissions.length} Pending Admission${pendingAdmissions.length > 1 ? 's' : ''}`,
+                message: pendingAdmissions.map(s => s.name).join(', '),
+                count: pendingAdmissions.length,
+                link: '/receptionist/admissions',
+            })
+        }
 
-        // --- Student Notifications ---
-        // Students with 'demo_completed' status awaiting admission
-        students.forEach(student => {
-            if (student.status === 'demo_completed') {
-                items.push({
-                    id: `student-admission-${student.id}`,
-                    type: 'admission',
-                    priority: 'medium',
-                    title: 'Pending Admission',
-                    message: `${student.name} has completed demos`,
-                    meta: student.branch || '',
-                    time: '',
-                    link: `/receptionist/admissions`,
-                })
-            }
-        })
-
-        // Sort: high priority first, then medium, then low
-        const priorityOrder = { high: 0, medium: 1, low: 2 }
-        return items.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
-    }, [students, todayDemos, absentDemos, upcomingDemos, todayFees])
+        // Sort: high → medium → low
+        const order = { high: 0, medium: 1, low: 2 }
+        return items.sort((a, b) => order[a.priority] - order[b.priority])
+    }, [students, todayDemos, absentDemos, upcomingDemos])
 
     const unreadCount = useMemo(
         () => notifications.filter(n => n.priority === 'high').length,

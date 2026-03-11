@@ -81,6 +81,7 @@ function DemoList() {
                                                 <p className="text-xs text-gray-500 mt-0.5">
                                                     Lecture {demo.lectureNumber} •{' '}
                                                     {formatDate(demo.scheduledDate)}
+                                                    {demo.subject && ` • ${demo.subject}`}
                                                     {demo.notes && ` • ${demo.notes}`}
                                                 </p>
                                             </div>
@@ -147,6 +148,7 @@ function DemoList() {
                                     <p className="text-sm font-semibold text-gray-900 truncate">{demo.studentName}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">
                                         Class {demo.studentClass}&nbsp;•&nbsp;Lecture {demo.lectureNumber}/4
+                                        {demo.subject && <>&nbsp;•&nbsp;<span className="text-emerald-600 font-medium">{demo.subject}</span></>}
                                     </p>
                                 </div>
 
@@ -205,6 +207,7 @@ function DemoList() {
                                     <p className="text-sm font-semibold text-gray-900 truncate">{demo.studentName}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">
                                         Class {demo.studentClass}&nbsp;•&nbsp;Lecture {demo.lectureNumber}/4
+                                        {demo.subject && <>&nbsp;•&nbsp;<span className="text-blue-600 font-medium">{demo.subject}</span></>}
                                     </p>
                                 </div>
 

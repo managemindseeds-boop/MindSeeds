@@ -1,17 +1,22 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDemos } from '../../context/DemoContext'
-import { ArrowLeft, Check, X, RotateCcw } from 'lucide-react'
+import {
+    PiArrowLeft, PiCheckCircle, PiXCircle, PiArrowCounterClockwise,
+    PiPencilSimpleLine, PiCheck, PiX, PiClock, PiBook
+} from 'react-icons/pi'
 import RescheduleModal from '../../components/Demos/RescheduleModal'
+import EditDemoModal from '../../components/Demos/EditDemoModal'
 
 function MarkAttendance() {
     const { studentId } = useParams()
     const navigate = useNavigate()
-    const { getDemosByStudent, markAttendance, rescheduleDemo } = useDemos()
+    const { getDemosByStudent, markAttendance, rescheduleDemo, updateDemo } = useDemos()
     const [demos, setDemos] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [rescheduleTarget, setRescheduleTarget] = useState(null)
+    const [editTarget, setEditTarget] = useState(null)
 
     const fetchStudentDemos = useCallback(async () => {
         setLoading(true)
@@ -59,6 +64,15 @@ function MarkAttendance() {
         }
     }
 
+    const handleEdit = async (demoId, fields) => {
+        try {
+            await updateDemo(demoId, fields)
+            fetchStudentDemos()
+        } catch (err) {
+            alert(err.message)
+        }
+    }
+
     if (loading && demos.length === 0) {
         return (
             <div className="flex items-center justify-center py-20">
@@ -96,8 +110,8 @@ function MarkAttendance() {
     }
 
     const getStatusIcon = (demo) => {
-        if (demo.attended === true) return <Check size={16} className="text-white" />
-        if (demo.attended === false) return <X size={16} className="text-white" />
+        if (demo.attended === true) return <PiCheck size={16} className="text-white" />
+        if (demo.attended === false) return <PiX size={16} className="text-white" />
         return <span className="text-xs font-bold text-gray-400">{demo.lectureNumber}</span>
     }
 
@@ -129,7 +143,7 @@ function MarkAttendance() {
                     onClick={() => navigate('/receptionist/demos')}
                     className="p-2 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                 >
-                    <ArrowLeft size={20} />
+                    <PiArrowLeft size={20} />
                 </button>
                 <div>
                     <h1 className="text-xl font-bold text-gray-900">{studentName}</h1>
@@ -150,6 +164,9 @@ function MarkAttendance() {
                             </div>
                             <p className="text-xs font-medium text-gray-900 mt-2">Lecture {demo.lectureNumber}</p>
                             <p className="text-[10px] text-gray-500">{formatDate(demo.scheduledDate)}</p>
+                            {demo.subject && (
+                                <p className="text-[10px] text-emerald-600 font-medium mt-0.5 px-1 text-center">{demo.subject}</p>
+                            )}
                             <span className={`text-[10px] font-medium mt-0.5 ${getStatusColor(demo)}`}>
                                 {getStatusLabel(demo)}
                             </span>
@@ -158,80 +175,115 @@ function MarkAttendance() {
                 </div>
             </div>
 
-            {/* Lecture Cards */}
-            <div className="space-y-3">
+            {/* Lecture Cards — 2×2 grid matching AddStudent page 2 */}
+            <div className="grid grid-cols-1 gap-3">
                 {demos.map((demo) => {
                     const isToday = demo.scheduledDate === today
                     const isPending = demo.attended === null
 
+                    // Derive weekday from date string
+                    const weekday = demo.scheduledDate
+                        ? new Date(demo.scheduledDate + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long' })
+                        : ''
+                    const fullDate = demo.scheduledDate
+                        ? new Date(demo.scheduledDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                        : ''
+
                     return (
                         <div
                             key={demo.id}
-                            className={`bg-white rounded-xl border p-4 flex items-center justify-between
-                                ${isToday && isPending ? 'border-amber-300 bg-amber-50/30' : 'border-gray-200'}
-                                ${demo.attended === false ? 'border-red-200 bg-red-50/30' : ''}`}
+                            className="flex items-start gap-3 p-3 rounded-xl border border-black bg-gray-50"
                         >
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <p className="text-sm font-medium text-gray-900">Lecture {demo.lectureNumber}</p>
-                                    {isToday && isPending && (
-                                        <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px] font-medium">TODAY</span>
-                                    )}
-                                </div>
-                                <p className="text-xs text-gray-500 mt-0.5">{formatDate(demo.scheduledDate)}</p>
-                                {demo.notes && (
-                                    <p className="text-xs text-gray-400 mt-1">Note: {demo.notes}</p>
-                                )}
+                            {/* Black square day badge */}
+                            <div className="flex-shrink-0 flex flex-col items-center justify-center w-11 h-11 bg-black text-white rounded-lg text-xs font-bold leading-tight">
+                                <span className="text-[10px] font-normal opacity-60">Day</span>
+                                <span>{demo.lectureNumber}</span>
                             </div>
 
-                            <div className="flex items-center gap-2">
-                                {demo.attended === true && (
-                                    <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-medium">
-                                        ✅ Present
-                                    </span>
-                                )}
-                                {demo.attended === false && (
-                                    <div className="flex items-center gap-2">
-                                        <span className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium">
-                                            ❌ Absent
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                                {/* Date + edit */}
+                                <div className="flex items-start justify-between gap-1">
+                                    <div>
+                                        <p className="text-sm font-semibold text-gray-900 leading-snug">{fullDate}</p>
+                                        <p className="text-xs text-gray-400">{weekday}</p>
+                                    </div>
+                                    {demo.attended !== true && (
+                                        <button
+                                            onClick={() => setEditTarget(demo)}
+                                            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-white rounded-md transition-colors cursor-pointer shrink-0"
+                                            title="Edit"
+                                        >
+                                            <PiPencilSimpleLine size={14} />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Subject pill + TODAY */}
+                                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                                    {demo.subject && (
+                                        <span className="flex items-center gap-1 text-xs text-emerald-700 font-medium bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                            <PiBook size={11} /> {demo.subject}
                                         </span>
-                                        <button
-                                            onClick={() => setRescheduleTarget(demo)}
-                                            className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
-                                        >
-                                            <RotateCcw size={12} />
-                                            Reschedule
-                                        </button>
-                                    </div>
+                                    )}
+                                    {isToday && isPending && (
+                                        <span className="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">TODAY</span>
+                                    )}
+                                </div>
+
+                                {/* Notes */}
+                                {demo.notes && (
+                                    <p className="text-[11px] text-gray-400 mt-1 leading-snug">{demo.notes}</p>
                                 )}
-                                {isPending && isToday && (
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleMarkPresent(demo.id)}
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors cursor-pointer"
-                                        >
-                                            <Check size={14} />
-                                            Present
-                                        </button>
-                                        <button
-                                            onClick={() => handleMarkAbsent(demo.id)}
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600 transition-colors cursor-pointer"
-                                        >
-                                            <X size={14} />
-                                            Absent
-                                        </button>
-                                    </div>
-                                )}
-                                {isPending && !isToday && (
-                                    <span className="px-3 py-1.5 bg-gray-50 text-gray-400 rounded-lg text-xs font-medium">
-                                        ⏳ Upcoming
-                                    </span>
-                                )}
+
+                                {/* Actions */}
+                                <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-gray-200">
+                                    {demo.attended === true && (
+                                        <span className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                                            <PiCheckCircle size={14} /> Present
+                                        </span>
+                                    )}
+                                    {demo.attended === false && (
+                                        <div className="flex items-center gap-2 w-full justify-between">
+                                            <span className="flex items-center gap-1 text-xs font-medium text-red-500">
+                                                <PiXCircle size={14} /> Absent
+                                            </span>
+                                            <button
+                                                onClick={() => setRescheduleTarget(demo)}
+                                                className="flex items-center gap-1 px-2 py-1 bg-white border border-gray-200 rounded-md text-xs text-gray-500 hover:bg-gray-100 transition-colors cursor-pointer"
+                                            >
+                                                <PiArrowCounterClockwise size={12} /> Reschedule
+                                            </button>
+                                        </div>
+                                    )}
+                                    {isPending && isToday && (
+                                        <div className="flex items-center gap-1.5 w-full">
+                                            <button
+                                                onClick={() => handleMarkPresent(demo.id)}
+                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-emerald-500 text-white rounded-md text-xs font-medium hover:bg-emerald-600 transition-colors cursor-pointer"
+                                            >
+                                                <PiCheck size={13} /> Present
+                                            </button>
+                                            <button
+                                                onClick={() => handleMarkAbsent(demo.id)}
+                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-red-500 text-white rounded-md text-xs font-medium hover:bg-red-600 transition-colors cursor-pointer"
+                                            >
+                                                <PiX size={13} /> Absent
+                                            </button>
+                                        </div>
+                                    )}
+                                    {isPending && !isToday && (
+                                        <span className="flex items-center gap-1 text-xs text-gray-400">
+                                            <PiClock size={13} /> Upcoming
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )
                 })}
             </div>
+
 
             {/* Reschedule Modal */}
             {rescheduleTarget && (
@@ -239,6 +291,13 @@ function MarkAttendance() {
                     demo={rescheduleTarget}
                     onConfirm={(id, date, notes) => handleReschedule(id, date, notes)}
                     onClose={() => setRescheduleTarget(null)}
+                />
+            )}
+            {editTarget && (
+                <EditDemoModal
+                    demo={editTarget}
+                    onConfirm={handleEdit}
+                    onClose={() => setEditTarget(null)}
                 />
             )}
         </div>

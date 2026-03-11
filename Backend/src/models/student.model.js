@@ -12,6 +12,7 @@ const studentSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
+            match: [/^\d{10}$/, 'Please fill a valid 10-digit mobile number']
         },
         gender: {
             type: String,
@@ -40,6 +41,7 @@ const studentSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
+            match: [/^\d{10}$/, 'Please fill a valid 10-digit mobile number']
         },
 
         // ENQUIRY DETAILS

@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-    Users, CalendarCheck, ClipboardList, IndianRupee,
+    Users, CalendarCheck, ClipboardList,
     UserPlus, CalendarPlus, TrendingUp, AlertCircle,
-    Clock, BookOpen, ArrowRight, CheckCircle2, MessageCircle, Loader2
+    Clock, BookOpen, ArrowRight, CheckCircle2
 } from 'lucide-react'
 import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
@@ -11,7 +11,6 @@ import {
 } from 'recharts'
 import { useStudents } from '../../context/StudentContext'
 import { useDemos } from '../../context/DemoContext'
-import { useFees } from '../../context/FeeContext'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,9 +41,7 @@ const todayLabel = () => {
 
 function KpiCard({ label, value, icon: Icon, accentColor, subText, alert }) {
     return (
-        <div style={{ borderTop: `3px solid ${accentColor}` }}
-            className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200"
-        >
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
             <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{label}</p>
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center"
@@ -98,42 +95,6 @@ function Dashboard() {
     const navigate = useNavigate()
     const { students } = useStudents()
     const { todayDemos, upcomingDemos, absentDemos } = useDemos()
-    const { monthFees } = useFees()
-
-    // ── WhatsApp Reminder State ────────────────────────────────────────────
-    const [reminderLoading, setReminderLoading] = useState(false)
-    const [reminderToast, setReminderToast] = useState(null) // { type: 'success'|'error', msg }
-
-    const showToast = (type, msg) => {
-        setReminderToast({ type, msg })
-        setTimeout(() => setReminderToast(null), 5000)
-    }
-
-    const handleSendReminders = async () => {
-        setReminderLoading(true)
-        try {
-            const token = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('accessToken='))
-                ?.split('=')?.[1]
-            const res = await fetch('/api/v1/notifications/send-monthly-reminders', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-            })
-            const data = await res.json()
-            if (res.ok) {
-                const { sent, failed, skipped } = data.data
-                showToast('success', `✅ ${sent} reminders sent, ${failed} failed, ${skipped} skipped`)
-            } else {
-                showToast('error', `❌ ${data.message || 'Failed to send reminders'}`)
-            }
-        } catch (err) {
-            showToast('error', `❌ Network error: ${err.message}`)
-        } finally {
-            setReminderLoading(false)
-        }
-    }
 
     // ── Computed KPIs ──────────────────────────────────────────────────────
     const totalStudents = students.length
@@ -142,10 +103,6 @@ function Dashboard() {
         () => students.filter(s => s.status === 'demo_completed').length,
         [students]
     )
-    const overdueFees = useMemo(() => {
-        const now = new Date()
-        return monthFees.filter(f => f.status === 'pending' && new Date(f.dueDate) < now)
-    }, [monthFees])
 
     // ── Student Status Chart Data ──────────────────────────────────────────
     const statusChartData = useMemo(() => {
@@ -174,10 +131,6 @@ function Dashboard() {
 
             {/* ── Top Welcome Bar ──────────────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900">Good morning 👋</h1>
-                    <p className="text-sm text-gray-400 mt-0.5">{todayLabel()}</p>
-                </div>
                 <div className="flex gap-2 flex-wrap">
                     <button
                         onClick={() => navigate('/receptionist/students/add')}
@@ -191,31 +144,11 @@ function Dashboard() {
                     >
                         <CalendarPlus size={15} /> View Demos
                     </button>
-                    <button
-                        id="btn-send-wa-reminders"
-                        onClick={handleSendReminders}
-                        disabled={reminderLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                    >
-                        {reminderLoading
-                            ? <><Loader2 size={15} className="animate-spin" /> Sending...</>
-                            : <><MessageCircle size={15} /> Fee Reminders</>}
-                    </button>
                 </div>
             </div>
 
-            {/* ── WhatsApp Toast ────────────────────────────────────────────── */}
-            {reminderToast && (
-                <div className={`px-4 py-3 rounded-lg text-sm font-medium border ${reminderToast.type === 'success'
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                        : 'bg-rose-50 border-rose-200 text-rose-800'
-                    }`}>
-                    {reminderToast.msg}
-                </div>
-            )}
-
             {/* ── KPI Cards ────────────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <KpiCard
                     label="Total Students"
                     value={totalStudents}
@@ -236,13 +169,6 @@ function Dashboard() {
                     icon={ClipboardList}
                     accentColor="#10b981"
                     alert={pendingAdmissions > 0}
-                />
-                <KpiCard
-                    label="Overdue Fees"
-                    value={overdueFees.length}
-                    icon={IndianRupee}
-                    accentColor="#ef4444"
-                    alert={overdueFees.length > 0}
                 />
             </div>
 
@@ -320,126 +246,73 @@ function Dashboard() {
                 </div>
             </div>
 
-            {/* ── Bottom Panels ─────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+            {/* ── Today's Demo Schedule ── */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <div className="flex items-center justify-between mb-4">
+                    <SectionHeader
+                        title="Today's Demo Schedule"
+                        subtitle={`${demosToday} session${demosToday !== 1 ? 's' : ''} scheduled`}
+                    />
+                    <button
+                        onClick={() => navigate('/receptionist/demos')}
+                        className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors cursor-pointer"
+                    >
+                        View all <ArrowRight size={12} />
+                    </button>
+                </div>
 
-                {/* Today's Demo Schedule — wider */}
-                <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <SectionHeader
-                            title="Today's Demo Schedule"
-                            subtitle={`${demosToday} session${demosToday !== 1 ? 's' : ''} scheduled`}
-                        />
-                        <button
-                            onClick={() => navigate('/receptionist/demos')}
-                            className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors cursor-pointer"
-                        >
-                            View all <ArrowRight size={12} />
-                        </button>
+                {todayDemos.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-gray-400 gap-2">
+                        <CalendarCheck size={32} className="opacity-30" />
+                        <p className="text-sm">No demos scheduled for today</p>
                     </div>
-
-                    {todayDemos.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 text-gray-400 gap-2">
-                            <CalendarCheck size={32} className="opacity-30" />
-                            <p className="text-sm">No demos scheduled for today</p>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b border-gray-100">
-                                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3 pr-4">Student</th>
-                                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3 pr-4">Class</th>
-                                        <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3 pr-4">Branch</th>
-                                        <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Lecture</th>
-                                        <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {todayDemos.map(demo => (
-                                        <tr key={demo.id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="py-3 pr-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-xs flex-shrink-0">
-                                                        {(demo.studentName || '?')[0].toUpperCase()}
-                                                    </div>
-                                                    <span className="font-medium text-gray-800 truncate max-w-[120px]">{demo.studentName}</span>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-gray-100">
+                                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3 pr-4">Student</th>
+                                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3 pr-4">Class</th>
+                                    <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3 pr-4">Branch</th>
+                                    <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Lecture</th>
+                                    <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wide pb-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {todayDemos.map(demo => (
+                                    <tr key={demo.id} className="transition-colors">
+                                        <td className="py-3 pr-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-xs flex-shrink-0">
+                                                    {(demo.studentName || '?')[0].toUpperCase()}
                                                 </div>
-                                            </td>
-                                            <td className="py-3 pr-4 text-gray-600 text-xs">{demo.studentClass || '—'}</td>
-                                            <td className="py-3 pr-4 text-gray-600 text-xs">{demo.branch || '—'}</td>
-                                            <td className="py-3 text-center">
-                                                <span className="inline-flex items-center gap-1 text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                                    <BookOpen size={10} /> #{demo.lectureNumber}
+                                                <span className="font-medium text-gray-800 truncate max-w-[120px]">{demo.studentName}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-3 pr-4 text-gray-600 text-xs">{demo.studentClass || '—'}</td>
+                                        <td className="py-3 pr-4 text-gray-600 text-xs">{demo.branch || '—'}</td>
+                                        <td className="py-3 text-center">
+                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                                <BookOpen size={10} /> #{demo.lectureNumber}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 text-center">
+                                            {demo.attended === true ? (
+                                                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                    <CheckCircle2 size={10} /> Present
                                                 </span>
-                                            </td>
-                                            <td className="py-3 text-center">
-                                                {demo.attended === true ? (
-                                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                                                        <CheckCircle2 size={10} /> Present
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                                                        <Clock size={10} /> Pending
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
-
-                {/* Overdue Fees — narrower */}
-                <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-                    <div className="flex items-center justify-between mb-4">
-                        <SectionHeader
-                            title="Overdue Fees"
-                            subtitle={overdueFees.length > 0 ? `${overdueFees.length} pending` : 'All clear'}
-                        />
-                        <button
-                            onClick={() => navigate('/receptionist/fees')}
-                            className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 font-medium transition-colors cursor-pointer"
-                        >
-                            View all <ArrowRight size={12} />
-                        </button>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                                                    <Clock size={10} /> Pending
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-
-                    {overdueFees.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 text-gray-400 gap-2">
-                            <CheckCircle2 size={32} className="opacity-30 text-emerald-400" />
-                            <p className="text-sm text-emerald-600 font-medium">No overdue fees 🎉</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
-                            {overdueFees.map((fee, idx) => (
-                                <div key={fee._id || idx}
-                                    className="flex items-center justify-between p-3 rounded-lg bg-rose-50 border border-rose-100 hover:bg-rose-100 transition-colors"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 rounded-full bg-rose-200 flex items-center justify-center text-rose-700 font-semibold text-xs flex-shrink-0">
-                                            {(fee.studentName || fee.student?.fullName || '?')[0].toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold text-gray-800 leading-tight">
-                                                {fee.studentName || fee.student?.fullName || 'Unknown'}
-                                            </p>
-                                            <p className="text-xs text-gray-400">
-                                                Due: {fee.dueDate ? new Date(fee.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '—'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs font-bold text-rose-600 bg-white px-2 py-1 rounded-md border border-rose-200">
-                                        ₹{fee.amount?.toLocaleString('en-IN') || '—'}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
+                )}
             </div>
         </div>
     )

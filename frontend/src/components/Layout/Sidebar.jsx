@@ -17,7 +17,6 @@ const navItems = [
     { label: 'Students', path: '/receptionist/students', icon: Users },
     { label: 'Demo Lectures', path: '/receptionist/demos', icon: CalendarCheck },
     { label: 'Admissions', path: '/receptionist/admissions', icon: ClipboardCheck },
-    { label: 'Fees', path: '/receptionist/fees', icon: IndianRupee },
 ]
 
 function Sidebar() {
@@ -32,8 +31,8 @@ function Sidebar() {
 
     return (
         <aside
-            className={`${collapsed ? 'w-20' : 'w-64'} 
-                h-screen sticky top-0 bg-black text-white flex flex-col transition-all duration-300 ease-in-out`}
+            className={`hidden md:flex ${collapsed ? 'w-20' : 'w-64'} 
+                h-screen sticky top-0 bg-black text-white flex-col transition-all duration-300 ease-in-out z-20`}
         >
             {/* Logo / Brand */}
             <div className="flex items-center justify-between px-5 py-6 border-b border-gray-800">

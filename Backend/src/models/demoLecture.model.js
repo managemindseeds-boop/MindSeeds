@@ -17,6 +17,10 @@ const demoLectureSchema = new mongoose.Schema(
             type: Number, // 1, 2, 3, 4
             required: true,
         },
+        subject: {
+            type: String,
+            default: "",
+        },
         scheduledDate: {
             type: Date,
             required: true,

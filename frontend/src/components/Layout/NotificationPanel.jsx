@@ -29,13 +29,6 @@ const typeConfig = {
         badge: 'bg-violet-100 text-violet-700',
         label: 'Upcoming',
     },
-    fee: {
-        icon: DollarSign,
-        bg: 'bg-amber-50',
-        iconColor: 'text-amber-600',
-        badge: 'bg-amber-100 text-amber-700',
-        label: 'Fee',
-    },
     admission: {
         icon: GraduationCap,
         bg: 'bg-emerald-50',

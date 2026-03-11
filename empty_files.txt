@@ -1,0 +1,4 @@
+C:\Users\moham\OneDrive\Documents\GitHub\MindSeeds\frontend\node_modules\@standard-schema\spec\dist\index.js
+C:\Users\moham\OneDrive\Documents\GitHub\MindSeeds\frontend\src\components\Layout\NotificationPanel.jsx
+C:\Users\moham\OneDrive\Documents\GitHub\MindSeeds\frontend\src\components\Layout\TopBar.jsx
+C:\Users\moham\OneDrive\Documents\GitHub\MindSeeds\frontend\src\pages\receptionist\StudentDetail.jsx

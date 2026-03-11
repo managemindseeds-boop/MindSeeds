@@ -121,3 +121,20 @@ export const rescheduleDemo = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, demo, "Demo rescheduled"));
 });
+
+// PATCH /api/v1/demos/:id/update
+// Body: { scheduledDate?: "YYYY-MM-DD", subject?: "...", notes?: "..." }
+export const updateDemo = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { scheduledDate, subject, notes } = req.body;
+
+    const update = {};
+    if (scheduledDate) update.scheduledDate = new Date(scheduledDate);
+    if (subject !== undefined) update.subject = subject;
+    if (notes !== undefined) update.notes = notes;
+
+    const demo = await DemoLecture.findByIdAndUpdate(id, update, { new: true });
+    if (!demo) throw new ApiError(404, "Demo not found");
+
+    return res.status(200).json(new ApiResponse(200, demo, "Demo updated"));
+});

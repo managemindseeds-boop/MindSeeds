@@ -51,8 +51,6 @@ export function DashboardProvider({ children }) {
     const [todayDemos, setTodayDemos] = useState([])
     const [upcomingDemos, setUpcomingDemos] = useState([])
     const [absentDemos, setAbsentDemos] = useState([])
-    const [monthFees, setMonthFees] = useState([])
-    const [todayFees, setTodayFees] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -75,14 +73,12 @@ export function DashboardProvider({ children }) {
             const res = await axios.get('/api/v1/dashboard', {
                 headers: { Authorization: `Bearer ${currentUser.token}` }
             })
-            const { students: rawStudents, todayDemos: td, upcomingDemos: ud, absentDemos: ad, monthFees: mf, todayFees: tf } = res.data.data
+            const { students: rawStudents, todayDemos: td, upcomingDemos: ud, absentDemos: ad } = res.data.data
 
             setStudents((rawStudents || []).map(s => normalizeStudent(s, localStatuses)))
             setTodayDemos((td || []).map(normalizeDemo))
             setUpcomingDemos((ud || []).map(normalizeDemo))
             setAbsentDemos((ad || []).map(normalizeDemo))
-            setMonthFees(mf || [])
-            setTodayFees(tf || [])
         } catch (err) {
             console.error('Error fetching dashboard:', err)
             setError(err.response?.data?.message || err.message)
@@ -156,42 +152,11 @@ export function DashboardProvider({ children }) {
         }
     }
 
-    // ─── Fee Actions ─────────────────────────────────────────────────────────
-    const markFeePaid = async (feeId) => {
-        if (!currentUser?.token) return
-        await axios.patch(`/api/v1/fees/${feeId}/pay`, {}, {
-            headers: { Authorization: `Bearer ${currentUser.token}` }
-        })
-        await fetchDashboard()
-    }
-
-    const rescheduleFee = async (feeId, newDate, notes) => {
-        if (!currentUser?.token) return
-        await axios.patch(`/api/v1/fees/${feeId}/reschedule`,
-            { newDate, notes },
-            { headers: { Authorization: `Bearer ${currentUser.token}` } }
-        )
-        await fetchDashboard()
-    }
-
-    const getStudentFees = async (studentId) => {
-        if (!currentUser?.token) return []
-        try {
-            const res = await axios.get(`/api/v1/fees/student/${studentId}`, {
-                headers: { Authorization: `Bearer ${currentUser.token}` }
-            })
-            return res.data.data
-        } catch {
-            return []
-        }
-    }
-
     return (
         <DashboardContext.Provider value={{
             // Data
             students,
             todayDemos, upcomingDemos, absentDemos,
-            monthFees,
             loading, error,
             // Refresh
             refetch: fetchDashboard,
@@ -203,10 +168,6 @@ export function DashboardProvider({ children }) {
             getUpcomingDemos: () => upcomingDemos,
             getAbsentDemos: () => absentDemos,
             refreshDemos: fetchDashboard,
-            // Fee actions
-            markFeePaid, rescheduleFee, getStudentFees,
-            todayFees,
-            refreshFees: fetchDashboard,
         }}>
             {children}
         </DashboardContext.Provider>
@@ -253,16 +214,3 @@ export function useDemos() {
     }
 }
 
-export function useFees() {
-    const ctx = useDashboard()
-    return {
-        todayFees: ctx.todayFees,
-        monthFees: ctx.monthFees,
-        loading: ctx.loading,
-        error: ctx.error,
-        markFeePaid: ctx.markFeePaid,
-        rescheduleFee: ctx.rescheduleFee,
-        getStudentFees: ctx.getStudentFees,
-        refreshFees: ctx.refreshFees,
-    }
-}

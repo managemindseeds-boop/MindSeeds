@@ -9,7 +9,6 @@ const pageTitles = {
     '/receptionist/students/add': 'Add Student',
     '/receptionist/demos': 'Demo Lectures',
     '/receptionist/admissions': 'Admissions',
-    '/receptionist/fees': 'Fees',
 }
 
 function getPageTitle(pathname) {
