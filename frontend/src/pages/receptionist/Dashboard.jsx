@@ -130,17 +130,17 @@ function Dashboard() {
         <div className="space-y-6">
 
             {/* ── Top Welcome Bar ──────────────────────────────────────────── */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex gap-2 flex-wrap">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end mb-4">
+                <div className="flex gap-2 justify-center sm:justify-end w-full sm:w-auto">
                     <button
                         onClick={() => navigate('/receptionist/students/add')}
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
                     >
                         <UserPlus size={15} /> Add Student
                     </button>
                     <button
                         onClick={() => navigate('/receptionist/demos')}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 text-sm font-medium rounded-lg hover:bg-emerald-100 transition-colors shadow-sm cursor-pointer"
                     >
                         <CalendarPlus size={15} /> View Demos
                     </button>
