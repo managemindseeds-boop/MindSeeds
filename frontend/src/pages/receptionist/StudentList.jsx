@@ -5,14 +5,14 @@ import { useNavigate } from 'react-router-dom'
 
 const statusLabels = {
     enquiry: 'Enquiry',
-    demo_scheduled: 'Demo Completed',
-    admitted: 'Admitted',
+    demo_scheduled: 'Demo Scheduled',
+    demo_completed: 'Demo Completed',
 }
 
 const statusColors = {
     enquiry: 'bg-blue-50 text-blue-600',
     demo_scheduled: 'bg-amber-50 text-amber-600',
-    admitted: 'bg-purple-50 text-purple-600',
+    demo_completed: 'bg-purple-50 text-purple-600',
 }
 
 function StudentList() {
@@ -72,8 +72,8 @@ function StudentList() {
                     >
                         <option value="all">All Status</option>
                         <option value="enquiry">Enquiry</option>
-                        <option value="demo_scheduled">Demo Completed</option>
-                        <option value="admitted">Admitted</option>
+                        <option value="demo_scheduled">Demo Scheduled</option>
+                        <option value="demo_completed">Demo Completed</option>
                     </select>
                 </div>
             </div>
@@ -145,16 +145,6 @@ function StudentList() {
                                             >
                                                 <Eye size={16} />
                                             </button>
-
-                                            {student.status === 'demo_scheduled' && (
-                                                <button
-                                                    onClick={() => navigate('/receptionist/admissions')}
-                                                    className="p-1.5 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                                    title="Process Admission"
-                                                >
-                                                    <ArrowRight size={16} />
-                                                </button>
-                                            )}
                                         </td>
                                     </tr>
                                 ))

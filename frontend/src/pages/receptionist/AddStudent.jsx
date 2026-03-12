@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStudents } from '../../context/StudentContext'
-import { ArrowLeft, Save, ArrowRight, CalendarDays, Clock, BookOpen } from 'lucide-react'
+import { ArrowLeft, Save, ArrowRight, CalendarDays, Clock, BookOpen, ChevronDown } from 'lucide-react'
 
 const genders = [
     { label: 'Male', value: 'male' },
@@ -185,7 +185,7 @@ function AddStudent() {
                         <h3 className="text-sm font-semibold text-gray-800 mb-2 uppercase tracking-wide">Student Information</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FieldInput label="Full Name" name="name" value={form.name} onChange={handleChange} error={errors.name} placeholder="Enter student name" required />
-                            <FieldInput label="Phone" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="10-digit number" required />
+                            <FieldInput label="Phone" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="10-digit number" required maxLength={10} type="tel" inputMode="numeric" pattern="[0-9]*" />
                             <FieldInput label="Email" name="email" type="email" value={form.email} onChange={handleChange} error={errors.email} placeholder="student@email.com" />
                             <FieldSelect label="Gender" name="gender" value={form.gender} onChange={handleChange} error={errors.gender} options={genders} placeholder="Select gender" required />
                             <FieldInput label="Address" name="address" value={form.address} onChange={handleChange} error={errors.address} placeholder="Enter full address" className="sm:col-span-2" required />
@@ -197,7 +197,7 @@ function AddStudent() {
                         <h3 className="text-sm font-semibold text-gray-800 mb-2 uppercase tracking-wide">Parent / Guardian</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FieldInput label="Parent Name" name="parentName" value={form.parentName} onChange={handleChange} error={errors.parentName} placeholder="Enter parent name" required />
-                            <FieldInput label="Parent Phone" name="parentPhone" value={form.parentPhone} onChange={handleChange} error={errors.parentPhone} placeholder="10-digit number" required />
+                            <FieldInput label="Parent Phone" name="parentPhone" value={form.parentPhone} onChange={handleChange} error={errors.parentPhone} placeholder="10-digit number" required maxLength={10} type="tel" inputMode="numeric" pattern="[0-9]*" />
                         </div>
                     </div>
 
@@ -335,7 +335,7 @@ function AddStudent() {
     )
 }
 
-function FieldInput({ label, name, value, onChange, error, placeholder, type = 'text', className = '', required = false }) {
+function FieldInput({ label, name, value, onChange, error, placeholder, type = 'text', className = '', required = false, ...props }) {
     return (
         <div className={className}>
             <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -349,6 +349,7 @@ function FieldInput({ label, name, value, onChange, error, placeholder, type = '
                 placeholder={placeholder}
                 className={`w-full px-3 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all
                     ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
+                {...props}
             />
             {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
         </div>
@@ -361,21 +362,24 @@ function FieldSelect({ label, name, value, onChange, error, options, placeholder
             <label className="block text-xs font-medium text-gray-700 mb-1">
                 {label}{required && <span className="text-red-500 ml-0.5">*</span>}
             </label>
-            <select
-                name={name}
-                value={value}
-                onChange={onChange}
-                className={`w-full px-3 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none cursor-pointer transition-all
-                    ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'}
-                    ${!value ? 'text-gray-400' : 'text-gray-900'}`}
-            >
-                <option value="">{placeholder}</option>
-                {options.map((opt) => {
-                    const val = typeof opt === 'object' ? opt.value : opt
-                    const lbl = typeof opt === 'object' ? opt.label : opt
-                    return <option key={val} value={val}>{lbl}</option>
-                })}
-            </select>
+            <div className="relative">
+                <select
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    className={`w-full pl-3 pr-10 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none cursor-pointer transition-all
+                        ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'}
+                        ${!value ? 'text-gray-400' : 'text-gray-900'}`}
+                >
+                    <option value="" disabled hidden>{placeholder}</option>
+                    {options.map((opt) => {
+                        const val = typeof opt === 'object' ? opt.value : opt
+                        const lbl = typeof opt === 'object' ? opt.label : opt
+                        return <option key={val} value={val}>{lbl}</option>
+                    })}
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            </div>
             {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
         </div>
     )

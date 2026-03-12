@@ -4,7 +4,6 @@ import {
     LayoutDashboard,
     Users,
     CalendarCheck,
-    ClipboardCheck,
     IndianRupee,
     LogOut,
     ChevronLeft,
@@ -16,7 +15,6 @@ const navItems = [
     { label: 'Dashboard', path: '/receptionist/dashboard', icon: LayoutDashboard },
     { label: 'Students', path: '/receptionist/students', icon: Users },
     { label: 'Demo Lectures', path: '/receptionist/demos', icon: CalendarCheck },
-    { label: 'Admissions', path: '/receptionist/admissions', icon: ClipboardCheck },
 ]
 
 function Sidebar() {

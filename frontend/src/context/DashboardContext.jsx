@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import { useAuth } from './AuthContext'
@@ -38,6 +39,7 @@ function normalizeDemo(d) {
         studentClass: d.studentClass || '',
         branch: d.branch || '',
         lectureNumber: d.lectureNumber,
+        subject: d.subject || '',
         scheduledDate: scheduledDateIST,
         attended: d.attended,
         notes: d.notes || '',
@@ -140,6 +142,15 @@ export function DashboardProvider({ children }) {
         await fetchDashboard()
     }
 
+    const updateDemo = async (demoId, fields) => {
+        if (!currentUser?.token) return
+        await axios.patch(`/api/v1/demos/${demoId}/update`,
+            fields,
+            { headers: { Authorization: `Bearer ${currentUser.token}` } }
+        )
+        await fetchDashboard()
+    }
+
     const getDemosByStudent = async (studentId) => {
         if (!currentUser?.token) return []
         try {
@@ -163,7 +174,7 @@ export function DashboardProvider({ children }) {
             // Student actions
             addStudent, updateStudentStatus, getStudentById,
             // Demo actions
-            markAttendance, rescheduleDemo, getDemosByStudent,
+            markAttendance, rescheduleDemo, getDemosByStudent, updateDemo,
             getTodaysDemos: () => todayDemos,
             getUpcomingDemos: () => upcomingDemos,
             getAbsentDemos: () => absentDemos,
@@ -207,6 +218,7 @@ export function useDemos() {
         markAttendance: ctx.markAttendance,
         rescheduleDemo: ctx.rescheduleDemo,
         getDemosByStudent: ctx.getDemosByStudent,
+        updateDemo: ctx.updateDemo,
         getTodaysDemos: ctx.getTodaysDemos,
         getUpcomingDemos: ctx.getUpcomingDemos,
         getAbsentDemos: ctx.getAbsentDemos,

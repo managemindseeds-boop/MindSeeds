@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
         const saved = localStorage.getItem('mindseeds_user')
         if (saved) {
             try {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setCurrentUser(JSON.parse(saved))
             } catch {
                 localStorage.removeItem('mindseeds_user')
@@ -85,6 +86,7 @@ export function AuthProvider({ children }) {
     )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext)
     if (!context) {

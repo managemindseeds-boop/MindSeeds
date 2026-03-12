@@ -91,6 +91,7 @@ export const addStudent = asyncHandler(async (req, res) => {
         parentPhone,
         class: studentClass,
         branch,
+        status: "demo_scheduled",
         addedBy: req.user._id,
     });
 
@@ -139,7 +140,7 @@ export const updateStudentStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ["enquiry", "demo_scheduled", "admitted"];
+    const validStatuses = ["enquiry", "demo_scheduled", "demo_completed"];
     if (!validStatuses.includes(status)) {
         throw new ApiError(400, `Invalid status. Must be one of: ${validStatuses.join(", ")}`);
     }
@@ -149,25 +150,7 @@ export const updateStudentStatus = asyncHandler(async (req, res) => {
 
     student.status = status;
 
-    // When admitted → lock in admission date & monthly fee date
-    if (status === "admitted" && !student.admissionDate) {
-        const today = new Date();
-        student.admissionDate = today;
-        student.feeDate = today.getDate(); // day of month (e.g. 5)
 
-        // Create the first FeeRecord for this month
-        const { FeeRecord } = await import("../models/feeRecord.model.js");
-        await FeeRecord.create({
-            student: student._id,
-            studentName: student.fullName,
-            branch: student.branch,
-            month: today.getMonth() + 1,
-            year: today.getFullYear(),
-            originalFeeDay: today.getDate(),
-            dueDate: today,
-            status: "pending",
-        });
-    }
 
     await student.save();
 

@@ -30,15 +30,9 @@ const STATUS_COLORS = {
     dropped: '#ef4444',
 }
 
-const todayLabel = () => {
-    const now = new Date()
-    return now.toLocaleDateString('en-IN', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-    })
-}
-
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
+// eslint-disable-next-line no-unused-vars
 function KpiCard({ label, value, icon: Icon, accentColor, subText, alert }) {
     return (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
@@ -99,7 +93,7 @@ function Dashboard() {
     // ── Computed KPIs ──────────────────────────────────────────────────────
     const totalStudents = students.length
     const demosToday = todayDemos.length
-    const pendingAdmissions = useMemo(
+    const completedDemos = useMemo(
         () => students.filter(s => s.status === 'demo_completed').length,
         [students]
     )
@@ -164,11 +158,11 @@ function Dashboard() {
                     subText="Scheduled"
                 />
                 <KpiCard
-                    label="Pending Admissions"
-                    value={pendingAdmissions}
+                    label="Completed Demos"
+                    value={completedDemos}
                     icon={ClipboardList}
                     accentColor="#10b981"
-                    alert={pendingAdmissions > 0}
+                    alert={completedDemos > 0}
                 />
             </div>
 

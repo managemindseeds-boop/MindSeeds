@@ -1,12 +1,10 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import { useStudents } from './StudentContext'
 import { useDemos } from './DemoContext'
 
 const NotificationContext = createContext(null)
 
 export function NotificationProvider({ children }) {
     const [isOpen, setIsOpen] = useState(false)
-    const { students } = useStudents()
     const { todayDemos, absentDemos, upcomingDemos } = useDemos()
 
     const notifications = useMemo(() => {
@@ -58,24 +56,12 @@ export function NotificationProvider({ children }) {
             })
         }
 
-        // ── 6. PENDING ADMISSIONS (grouped summary) ──────────────────────────
-        const pendingAdmissions = students.filter(s => s.status === 'demo_completed')
-        if (pendingAdmissions.length > 0) {
-            items.push({
-                id: 'group-admissions',
-                type: 'admission',
-                priority: 'medium',
-                title: `${pendingAdmissions.length} Pending Admission${pendingAdmissions.length > 1 ? 's' : ''}`,
-                message: pendingAdmissions.map(s => s.name).join(', '),
-                count: pendingAdmissions.length,
-                link: '/receptionist/admissions',
-            })
-        }
+
 
         // Sort: high → medium → low
         const order = { high: 0, medium: 1, low: 2 }
         return items.sort((a, b) => order[a.priority] - order[b.priority])
-    }, [students, todayDemos, absentDemos, upcomingDemos])
+    }, [todayDemos, absentDemos, upcomingDemos])
 
     const unreadCount = useMemo(
         () => notifications.filter(n => n.priority === 'high').length,
@@ -89,6 +75,7 @@ export function NotificationProvider({ children }) {
     )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotifications() {
     const context = useContext(NotificationContext)
     if (!context) throw new Error('useNotifications must be used within a NotificationProvider')

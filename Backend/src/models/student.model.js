@@ -59,15 +59,8 @@ const studentSchema = new mongoose.Schema(
         // JOURNEY STATUS
         status: {
             type: String,
-            enum: ["enquiry", "demo_scheduled", "admitted"],
+            enum: ["enquiry", "demo_scheduled", "demo_completed"],
             default: "enquiry",
-        },
-
-        // Set when status → admitted
-        admissionDate: { type: Date, default: null },
-        feeDate: {
-            type: Number, // Day of month: 1–28
-            default: null,
         },
 
         addedBy: {

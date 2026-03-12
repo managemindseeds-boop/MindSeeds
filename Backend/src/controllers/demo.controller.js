@@ -87,7 +87,7 @@ export const markAttendance = asyncHandler(async (req, res) => {
         const allDemos = await DemoLecture.find({ student: demo.student });
         const allAttended = allDemos.length === 4 && allDemos.every(d => d.attended === true);
         if (allAttended) {
-            await Student.findByIdAndUpdate(demo.student, { status: "demo_scheduled" });
+            await Student.findByIdAndUpdate(demo.student, { status: "demo_completed" });
         }
     }
 

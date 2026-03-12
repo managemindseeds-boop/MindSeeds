@@ -14,7 +14,6 @@ function MarkAttendance() {
     const { getDemosByStudent, markAttendance, rescheduleDemo, updateDemo } = useDemos()
     const [demos, setDemos] = useState([])
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
     const [rescheduleTarget, setRescheduleTarget] = useState(null)
     const [editTarget, setEditTarget] = useState(null)
 
@@ -23,8 +22,8 @@ function MarkAttendance() {
         try {
             const data = await getDemosByStudent(studentId)
             setDemos(data)
-        } catch (err) {
-            setError('Failed to load demos')
+        } catch {
+            // setError removed
         } finally {
             setLoading(false)
         }

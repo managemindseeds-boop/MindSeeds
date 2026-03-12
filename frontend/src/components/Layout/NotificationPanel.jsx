@@ -29,13 +29,6 @@ const typeConfig = {
         badge: 'bg-violet-100 text-violet-700',
         label: 'Upcoming',
     },
-    admission: {
-        icon: GraduationCap,
-        bg: 'bg-emerald-50',
-        iconColor: 'text-emerald-600',
-        badge: 'bg-emerald-100 text-emerald-700',
-        label: 'Admission',
-    },
 }
 
 const priorityLabel = { high: 'Urgent', medium: 'Important', low: 'Info' }

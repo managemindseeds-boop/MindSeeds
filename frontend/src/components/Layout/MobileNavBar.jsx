@@ -2,15 +2,13 @@ import { NavLink } from 'react-router-dom'
 import {
     LayoutDashboard,
     Users,
-    CalendarCheck,
-    ClipboardCheck
+    CalendarCheck
 } from 'lucide-react'
 
 const navItems = [
     { label: 'Dashboard', path: '/receptionist/dashboard', icon: LayoutDashboard },
     { label: 'Students', path: '/receptionist/students', icon: Users },
     { label: 'Demos', path: '/receptionist/demos', icon: CalendarCheck },
-    { label: 'Admissions', path: '/receptionist/admissions', icon: ClipboardCheck },
 ]
 
 function MobileNavBar() {

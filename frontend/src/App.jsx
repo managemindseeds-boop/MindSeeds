@@ -13,7 +13,6 @@ import AddStudent from './pages/receptionist/AddStudent'
 import StudentDetail from './pages/receptionist/StudentDetail'
 import DemoList from './pages/receptionist/DemoList'
 import MarkAttendance from './pages/receptionist/MarkAttendance'
-import Admissions from './pages/receptionist/Admissions'
 import AdminDashboard from './pages/admin/Dashboard'
 
 function App() {
@@ -41,7 +40,6 @@ function App() {
                 <Route path="students/:id" element={<StudentDetail />} />
                 <Route path="demos" element={<DemoList />} />
                 <Route path="demos/:studentId" element={<MarkAttendance />} />
-                <Route path="admissions" element={<Admissions />} />
               </Route>
 
               {/* Protected admin route */}
