@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "receptionist"],
       required: true,
     },
+
+    branch: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

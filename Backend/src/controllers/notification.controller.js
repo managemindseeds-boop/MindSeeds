@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { FeeRecord } from "../models/feeRecord.model.js";
 import { Student } from "../models/student.model.js";
 import { sendFeeReminder, scheduleFeeReminder } from "../utils/whatsapp.service.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
 // ─── POST /api/v1/notifications/send-monthly-reminders ───────────────────────
 // Sends WhatsApp fee reminder to ALL students with pending fees this month.
@@ -13,7 +14,7 @@ export const sendMonthlyFeeReminders = asyncHandler(async (req, res) => {
     const year = now.getFullYear();
 
     // Fetch all PENDING fee records for current month
-    const pendingFees = await FeeRecord.find({ month, year, status: "pending" });
+    const pendingFees = await FeeRecord.find({ month, year, status: "pending", ...branchFilter(req) });
 
     if (pendingFees.length === 0) {
         return res.status(200).json(

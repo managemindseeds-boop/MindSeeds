@@ -27,6 +27,7 @@ import demoRouter from "./route/demo.route.js";
 import feeRouter from "./route/fee.route.js";
 import dashboardRouter from "./route/dashboard.route.js";
 import notificationRouter from "./route/notification.route.js";
+import attendanceRouter from "./route/attendance.route.js";
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/students", studentRouter);
@@ -34,5 +35,6 @@ app.use("/api/v1/demos", demoRouter);
 app.use("/api/v1/fees", feeRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/attendance", attendanceRouter);
 
 export { app }

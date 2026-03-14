@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Student } from "../models/student.model.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
 // Class-based demo subjects (mirrors the frontend mapping)
 const CLASS_SUBJECTS = {
@@ -106,7 +107,7 @@ export const addStudent = asyncHandler(async (req, res) => {
 
 // GET /api/v1/students
 export const getAllStudents = asyncHandler(async (req, res) => {
-    const students = await Student.find().sort({ createdAt: -1 });
+    const students = await Student.find(branchFilter(req)).sort({ createdAt: -1 });
 
     return res.status(200).json(
         new ApiResponse(200, students, "Students fetched successfully")

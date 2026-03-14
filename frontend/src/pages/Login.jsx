@@ -5,10 +5,12 @@ import { useAuth } from '../context/AuthContext'
 
 const REMEMBER_KEY = 'mindseeds_remember'
 const SAVED_USERS_KEY = 'mindseeds_saved_usernames'
+const BRANCHES = ['Vijay Nagar', 'Palasia', 'Sapna Sangeeta', 'AB Road', 'Bhawarkuan']
 
 function Login() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [branch, setBranch] = useState('')
     const [showPass, setShowPass] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -51,9 +53,14 @@ function Login() {
             return
         }
 
+        if (!branch) {
+            setError('Please select a branch')
+            return
+        }
+
         setLoading(true)
         try {
-            const result = await login(username, password)
+            const result = await login(username, password, branch)
             if (result.success) {
                 // Save or clear remembered credentials
                 if (rememberMe) {
@@ -119,6 +126,23 @@ function Login() {
                                     <option key={u} value={u} />
                                 ))}
                             </datalist>
+                        </div>
+
+                        {/* Branch Selection */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                Branch
+                            </label>
+                            <select
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all cursor-pointer"
+                                value={branch}
+                                onChange={(e) => setBranch(e.target.value)}
+                            >
+                                <option value="">Select branch</option>
+                                {BRANCHES.map((b) => (
+                                    <option key={b} value={b}>{b}</option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Password */}

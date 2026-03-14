@@ -4,6 +4,7 @@ import { Student } from "../models/student.model.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { FeeRecord } from "../models/feeRecord.model.js";
 import { scheduleFeeReminder } from "../utils/whatsapp.service.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
 // Helper: today ki start aur end time — IST aware (UTC+5:30)
 // Server UTC mein run karta hai, isliye explicitly IST date calculate karte hain
@@ -75,6 +76,7 @@ export const getDashboardData = asyncHandler(async (req, res) => {
     await ensureCurrentMonthRecords();
 
     // Sab queries parallel chalao — fast!
+    const bf = branchFilter(req);
     const [
         students,
         todayDemos,
@@ -83,31 +85,34 @@ export const getDashboardData = asyncHandler(async (req, res) => {
         monthFees,
         todayFees,
     ] = await Promise.all([
-        // Saare students
-        Student.find({}).sort({ createdAt: -1 }),
+        // Saare students (branch-filtered)
+        Student.find(bf).sort({ createdAt: -1 }),
 
         // Aaj ke pending demos
         DemoLecture.find({
             scheduledDate: { $gte: start, $lte: end },
             attended: null,
+            ...bf,
         }).sort({ scheduledDate: 1 }),
 
         // Upcoming demos (aaj ke baad)
         DemoLecture.find({
             scheduledDate: { $gt: end },
             attended: null,
+            ...bf,
         }).sort({ scheduledDate: 1 }),
 
         // Absent demos
-        DemoLecture.find({ attended: false }).sort({ scheduledDate: -1 }),
+        DemoLecture.find({ attended: false, ...bf }).sort({ scheduledDate: -1 }),
 
         // Is mahine ki saari fees
-        FeeRecord.find({ month, year }).sort({ dueDate: 1 }),
+        FeeRecord.find({ month, year, ...bf }).sort({ dueDate: 1 }),
 
         // Aaj ki due fees (pending aur aaj ki dueDate)
         FeeRecord.find({
             dueDate: { $gte: start, $lte: end },
             status: "pending",
+            ...bf,
         }).sort({ studentName: 1 }),
     ]);
 

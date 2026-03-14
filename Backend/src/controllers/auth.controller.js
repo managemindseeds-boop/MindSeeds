@@ -18,7 +18,7 @@ const generateToken = (user) => {
 
 export const loginUser = asyncHandler(async (req, res) => {
 
-  const { username, password } = req.body;
+  const { username, password, branch } = req.body;
 
   if (!username || !password) {
     throw new ApiError(400, "Username and password required");
@@ -34,6 +34,12 @@ export const loginUser = asyncHandler(async (req, res) => {
 
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid password");
+  }
+
+  // Save selected branch to user (receptionist selects branch at login)
+  if (branch) {
+    user.branch = branch;
+    await user.save();
   }
 
   const token = generateToken(user);
@@ -55,6 +61,7 @@ export const loginUser = asyncHandler(async (req, res) => {
           token,
           role: user.role,
           username: user.username,
+          branch: user.branch || "",
         },
         "Login successful"
       )

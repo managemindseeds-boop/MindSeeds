@@ -3,6 +3,9 @@ import axios from 'axios'
 
 const AuthContext = createContext(null)
 
+// Send cookies with every request (needed for JWT httpOnly cookie auth)
+axios.defaults.withCredentials = true
+
 // Mock credentials — replace with API call when backend is ready
 const MOCK_USERS = [
     { username: 'receptionist', password: 'Recept@123', role: 'receptionist', name: 'Receptionist' },
@@ -27,11 +30,12 @@ export function AuthProvider({ children }) {
         setLoading(false)
     }, [])
 
-    const login = async (username, password) => {
+    const login = async (username, password, branch) => {
         try {
             const response = await axios.post('/api/v1/auth/login', {
                 username,
-                password
+                password,
+                branch,
             })
 
 
@@ -41,7 +45,8 @@ export function AuthProvider({ children }) {
                 username: payload.username,
                 role: payload.role,
                 name: payload.username, // backend doesn't return name separately
-                token: payload.token
+                token: payload.token,
+                branch: branch || '',
             }
 
             setCurrentUser(userData)
@@ -57,7 +62,7 @@ export function AuthProvider({ children }) {
                 )
 
                 if (mockUser) {
-                    const userData = { username: mockUser.username, role: mockUser.role, name: mockUser.name }
+                    const userData = { username: mockUser.username, role: mockUser.role, name: mockUser.name, branch: branch || '' }
                     setCurrentUser(userData)
                     localStorage.setItem('mindseeds_user', JSON.stringify(userData))
                     return { success: true, role: mockUser.role, isMock: true }

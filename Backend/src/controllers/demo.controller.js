@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { Student } from "../models/student.model.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
 // Helper: today ki start aur end time — IST aware (UTC+5:30)
 const todayRange = () => {
@@ -20,6 +21,7 @@ export const getTodaysDemos = asyncHandler(async (req, res) => {
     const demos = await DemoLecture.find({
         scheduledDate: { $gte: start, $lte: end },
         attended: null,
+        ...branchFilter(req),
     }).sort({ scheduledDate: 1 });
 
     return res.status(200).json(new ApiResponse(200, demos, "Today's demos fetched"));
@@ -31,6 +33,7 @@ export const getUpcomingDemos = asyncHandler(async (req, res) => {
     const demos = await DemoLecture.find({
         scheduledDate: { $gt: end },
         attended: null,
+        ...branchFilter(req),
     }).sort({ scheduledDate: 1 });
 
     return res.status(200).json(new ApiResponse(200, demos, "Upcoming demos fetched"));
@@ -38,7 +41,7 @@ export const getUpcomingDemos = asyncHandler(async (req, res) => {
 
 // GET /api/v1/demos/absent
 export const getAbsentDemos = asyncHandler(async (req, res) => {
-    const demos = await DemoLecture.find({ attended: false }).sort({ scheduledDate: -1 });
+    const demos = await DemoLecture.find({ attended: false, ...branchFilter(req) }).sort({ scheduledDate: -1 });
 
     return res.status(200).json(new ApiResponse(200, demos, "Absent demos fetched"));
 });
@@ -138,14 +141,4 @@ export const updateDemo = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, demo, "Demo updated"));
 });
-if (!result.success) {
-    const errorDetails = result.results?.map(r => r.error).filter(Boolean).join(", ") || "Unknown error";
-    throw new ApiError(500, `Failed to send demo reminder: ${errorDetails}`);
-}
 
-return res.status(200).json(new ApiResponse(200, result, "Demo reminder sent successfully"));
-    } catch (error) {
-    console.error(`[sendDemoReminderHandler] Caught Error:`, error);
-    throw error;
-}
-});

@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { FeeRecord } from "../models/feeRecord.model.js";
 import { Student } from "../models/student.model.js";
 import { scheduleFeeReminder } from "../utils/whatsapp.service.js";
+import { branchFilter } from "../utils/branchFilter.js";
 
 // Helper: build the due date for a given day and month/year
 const buildDueDate = (day, month, year) => {
@@ -71,6 +72,7 @@ export const getTodaysFees = asyncHandler(async (req, res) => {
     const fees = await FeeRecord.find({
         dueDate: { $gte: start, $lte: end },
         status: "pending",
+        ...branchFilter(req),
     }).sort({ studentName: 1 });
 
     return res.status(200).json(new ApiResponse(200, fees, "Today's fees fetched"));
@@ -84,7 +86,7 @@ export const getThisMonthFees = asyncHandler(async (req, res) => {
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
-    const fees = await FeeRecord.find({ month, year }).sort({ dueDate: 1 });
+    const fees = await FeeRecord.find({ month, year, ...branchFilter(req) }).sort({ dueDate: 1 });
 
     return res.status(200).json(new ApiResponse(200, fees, "This month's fees fetched"));
 });

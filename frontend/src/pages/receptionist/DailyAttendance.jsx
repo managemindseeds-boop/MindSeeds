@@ -1,25 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Calendar, Users, Save, CheckCircle2, UserX } from 'lucide-react';
+import { Users, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
-// --- MOCK DATA ---
-const MOCK_BRANCH = "Main Branch"; // Simulating the receptionist's assigned branch
-const CLASSES = ["Class 10", "Class 11", "Class 12"];
-
-const generateMockStudents = (branch, className) => {
-    return [
-        { id: '1', name: 'Aarav Sharma', studentId: 'STU-001', phone: '9876543210' },
-        { id: '2', name: 'Priya Patel', studentId: 'STU-002', phone: '9876543211' },
-        { id: '3', name: 'Rahul Kumar', studentId: 'STU-003', phone: '9876543212' },
-        { id: '4', name: 'Sneha Singh', studentId: 'STU-004', phone: '9876543213' },
-        { id: '5', name: 'Aditya Gupta', studentId: 'STU-005', phone: '9876543214' },
-    ];
-};
-// -----------------
+const CLASSES = ['8th', '9th', '10th', '11th', '12th'];
 
 function DailyAttendance() {
-    const { user } = useAuth();
+    const { currentUser } = useAuth();
 
     // Filters
     const [selectedClass, setSelectedClass] = useState('');
@@ -30,69 +18,112 @@ function DailyAttendance() {
     const [attendance, setAttendance] = useState({}); // { studentId: 'present' | 'absent' }
     const [notes, setNotes] = useState('');
     const [isFetching, setIsFetching] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [hasExisting, setHasExisting] = useState(false); // true if attendance already exists for this date
 
-    // Load mock data when filters change
-    const fetchStudents = () => {
+    // Auto-fetch students when class or date changes
+    useEffect(() => {
+        if (selectedClass) {
+            fetchStudents();
+        }
+    }, [selectedClass, selectedDate]);
+
+    // Fetch students from real API + check if attendance already exists
+    const fetchStudents = async () => {
         if (!selectedClass) {
             toast.error("Please select a class first");
             return;
         }
 
         setIsFetching(true);
-        // Simulate network delay
-        setTimeout(() => {
-            const mockData = generateMockStudents(MOCK_BRANCH, selectedClass);
-            setStudents(mockData);
+        try {
+            // Parallel: fetch students + existing attendance for this date+class
+            const [studentsRes, attendanceRes] = await Promise.all([
+                axios.get(`/api/v1/attendance/students?class=${selectedClass}`),
+                axios.get(`/api/v1/attendance?date=${selectedDate}&class=${selectedClass}`),
+            ]);
 
-            // Initialize all as present by default when fetching new batch
-            const initialAttendance = {};
-            mockData.forEach(s => {
-                initialAttendance[s.id] = 'present';
-            });
-            setAttendance(initialAttendance);
+            const studentList = studentsRes.data.data || [];
+            const existingRecords = attendanceRes.data.data || [];
 
+            if (studentList.length === 0) {
+                toast.error(`No admitted students found for ${selectedClass}`);
+                setStudents([]);
+                setAttendance({});
+                return;
+            }
+
+            setStudents(studentList);
+
+            // If attendance already exists, pre-fill the toggles
+            if (existingRecords.length > 0) {
+                setHasExisting(true);
+                const existingMap = {};
+                existingRecords.forEach(r => {
+                    existingMap[r.student] = r.status;
+                });
+                // Merge: existing records take priority, rest default to 'present'
+                const initialAttendance = {};
+                studentList.forEach(s => {
+                    initialAttendance[s._id] = existingMap[s._id] || 'present';
+                });
+                setAttendance(initialAttendance);
+                toast.success(`Loaded ${studentList.length} students (attendance already marked — editing mode)`);
+            } else {
+                setHasExisting(false);
+                // Initialize all as present by default
+                const initialAttendance = {};
+                studentList.forEach(s => {
+                    initialAttendance[s._id] = 'present';
+                });
+                setAttendance(initialAttendance);
+                toast.success(`Loaded ${studentList.length} students`);
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            toast.error(error.response?.data?.message || 'Failed to fetch students');
+        } finally {
             setIsFetching(false);
-            toast.success(`Loaded ${mockData.length} students`);
-        }, 600);
-    };
-
-    const handleToggleAttendance = (studentId) => {
-        setAttendance(prev => ({
-            ...prev,
-            [studentId]: prev[studentId] === 'present' ? 'absent' : 'present'
-        }));
+        }
     };
 
     const handleMarkAllPresent = () => {
         const resetAttendance = {};
         students.forEach(s => {
-            resetAttendance[s.id] = 'present';
+            resetAttendance[s._id] = 'present';
         });
         setAttendance(resetAttendance);
         toast.success("All marked present");
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (students.length === 0) {
             toast.error("No students to save attendance for");
             return;
         }
 
-        // Generate the payload
-        const payload = {
-            date: selectedDate,
-            branch: MOCK_BRANCH,
-            class: selectedClass,
-            records: Object.entries(attendance).map(([studentId, status]) => ({
-                studentId,
-                status
-            })),
-            notes: notes,
-            markedBy: user?.id || 'mock-receptionist-id'
-        };
+        setIsSaving(true);
+        try {
+            const payload = {
+                date: selectedDate,
+                class: selectedClass,
+                records: Object.entries(attendance).map(([student, status]) => ({
+                    student,
+                    status,
+                })),
+                notes,
+            };
 
-        console.log("=== ATTENDANCE PAYLOAD SAVED ===", payload);
-        toast.success("Attendance saved successfully!");
+            const res = await axios.post('/api/v1/attendance/save', payload);
+            const data = res.data.data;
+            setHasExisting(true);
+            toast.success(`✅ Saved: ${data.present} present, ${data.absent} absent`);
+        } catch (error) {
+            console.error('Save error:', error);
+            toast.error(error.response?.data?.message || 'Failed to save attendance');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -101,7 +132,7 @@ function DailyAttendance() {
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Daily Attendance</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    Manage daily attendance for <span className="font-bold text-emerald-600">{MOCK_BRANCH}</span>
+                    Manage daily attendance for <span className="font-bold text-emerald-600">{currentUser?.branch || 'All Branches'}</span>
                 </p>
             </div>
 
@@ -143,7 +174,7 @@ function DailyAttendance() {
                         <button
                             onClick={fetchStudents}
                             disabled={isFetching}
-                            className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                            className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {isFetching ? (
                                 <span className="animate-pulse">Loading...</span>
@@ -164,12 +195,17 @@ function DailyAttendance() {
 
                     {/* List Header Actions */}
                     <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50">
-                        <h2 className="font-semibold text-gray-800">
-                            {selectedClass} Students
-                        </h2>
+                        <div>
+                            <h2 className="font-semibold text-gray-800">
+                                {selectedClass} Students
+                            </h2>
+                            {hasExisting && (
+                                <span className="text-xs text-amber-600 font-medium">⚠️ Attendance already exists — editing mode</span>
+                            )}
+                        </div>
                         <button
                             onClick={handleMarkAllPresent}
-                            className="text-sm text-emerald-600 font-medium hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-md transition-colors"
+                            className="text-sm text-emerald-600 font-medium hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-md transition-colors cursor-pointer"
                         >
                             Mark All Present
                         </button>
@@ -181,21 +217,17 @@ function DailyAttendance() {
                             <thead>
                                 <tr className="bg-white border-b border-gray-100 text-sm text-gray-500">
                                     <th className="px-6 py-4 font-medium">Student Info</th>
-                                    <th className="px-6 py-4 font-medium">Student ID</th>
                                     <th className="px-6 py-4 font-medium text-right">Attendance Status</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {students.map((student) => {
-                                    const isPresent = attendance[student.id] === 'present';
+                                    const isPresent = attendance[student._id] === 'present';
                                     return (
-                                        <tr key={student.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <tr key={student._id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">{student.name}</div>
+                                                <div className="font-medium text-gray-900">{student.fullName}</div>
                                                 <div className="text-xs text-gray-500">{student.phone}</div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
-                                                {student.studentId}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="relative inline-flex bg-gray-100 p-1 rounded-lg w-[160px] h-10 items-center overflow-hidden">
@@ -206,19 +238,19 @@ function DailyAttendance() {
                                                         `}
                                                     />
 
-                                                    {/* Absent Button Container */}
+                                                    {/* Absent Button */}
                                                     <button
-                                                        onClick={() => setAttendance(prev => ({ ...prev, [student.id]: 'absent' }))}
-                                                        className={`relative z-10 w-1/2 flex items-center justify-center text-sm font-medium transition-colors duration-100 ${!isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                                                        onClick={() => setAttendance(prev => ({ ...prev, [student._id]: 'absent' }))}
+                                                        className={`relative z-10 w-1/2 flex items-center justify-center text-sm font-medium transition-colors duration-100 cursor-pointer ${!isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
                                                             }`}
                                                     >
                                                         Absent
                                                     </button>
 
-                                                    {/* Present Button Container */}
+                                                    {/* Present Button */}
                                                     <button
-                                                        onClick={() => setAttendance(prev => ({ ...prev, [student.id]: 'present' }))}
-                                                        className={`relative z-10 w-1/2 flex items-center justify-center text-sm font-medium transition-colors duration-100 ${isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                                                        onClick={() => setAttendance(prev => ({ ...prev, [student._id]: 'present' }))}
+                                                        className={`relative z-10 w-1/2 flex items-center justify-center text-sm font-medium transition-colors duration-100 cursor-pointer ${isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
                                                             }`}
                                                     >
                                                         Present
@@ -235,12 +267,12 @@ function DailyAttendance() {
                     {/* Mobile List View */}
                     <div className="md:hidden divide-y divide-gray-100">
                         {students.map((student) => {
-                            const isPresent = attendance[student.id] === 'present';
+                            const isPresent = attendance[student._id] === 'present';
                             return (
-                                <div key={student.id} className="flex items-center justify-between p-4">
+                                <div key={student._id} className="flex items-center justify-between p-4">
                                     <div>
-                                        <div className="font-medium text-gray-900">{student.name}</div>
-                                        <div className="text-xs text-gray-500">{student.studentId}</div>
+                                        <div className="font-medium text-gray-900">{student.fullName}</div>
+                                        <div className="text-xs text-gray-500">{student.phone}</div>
                                     </div>
                                     <div className="relative flex bg-gray-100 p-1 rounded-lg w-[140px] h-9 items-center overflow-hidden">
                                         {/* Animated Background Slider */}
@@ -250,19 +282,19 @@ function DailyAttendance() {
                                             `}
                                         />
 
-                                        {/* Absent Button Container */}
+                                        {/* Absent Button */}
                                         <button
-                                            onClick={() => setAttendance(prev => ({ ...prev, [student.id]: 'absent' }))}
-                                            className={`relative z-10 w-1/2 flex items-center justify-center text-xs font-medium transition-colors duration-100 ${!isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                                            onClick={() => setAttendance(prev => ({ ...prev, [student._id]: 'absent' }))}
+                                            className={`relative z-10 w-1/2 flex items-center justify-center text-xs font-medium transition-colors duration-100 cursor-pointer ${!isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
                                                 }`}
                                         >
                                             Absent
                                         </button>
 
-                                        {/* Present Button Container */}
+                                        {/* Present Button */}
                                         <button
-                                            onClick={() => setAttendance(prev => ({ ...prev, [student.id]: 'present' }))}
-                                            className={`relative z-10 w-1/2 flex items-center justify-center text-xs font-medium transition-colors duration-100 ${isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                                            onClick={() => setAttendance(prev => ({ ...prev, [student._id]: 'present' }))}
+                                            className={`relative z-10 w-1/2 flex items-center justify-center text-xs font-medium transition-colors duration-100 cursor-pointer ${isPresent ? 'text-white' : 'text-gray-500 hover:text-gray-700'
                                                 }`}
                                         >
                                             Present
@@ -288,10 +320,11 @@ function DailyAttendance() {
                         <div className="flex justify-end">
                             <button
                                 onClick={handleSave}
-                                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-emerald-600/20"
+                                disabled={isSaving}
+                                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-emerald-600/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Save size={18} />
-                                Save Attendance
+                                {isSaving ? 'Saving...' : hasExisting ? 'Update Attendance' : 'Save Attendance'}
                             </button>
                         </div>
                     </div>
@@ -301,4 +334,4 @@ function DailyAttendance() {
     );
 }
 
-export default DailyAttendance; 
+export default DailyAttendance;
