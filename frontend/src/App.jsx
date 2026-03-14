@@ -13,7 +13,7 @@ import AddStudent from './pages/receptionist/AddStudent'
 import StudentDetail from './pages/receptionist/StudentDetail'
 import DemoList from './pages/receptionist/DemoList'
 import MarkAttendance from './pages/receptionist/MarkAttendance'
-import AdminDashboard from './pages/admin/Dashboard'
+import DailyAttendance from './pages/receptionist/DailyAttendance'
 
 function App() {
   return (
@@ -40,17 +40,8 @@ function App() {
                 <Route path="students/:id" element={<StudentDetail />} />
                 <Route path="demos" element={<DemoList />} />
                 <Route path="demos/:studentId" element={<MarkAttendance />} />
+                <Route path="attendance" element={<DailyAttendance />} />
               </Route>
-
-              {/* Protected admin route */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
 
               {/* Catch-all → redirect to login */}
               <Route path="*" element={<Navigate to="/login" replace />} />

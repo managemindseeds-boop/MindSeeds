@@ -9,6 +9,7 @@ const navItems = [
     { label: 'Dashboard', path: '/receptionist/dashboard', icon: LayoutDashboard },
     { label: 'Students', path: '/receptionist/students', icon: Users },
     { label: 'Demos', path: '/receptionist/demos', icon: CalendarCheck },
+    { label: 'Attendance', path: '/receptionist/attendance', icon: CalendarCheck },
 ]
 
 function MobileNavBar() {

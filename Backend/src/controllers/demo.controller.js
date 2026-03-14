@@ -138,3 +138,14 @@ export const updateDemo = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, demo, "Demo updated"));
 });
+if (!result.success) {
+    const errorDetails = result.results?.map(r => r.error).filter(Boolean).join(", ") || "Unknown error";
+    throw new ApiError(500, `Failed to send demo reminder: ${errorDetails}`);
+}
+
+return res.status(200).json(new ApiResponse(200, result, "Demo reminder sent successfully"));
+    } catch (error) {
+    console.error(`[sendDemoReminderHandler] Caught Error:`, error);
+    throw error;
+}
+});
