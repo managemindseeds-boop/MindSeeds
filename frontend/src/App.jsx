@@ -15,6 +15,11 @@ import DemoList from './pages/receptionist/DemoList'
 import MarkAttendance from './pages/receptionist/MarkAttendance'
 import DailyAttendance from './pages/receptionist/DailyAttendance'
 
+import AdminLayout from './components/Layout/AdminLayout'
+import AdminDashboard from './pages/admin/Dashboard'
+import AdminStaffList from './pages/admin/StaffList'
+import AdminStudentList from './pages/admin/StudentList'
+
 function App() {
   return (
     <AuthProvider>
@@ -29,7 +34,7 @@ function App() {
               <Route
                 path="/receptionist"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={['receptionist']}>
                     <MainLayout />
                   </ProtectedRoute>
                 }
@@ -41,6 +46,20 @@ function App() {
                 <Route path="demos" element={<DemoList />} />
                 <Route path="demos/:studentId" element={<MarkAttendance />} />
                 <Route path="attendance" element={<DailyAttendance />} />
+              </Route>
+
+              {/* Protected admin routes */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="staff" element={<AdminStaffList />} />
+                <Route path="students" element={<AdminStudentList />} />
               </Route>
 
               {/* Catch-all → redirect to login */}

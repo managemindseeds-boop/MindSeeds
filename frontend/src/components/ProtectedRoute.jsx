@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, allowedRoles }) {
     const { currentUser, loading } = useAuth()
 
     if (loading) {
@@ -14,6 +14,14 @@ function ProtectedRoute({ children }) {
 
     if (!currentUser) {
         return <Navigate to="/login" replace />
+    }
+
+    if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
+        // Redirect based on role if they try to access unauthorized routes
+        if (currentUser.role === 'admin') {
+            return <Navigate to="/admin/dashboard" replace />
+        }
+        return <Navigate to="/receptionist/dashboard" replace />
     }
 
     return children
