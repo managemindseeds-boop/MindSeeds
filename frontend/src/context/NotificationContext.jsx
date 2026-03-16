@@ -1,11 +1,26 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useContext, useMemo, useState, useEffect } from 'react'
 import { useDemos } from './DemoContext'
+import axios from 'axios'
 
 const NotificationContext = createContext(null)
 
 export function NotificationProvider({ children }) {
     const [isOpen, setIsOpen] = useState(false)
     const { todayDemos, absentDemos, upcomingDemos } = useDemos()
+    const [pendingCallsCount, setPendingCallsCount] = useState(0)
+
+    // Fetch pending calls count
+    useEffect(() => {
+        const fetchCalls = () => {
+            axios.get('/api/v1/calls/count')
+                .then(res => setPendingCallsCount(res.data.data?.count || 0))
+                .catch(() => {})
+        }
+        fetchCalls()
+        // Refresh every 2 minutes
+        const interval = setInterval(fetchCalls, 2 * 60 * 1000)
+        return () => clearInterval(interval)
+    }, [])
 
     const notifications = useMemo(() => {
         const items = []
@@ -58,10 +73,22 @@ export function NotificationProvider({ children }) {
 
 
 
+        // ── 3. PENDING CALLS ───────────────────────────────────────────────
+        if (pendingCallsCount > 0) {
+            items.push({
+                id: 'group-pending-calls',
+                type: 'call',
+                priority: 'high',
+                title: `${pendingCallsCount} Pending Call${pendingCallsCount > 1 ? 's' : ''}`,
+                message: 'Students jinhe abhi call karni hai',
+                link: '/receptionist/calls',
+            })
+        }
+
         // Sort: high → medium → low
         const order = { high: 0, medium: 1, low: 2 }
         return items.sort((a, b) => order[a.priority] - order[b.priority])
-    }, [todayDemos, absentDemos, upcomingDemos])
+    }, [todayDemos, absentDemos, upcomingDemos, pendingCallsCount])
 
     const unreadCount = useMemo(
         () => notifications.filter(n => n.priority === 'high').length,

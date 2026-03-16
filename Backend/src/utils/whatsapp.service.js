@@ -1,10 +1,8 @@
 // ─── CHDS WhatsApp Service ────────────────────────────────────────────────────
 // Docs: https://whatsapp-integration-system-chds.vercel.app/api-docs
 // CHDS has built-in scheduling — no cron job needed on our server!
-// Flow: when a FeeRecord is created → call scheduleFeeReminder() once
-//       → CHDS will auto-send WhatsApp on the due date at 9:00 AM
-// Uses plain text send (no Meta template approval needed)
-// When you create a template later, switch to sendFeeReminderTemplate()
+// Fee reminder is handled by a separate external system.
+// This file handles: generic send + demo lecture reminders.
 
 const CHDS_BASE_URL = "https://whatsapp-integration-system-chds.vercel.app";
 
@@ -64,121 +62,128 @@ export const sendWhatsAppMessage = async (phone, message) => {
     }
 };
 
+
+// Call this when a demo is created / rescheduled / updated.
+// CHDS will automatically send WhatsApp 1 day before scheduledDate at 9:00 AM IST.
+// Sends to BOTH student phone and parent phone.
 /**
- * Builds & sends a monthly fee reminder to a student's parent
- * @param {{ studentName: string, parentPhone: string, month: number, year: number, dueDate: Date }} param0
+ * @param {{ studentName: string, studentPhone: string, parentPhone: string, scheduledDate: Date, lectureNumber: number, subject?: string }} param0
+ * @returns {{ success: boolean, results: Array }}
  */
-export const sendFeeReminder = async ({ studentName, parentPhone, month, year, dueDate }) => {
-    const MONTH_NAMES = [
-        "", "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
-    ];
-
-    const dueDateStr = new Date(dueDate).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-    });
-
-    const message =
-        `📚 *MindSeeds Fee Reminder*\n\n` +
-        `Dear Parent,\n\n` +
-        `Yeh message aapke Bache *${studentName}* ki monthly fees ki yaad dilane ke liye bheja gaya hai.\n\n` +
-        `📅 *Month:* ${MONTH_NAMES[month]} ${year}\n` +
-        `⏰ *Due Date:* ${dueDateStr}\n\n` +
-        `Kripaya nirdharit samay par fees jama karein.\n` +
-        `Dhanyavaad! 🙏`;
-
-    return sendWhatsAppMessage(parentPhone, message);
-};
-
-// ─── Schedule a fee reminder via CHDS built-in scheduler ───────────────────────
-// Call this ONCE when a FeeRecord is created.
-// CHDS will automatically send the WhatsApp message on dueDate at 9:00 AM.
-/**
- * @param {{ studentName: string, parentPhone: string, month: number, year: number, dueDate: Date }} param0
- * @returns {{ success: boolean, scheduledId?: string, error?: string }}
- */
-export const scheduleFeeReminder = async ({ studentName, parentPhone, month, year, dueDate }) => {
+export const scheduleDemoReminder = async ({
+    studentName,
+    studentPhone,
+    parentPhone,
+    scheduledDate,
+    lectureNumber,
+    subject = "",
+}) => {
     const apiKey = process.env.CHDS_WA_API_KEY;
     if (!apiKey) {
         console.error("[WhatsApp] CHDS_WA_API_KEY is not set in .env");
         return { success: false, error: "API key not configured" };
     }
 
-    const MONTH_NAMES = [
-        "", "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
-    ];
+    // Demo ki IST date string nikalo
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const demoDateIST = new Date(new Date(scheduledDate).getTime() + IST_OFFSET_MS);
+    const demoDateISTStr = demoDateIST.toISOString().split("T")[0]; // "2026-03-15"
 
-    const dueDateStr = new Date(dueDate).toLocaleDateString("en-IN", {
-        day: "numeric", month: "long", year: "numeric",
+    const demoDateDisplay = new Date(scheduledDate).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
     });
 
-    const message =
-        `📚 *MindSeeds Fee Reminder*\n\n` +
-        `Dear Parent,\n\n` +
-        `Aaj *${studentName}* ki ${MONTH_NAMES[month]} ${year} ki fees due hai.\n\n` +
-        `📅 *Due Date:* ${dueDateStr}\n\n` +
-        `Kripaya aaj fees jama karein.\n` +
-        `Dhanyavaad! 🙏`;
-
-    // dueDate IST mein convert karo (UTC+5:30)
-    // dueDate DB mein IST midnight ke roop mein store hai (e.g. March 11 IST = March 10 18:30 UTC)
-    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-    const dueDateIST = new Date(new Date(dueDate).getTime() + IST_OFFSET_MS);
-    const dueDateISTStr = dueDateIST.toISOString().split('T')[0]; // "2026-03-11"
-
-    // 1 din pehle ka IST date calculate karo
-    const parts = dueDateISTStr.split('-');
+    // 1 din pehle subah 9:00 AM IST
+    const parts = demoDateISTStr.split("-");
     const dayBefore = new Date(
-        parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]) - 1
+        parseInt(parts[0]),
+        parseInt(parts[1]) - 1,
+        parseInt(parts[2]) - 1
     );
     const yyyy = dayBefore.getFullYear();
-    const mm = String(dayBefore.getMonth() + 1).padStart(2, '0');
-    const dd = String(dayBefore.getDate()).padStart(2, '0');
-
-    // Subah 9:00 AM IST = 03:30 UTC
+    const mm = String(dayBefore.getMonth() + 1).padStart(2, "0");
+    const dd = String(dayBefore.getDate()).padStart(2, "0");
     const scheduledTime = new Date(`${yyyy}-${mm}-${dd}T09:00:00+05:30`);
-
     const now = new Date();
 
-    // Guard: if scheduled time is already past, send immediately instead
-    if (scheduledTime <= now) {
-        console.warn(`[WhatsApp] Scheduled time already past for ${studentName} — sending immediately`);
-        return sendWhatsAppMessage(parentPhone, message);
-    }
+    const subjectLine = subject ? `📖 *Subject:* ${subject}\n` : "";
+    const lectureLabel = `Demo Lecture ${lectureNumber}`;
 
-    const sendAt = scheduledTime.toISOString();
+    // Student ko message
+    const studentMessage =
+        `🎓 *MindSeeds Demo Reminder*\n\n` +
+        `Hi *${studentName}*,\n\n` +
+        `Kal aapka *${lectureLabel}* scheduled hai!\n\n` +
+        `📅 *Date:* ${demoDateDisplay}\n` +
+        `⏰ *Time:* 9:00 AM\n` +
+        subjectLine +
+        `\nKripaya samay par aayein.\nDhanyavaad! 🙏`;
 
-    try {
-        const res = await fetch(`https://whatsapp-integration-system-chds.vercel.app/api/scheduled-messages`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                contact_phone: normalizePhone(parentPhone),
-                send_at: sendAt,
-                message,
-                message_type: "text",
-            }),
-        });
+    // Parent ko message
+    const parentMessage =
+        `🎓 *MindSeeds Demo Reminder*\n\n` +
+        `Dear Parent,\n\n` +
+        `Kal aapke bache *${studentName}* ka *${lectureLabel}* scheduled hai!\n\n` +
+        `📅 *Date:* ${demoDateDisplay}\n` +
+        `⏰ *Time:* 9:00 AM\n` +
+        subjectLine +
+        `\nKripaya unhe samay par bhejein.\nDhanyavaad! 🙏`;
 
-        const data = await res.json();
+    // Helper: schedule OR immediate send
+    const scheduleOne = async (phone, message, label) => {
+        const normalizedPhone = normalizePhone(phone);
 
-        if (!res.ok) {
-            console.error(`[WhatsApp] Schedule failed for ${studentName}:`, data);
-            return { success: false, error: data?.message || "Unknown error" };
+        // Agar time already past ho toh turant bhejo
+        if (scheduledTime <= now) {
+            console.warn(`[WhatsApp] Demo reminder time already past for ${studentName} (${label}) — sending immediately`);
+            return sendWhatsAppMessage(phone, message);
         }
 
-        console.log(`[WhatsApp] ✅ Scheduled reminder for ${studentName} on ${sendAt} (1 day before due)`);
-        return { success: true, scheduledId: data?.id || data?.data?.id };
-    } catch (err) {
-        console.error(`[WhatsApp] Network error (schedule) for ${studentName}:`, err.message);
-        return { success: false, error: err.message };
-    }
+        const sendAt = scheduledTime.toISOString();
+        try {
+            const res = await fetch(`https://whatsapp-integration-system-chds.vercel.app/api/scheduled-messages`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    contact_phone: normalizedPhone,
+                    send_at: sendAt,
+                    message,
+                    message_type: "text",
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                console.error(`[WhatsApp] Demo reminder schedule failed (${label}) for ${studentName}:`, data);
+                return { success: false, error: data?.message || "Unknown error" };
+            }
+
+            console.log(`[WhatsApp] ✅ Demo reminder scheduled (${label}) for ${studentName} on ${sendAt}`);
+            return { success: true, scheduledId: data?.id || data?.data?.id };
+        } catch (err) {
+            console.error(`[WhatsApp] Network error (${label}) for ${studentName}:`, err.message);
+            return { success: false, error: err.message };
+        }
+    };
+
+    const [studentResult, parentResult] = await Promise.all([
+        scheduleOne(studentPhone, studentMessage, "student"),
+        scheduleOne(parentPhone, parentMessage, "parent"),
+    ]);
+
+    return {
+        success: studentResult.success || parentResult.success,
+        results: [
+            { to: "student", phone: studentPhone, ...studentResult },
+            { to: "parent", phone: parentPhone, ...parentResult },
+        ],
+    };
 };
 
 // ─── Template version (uncomment when Meta template is approved) ──────────────

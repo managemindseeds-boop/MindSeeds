@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     X, Bell, Calendar, AlertCircle, DollarSign,
-    GraduationCap, Clock, ChevronRight, CheckCircle2
+    GraduationCap, Clock, ChevronRight, CheckCircle2, Phone
 } from 'lucide-react'
 import { useNotifications } from '../../context/NotificationContext'
 
@@ -28,6 +28,13 @@ const typeConfig = {
         iconColor: 'text-violet-600',
         badge: 'bg-violet-100 text-violet-700',
         label: 'Upcoming',
+    },
+    call: {
+        icon: Phone,
+        bg: 'bg-amber-50',
+        iconColor: 'text-amber-600',
+        badge: 'bg-amber-100 text-amber-700',
+        label: 'Call',
     },
 }
 

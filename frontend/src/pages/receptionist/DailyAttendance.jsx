@@ -132,7 +132,7 @@ function DailyAttendance() {
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Daily Attendance</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                    Manage daily attendance for <span className="font-bold text-emerald-600">{currentUser?.branch || 'All Branches'}</span>
+                    Manage daily attendance for <span className="font-bold text-emerald-600">{currentUser?.branches?.length > 0 ? currentUser.branches.join(', ') : 'All Branches'}</span>
                 </p>
             </div>
 

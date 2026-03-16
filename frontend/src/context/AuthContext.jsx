@@ -30,12 +30,11 @@ export function AuthProvider({ children }) {
         setLoading(false)
     }, [])
 
-    const login = async (username, password, branch) => {
+    const login = async (username, password) => {
         try {
             const response = await axios.post('/api/v1/auth/login', {
                 username,
                 password,
-                branch,
             })
 
 
@@ -44,9 +43,9 @@ export function AuthProvider({ children }) {
             const userData = {
                 username: payload.username,
                 role: payload.role,
-                name: payload.username, // backend doesn't return name separately
+                name: payload.username,
                 token: payload.token,
-                branch: branch || '',
+                branches: payload.branches || [],  // array from DB
             }
 
             setCurrentUser(userData)
@@ -62,7 +61,7 @@ export function AuthProvider({ children }) {
                 )
 
                 if (mockUser) {
-                    const userData = { username: mockUser.username, role: mockUser.role, name: mockUser.name, branch: branch || '' }
+                    const userData = { username: mockUser.username, role: mockUser.role, name: mockUser.name, branches: [] }
                     setCurrentUser(userData)
                     localStorage.setItem('mindseeds_user', JSON.stringify(userData))
                     return { success: true, role: mockUser.role, isMock: true }

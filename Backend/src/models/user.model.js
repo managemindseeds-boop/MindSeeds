@@ -21,9 +21,9 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    branch: {
-      type: String,
-      default: "",
+    branches: {
+      type: [String],   // receptionist can belong to multiple branches
+      default: [],
     },
   },
   { timestamps: true }

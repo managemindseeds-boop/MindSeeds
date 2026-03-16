@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     Users, CalendarCheck, ClipboardList,
     UserPlus, CalendarPlus, TrendingUp, AlertCircle,
-    Clock, BookOpen, ArrowRight, CheckCircle2
+    Clock, BookOpen, ArrowRight, CheckCircle2, Phone,
 } from 'lucide-react'
+import axios from 'axios'
 import {
     PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
     BarChart, Bar, XAxis, YAxis, CartesianGrid
@@ -89,6 +90,13 @@ function Dashboard() {
     const navigate = useNavigate()
     const { students } = useStudents()
     const { todayDemos, upcomingDemos, absentDemos } = useDemos()
+    const [pendingCalls, setPendingCalls] = useState(0)
+
+    useEffect(() => {
+        axios.get('/api/v1/calls/count')
+            .then(res => setPendingCalls(res.data.data?.count || 0))
+            .catch(() => {})
+    }, [])
 
     // ── Computed KPIs ──────────────────────────────────────────────────────
     const totalStudents = students.length
@@ -142,7 +150,7 @@ function Dashboard() {
             </div>
 
             {/* ── KPI Cards ────────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <KpiCard
                     label="Total Students"
                     value={totalStudents}
@@ -164,6 +172,18 @@ function Dashboard() {
                     accentColor="#10b981"
                     alert={completedDemos > 0}
                 />
+                <div
+                    onClick={() => navigate('/receptionist/calls')}
+                    className="cursor-pointer"
+                >
+                    <KpiCard
+                        label="Pending Calls"
+                        value={pendingCalls}
+                        icon={Phone}
+                        accentColor="#ef4444"
+                        alert={pendingCalls > 0}
+                    />
+                </div>
             </div>
 
             {/* ── Charts Row ───────────────────────────────────────────────── */}

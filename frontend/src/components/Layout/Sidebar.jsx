@@ -7,15 +7,18 @@ import {
     IndianRupee,
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Phone,
+    ClipboardCheck,
 } from 'lucide-react'
 import { useState } from 'react'
 
 const navItems = [
-    { label: 'Dashboard', path: '/receptionist/dashboard', icon: LayoutDashboard },
-    { label: 'Students', path: '/receptionist/students', icon: Users },
-    { label: 'Demo Lectures', path: '/receptionist/demos', icon: CalendarCheck },
-    { label: 'Daily Attendance', path: '/receptionist/attendance', icon: CalendarCheck },
+    { label: 'Dashboard',       path: '/receptionist/dashboard',  icon: LayoutDashboard },
+    { label: 'Students',         path: '/receptionist/students',   icon: Users },
+    { label: 'Demo Lectures',    path: '/receptionist/demos',      icon: CalendarCheck },
+    { label: 'Daily Attendance', path: '/receptionist/attendance', icon: ClipboardCheck },
+    { label: 'Call List',        path: '/receptionist/calls',      icon: Phone },
 ]
 
 function Sidebar() {

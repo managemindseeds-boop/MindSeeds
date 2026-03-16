@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Student } from "../models/student.model.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { branchFilter } from "../utils/branchFilter.js";
+import { scheduleDemoReminder } from "../utils/whatsapp.service.js";
 
 // Class-based demo subjects (mirrors the frontend mapping)
 const CLASS_SUBJECTS = {
@@ -52,8 +53,10 @@ const scheduleDemos = async (student, demoLecturesFromFrontend) => {
         }
     }
 
-    await DemoLecture.insertMany(lectures);
+    const createdDemos = await DemoLecture.insertMany(lectures);
+    return createdDemos; // return so addStudent can use them for reminders
 };
+
 
 // POST /api/v1/students/add
 export const addStudent = asyncHandler(async (req, res) => {
@@ -97,7 +100,23 @@ export const addStudent = asyncHandler(async (req, res) => {
     });
 
     // Auto-schedule 4 demo lectures (with correct class-based subjects)
-    await scheduleDemos(student, demoLectures);
+    const createdDemos = await scheduleDemos(student, demoLectures);
+
+    // 📲 Schedule WhatsApp reminder for each demo (fire-and-forget — don't block response)
+    if (student.phone && student.parentPhone) {
+        createdDemos.forEach((demo) => {
+            scheduleDemoReminder({
+                studentName: student.fullName,
+                studentPhone: student.phone,
+                parentPhone: student.parentPhone,
+                scheduledDate: demo.scheduledDate,
+                lectureNumber: demo.lectureNumber,
+                subject: demo.subject || "",
+            }).catch((err) =>
+                console.error(`[DemoReminder] Schedule error for ${student.fullName} lecture ${demo.lectureNumber}:`, err.message)
+            );
+        });
+    }
 
     return res.status(201).json(
         new ApiResponse(201, { student }, "Student registered and 4 demo lectures scheduled successfully")

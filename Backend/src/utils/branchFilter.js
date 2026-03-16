@@ -1,11 +1,21 @@
 /**
  * Returns a MongoDB filter object based on the logged-in user's role.
- *   - Admin    → {} (no filter — sees ALL branches)
- *   - Receptionist → { branch } with case-insensitive match
- * Uses $regex with 'i' flag so "AB Road", "AB ROAD", "ab road" all match.
+ *   - Admin         → {} (no filter — sees ALL branches)
+ *   - Receptionist  → { branch: { $in: [...regexes] } }
+ *     A receptionist can be assigned to multiple branches.
+ *     Each branch uses a case-insensitive regex so "Mawaddah" == "mawaddah".
  */
 export const branchFilter = (req) => {
     if (req.user.role === 'admin') return {};
-    const branch = req.user.branch || '';
-    return { branch: { $regex: new RegExp(`^${branch}$`, 'i') } };
+
+    const branches = req.user.branches || [];
+
+    if (branches.length === 0) {
+        // Receptionist has no branch assigned — return nothing
+        return { branch: { $in: [] } };
+    }
+
+    // Build a case-insensitive regex for each assigned branch
+    const regexList = branches.map((b) => new RegExp(`^${b}$`, 'i'));
+    return { branch: { $in: regexList } };
 };

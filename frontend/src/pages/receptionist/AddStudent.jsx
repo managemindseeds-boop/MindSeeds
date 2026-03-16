@@ -10,7 +10,7 @@ const genders = [
 ]
 
 const classes = ['8th', '9th', '10th', '11th', '12th']
-const branches = ['Vijay Nagar', 'Palasia', 'Sapna Sangeeta', 'AB Road', 'Bhawarkuan']
+const branches = ['Mawaddah', 'E Ward', 'Gordon Hall', 'Aghadi']
 
 const DEMO_LECTURE_TIMES = ['10:00 AM', '11:30 AM', '1:00 PM', '2:30 PM']
 

@@ -4,6 +4,29 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { Student } from "../models/student.model.js";
 import { branchFilter } from "../utils/branchFilter.js";
+import { scheduleDemoReminder } from "../utils/whatsapp.service.js";
+
+// Helper: student phone fetch karke demo reminder schedule karo (fire-and-forget)
+const scheduleReminderForDemo = async (demo) => {
+    try {
+        const student = await Student.findById(demo.student).select("phone parentPhone");
+        if (!student?.phone || !student?.parentPhone) {
+            console.warn(`[DemoReminder] Student ${demo.studentName} ka phone/parentPhone missing — reminder skip`);
+            return;
+        }
+        await scheduleDemoReminder({
+            studentName: demo.studentName,
+            studentPhone: student.phone,
+            parentPhone: student.parentPhone,
+            scheduledDate: demo.scheduledDate,
+            lectureNumber: demo.lectureNumber,
+            subject: demo.subject || "",
+        });
+    } catch (err) {
+        // reminder failure se main flow affect na ho
+        console.error(`[DemoReminder] Failed to schedule reminder for ${demo.studentName}:`, err.message);
+    }
+};
 
 // Helper: today ki start aur end time — IST aware (UTC+5:30)
 const todayRange = () => {
@@ -85,6 +108,11 @@ export const markAttendance = asyncHandler(async (req, res) => {
 
     await demo.save();
 
+    // Absent auto-reschedule ke baad naye date pe reminder schedule karo
+    if (attended === false) {
+        scheduleReminderForDemo(demo);
+    }
+
     // When present: check if all 4 demos attended → advance student to demo_scheduled
     if (attended === true) {
         const allDemos = await DemoLecture.find({ student: demo.student });
@@ -122,6 +150,9 @@ export const rescheduleDemo = asyncHandler(async (req, res) => {
 
     if (!demo) throw new ApiError(404, "Demo not found");
 
+    // Naye date pe reminder schedule karo
+    scheduleReminderForDemo(demo);
+
     return res.status(200).json(new ApiResponse(200, demo, "Demo rescheduled"));
 });
 
@@ -138,6 +169,11 @@ export const updateDemo = asyncHandler(async (req, res) => {
 
     const demo = await DemoLecture.findByIdAndUpdate(id, update, { new: true });
     if (!demo) throw new ApiError(404, "Demo not found");
+
+    // Agar date change hui ho toh naye date pe reminder schedule karo
+    if (scheduledDate) {
+        scheduleReminderForDemo(demo);
+    }
 
     return res.status(200).json(new ApiResponse(200, demo, "Demo updated"));
 });

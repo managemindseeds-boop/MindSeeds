@@ -45,7 +45,7 @@ export const saveAttendance = asyncHandler(async (req, res) => {
     }
 
     const attendanceDate = toISTMidnight(date);
-    const userBranch = req.user.branch || "";
+
 
     // Validate all student IDs exist and belong to this branch
     const studentIds = records.map((r) => r.student);

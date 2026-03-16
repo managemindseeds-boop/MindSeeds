@@ -3,7 +3,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Student } from "../models/student.model.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { FeeRecord } from "../models/feeRecord.model.js";
-import { scheduleFeeReminder } from "../utils/whatsapp.service.js";
 import { branchFilter } from "../utils/branchFilter.js";
 
 // Helper: today ki start aur end time — IST aware (UTC+5:30)
@@ -48,18 +47,6 @@ const ensureCurrentMonthRecords = async () => {
                 status: "pending",
             });
 
-            // 📲 WhatsApp reminder schedule karo via CHDS
-            if (s.parentPhone) {
-                scheduleFeeReminder({
-                    studentName: s.fullName,
-                    parentPhone: s.parentPhone,
-                    month,
-                    year,
-                    dueDate,
-                }).catch((err) =>
-                    console.error(`[WhatsApp] Dashboard schedule error for ${s.fullName}:`, err.message)
-                );
-            }
         }
     }
 };

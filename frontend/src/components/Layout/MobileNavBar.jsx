@@ -3,14 +3,17 @@ import {
     LayoutDashboard,
     Users,
     CalendarCheck,
-    UsersRound
+    UsersRound,
+    Phone,
+    ClipboardCheck,
 } from 'lucide-react'
 
 const receptionistNavItems = [
-    { label: 'Dashboard', path: '/receptionist/dashboard', icon: LayoutDashboard },
-    { label: 'Students', path: '/receptionist/students', icon: Users },
-    { label: 'Demos', path: '/receptionist/demos', icon: CalendarCheck },
-    { label: 'Attendance', path: '/receptionist/attendance', icon: CalendarCheck },
+    { label: 'Dashboard',  path: '/receptionist/dashboard',  icon: LayoutDashboard },
+    { label: 'Students',   path: '/receptionist/students',   icon: Users },
+    { label: 'Demos',      path: '/receptionist/demos',      icon: CalendarCheck },
+    { label: 'Attendance', path: '/receptionist/attendance', icon: ClipboardCheck },
+    { label: 'Calls',      path: '/receptionist/calls',      icon: Phone },
 ]
 
 const adminNavItems = [
