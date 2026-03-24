@@ -71,20 +71,7 @@ function AdminSidebar() {
                 ))}
             </nav>
 
-            {/* Admin Badge */}
-            {!collapsed && (
-                <div className="px-5 py-3 mb-2 mx-3 bg-blue-900/50 rounded-lg border border-blue-800/50">
-                     <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                             A
-                         </div>
-                         <div className="flex flex-col">
-                             <span className="text-sm font-medium text-white">Administrator</span>
-                             <span className="text-xs text-blue-300">Super User</span>
-                         </div>
-                     </div>
-                </div>
-            )}
+
 
             {/* Logout */}
             <div className="px-3 py-4 border-t border-blue-900">
