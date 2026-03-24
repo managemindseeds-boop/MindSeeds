@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema(
       type: [String],   // receptionist can belong to multiple branches
       default: [],
     },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStudents } from '../../context/StudentContext'
 import { ArrowLeft, Save, ArrowRight, CalendarDays, Clock, BookOpen, ChevronDown } from 'lucide-react'
+import { BRANCHES } from '../../constants/branches'
 
 const genders = [
     { label: 'Male', value: 'male' },
@@ -10,7 +11,8 @@ const genders = [
 ]
 
 const classes = ['8th', '9th', '10th', '11th', '12th']
-const branches = ['Mawaddah', 'E Ward', 'Gordon Hall', 'Aghadi']
+
+const branches = BRANCHES
 
 const DEMO_LECTURE_TIMES = ['10:00 AM', '11:30 AM', '1:00 PM', '2:30 PM']
 

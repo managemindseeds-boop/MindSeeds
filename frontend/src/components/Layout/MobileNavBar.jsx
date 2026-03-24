@@ -4,6 +4,7 @@ import {
     Users,
     CalendarCheck,
     UsersRound,
+    BookOpen,
     Phone,
     ClipboardCheck,
 } from 'lucide-react'
@@ -18,8 +19,9 @@ const receptionistNavItems = [
 
 const adminNavItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Staff', path: '/admin/staff', icon: UsersRound },
     { label: 'Students', path: '/admin/students', icon: Users },
+    { label: 'Demos', path: '/admin/demos', icon: BookOpen },
+    { label: 'Staff', path: '/admin/staff', icon: UsersRound },
 ]
 
 function MobileNavBar({ isAdmin = false }) {

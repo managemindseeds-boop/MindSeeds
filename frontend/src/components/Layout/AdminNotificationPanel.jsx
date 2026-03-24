@@ -4,9 +4,9 @@ import {
     X, Bell, Calendar, AlertCircle,
     Clock, ChevronRight, CheckCircle2, Phone, UserPlus, Users
 } from 'lucide-react'
-import { useNotifications } from '../../context/NotificationContext'
+import { useAdminNotifications } from '../../context/AdminNotificationContext'
 
-/* ── icon + colour map by notification type ── */
+/* ── icon + colour map by admin notification type ── */
 const typeConfig = {
     demo: {
         icon: Calendar,
@@ -48,21 +48,14 @@ const typeConfig = {
         bg: 'bg-indigo-50',
         iconColor: 'text-indigo-600',
         badge: 'bg-indigo-100 text-indigo-700',
-        label: 'Staff',
+        label: 'System',
     },
 }
 
 const priorityLabel = { high: 'Urgent', medium: 'Important', low: 'Info' }
 const priorityDot = { high: 'bg-red-500', medium: 'bg-amber-400', low: 'bg-emerald-400' }
 
-function formatDate(dateStr) {
-    if (!dateStr) return ''
-    const d = new Date(dateStr)
-    if (isNaN(d)) return dateStr
-    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
-}
-
-/* ── group notifications by section heading ── */
+/* ── group notifications by priority section ── */
 function groupNotifications(notifications) {
     const groups = {
         urgent: { label: '🔴 Urgent', items: [] },
@@ -77,8 +70,8 @@ function groupNotifications(notifications) {
     return Object.values(groups).filter(g => g.items.length > 0)
 }
 
-export default function NotificationPanel() {
-    const { notifications, isOpen, setIsOpen } = useNotifications()
+export default function AdminNotificationPanel() {
+    const { notifications, isOpen, setIsOpen, refreshNotifications } = useAdminNotifications()
     const navigate = useNavigate()
     const panelRef = useRef(null)
 
@@ -108,6 +101,11 @@ export default function NotificationPanel() {
         return () => { document.body.style.overflow = '' }
     }, [isOpen])
 
+    // Refresh data when panel opens
+    useEffect(() => {
+        if (isOpen) refreshNotifications()
+    }, [isOpen, refreshNotifications])
+
     const groups = groupNotifications(notifications)
 
     function handleItemClick(link) {
@@ -131,26 +129,26 @@ export default function NotificationPanel() {
                     width: '40%',
                     minWidth: 360,
                     transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-                    background: 'linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%)',
+                    background: 'linear-gradient(160deg, #f0f4ff 0%, #f1f5f9 100%)',
                 }}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Notifications panel"
+                aria-label="Admin Notifications panel"
             >
                 {/* ── Header ── */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-blue-100 bg-white/80 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-800 to-slate-600 flex items-center justify-center shadow-sm">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-800 to-blue-600 flex items-center justify-center shadow-sm">
                             <Bell size={17} className="text-white" />
                         </div>
                         <div>
-                            <h2 className="text-base font-bold text-gray-900 leading-tight">Notifications</h2>
-                            <p className="text-xs text-gray-500">{notifications.length} total alerts</p>
+                            <h2 className="text-base font-bold text-gray-900 leading-tight">Admin Notifications</h2>
+                            <p className="text-xs text-gray-500">{notifications.length} alerts · Auto-refreshes every 30s</p>
                         </div>
                     </div>
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
                         aria-label="Close notifications"
                     >
                         <X size={18} />
@@ -165,7 +163,7 @@ export default function NotificationPanel() {
                                 <CheckCircle2 size={32} className="text-emerald-500" />
                             </div>
                             <p className="text-sm font-semibold text-gray-700">All caught up!</p>
-                            <p className="text-xs text-gray-400">No pending notifications at the moment.</p>
+                            <p className="text-xs text-gray-400">No pending alerts across any branch.</p>
                         </div>
                     ) : (
                         <div className="px-4 py-4 space-y-5">
@@ -183,7 +181,7 @@ export default function NotificationPanel() {
                                                 <button
                                                     key={notification.id}
                                                     onClick={() => handleItemClick(notification.link)}
-                                                    className="w-full text-left bg-white rounded-xl border border-gray-100 hover:border-gray-300 hover:shadow-md transition-all duration-150 group overflow-hidden"
+                                                    className="w-full text-left bg-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all duration-150 group overflow-hidden cursor-pointer"
                                                 >
                                                     <div className="flex items-start gap-3 p-3.5">
                                                         {/* Icon */}
@@ -208,26 +206,12 @@ export default function NotificationPanel() {
                                                             <p className="text-xs text-gray-500 mt-0.5 truncate">
                                                                 {notification.message}
                                                             </p>
-                                                            {(notification.meta || notification.time) && (
-                                                                <div className="flex items-center gap-2 mt-1.5">
-                                                                    {notification.meta && (
-                                                                        <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-medium">
-                                                                            {notification.meta}
-                                                                        </span>
-                                                                    )}
-                                                                    {notification.time && (
-                                                                        <span className="text-[10px] text-gray-400">
-                                                                            {formatDate(notification.time)}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            )}
                                                         </div>
 
                                                         {/* Arrow */}
                                                         <ChevronRight
                                                             size={14}
-                                                            className="flex-shrink-0 text-gray-300 group-hover:text-gray-500 transition-colors mt-2"
+                                                            className="flex-shrink-0 text-gray-300 group-hover:text-blue-500 transition-colors mt-2"
                                                         />
                                                     </div>
                                                 </button>
@@ -241,9 +225,9 @@ export default function NotificationPanel() {
                 </div>
 
                 {/* ── Footer ── */}
-                <div className="px-6 py-3 border-t border-gray-200 bg-white/80 backdrop-blur-sm">
+                <div className="px-6 py-3 border-t border-blue-100 bg-white/80 backdrop-blur-sm">
                     <p className="text-[11px] text-center text-gray-400">
-                        Click any notification to navigate to the relevant section
+                        Admin Portal · Real-time notifications across all branches
                     </p>
                 </div>
             </div>

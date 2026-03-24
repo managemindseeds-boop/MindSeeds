@@ -4,6 +4,7 @@ import {
     LayoutDashboard,
     Users,
     UsersRound,
+    BookOpen,
     LogOut,
     ChevronLeft,
     ChevronRight
@@ -12,8 +13,9 @@ import { useState } from 'react'
 
 const navItems = [
     { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Staff Directory', path: '/admin/staff', icon: UsersRound },
-    { label: 'All Students', path: '/admin/students', icon: Users },
+    { label: 'Students', path: '/admin/students', icon: Users },
+    { label: 'Demos', path: '/admin/demos', icon: BookOpen },
+    { label: 'Staff', path: '/admin/staff', icon: UsersRound },
 ]
 
 function AdminSidebar() {

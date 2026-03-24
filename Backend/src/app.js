@@ -29,6 +29,7 @@ import dashboardRouter from "./route/dashboard.route.js";
 import notificationRouter from "./route/notification.route.js";
 import attendanceRouter from "./route/attendance.route.js";
 import callRouter from "./route/call.route.js";
+import adminRouter from "./route/admin.route.js";
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/students", studentRouter);
@@ -38,5 +39,6 @@ app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/attendance", attendanceRouter);
 app.use("/api/v1/calls", callRouter);
+app.use("/api/v1/admin", adminRouter);
 
 export { app }
