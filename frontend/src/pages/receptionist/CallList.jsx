@@ -170,7 +170,7 @@ function CallList() {
                             </span>
                         )}
                     </h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Students jinhe call karni hai</p>
+                    <p className="text-sm text-gray-500 mt-0.5">Students pending a follow-up call</p>
                 </div>
                 <button
                     onClick={fetchCalls}
@@ -210,7 +210,7 @@ function CallList() {
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
                     <Clock size={40} className="opacity-30" />
                     <p className="text-sm">
-                        {activeTab === 'pending' ? 'Koi pending call nahi hai 🎉' : 'Koi record nahi mila'}
+                        {activeTab === 'pending' ? 'No pending calls 🎉' : 'No records found'}
                     </p>
                 </div>
             ) : (

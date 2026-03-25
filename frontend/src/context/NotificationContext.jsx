@@ -80,7 +80,7 @@ export function NotificationProvider({ children }) {
                 type: 'call',
                 priority: 'high',
                 title: `${pendingCallsCount} Pending Call${pendingCallsCount > 1 ? 's' : ''}`,
-                message: 'Students jinhe abhi call karni hai',
+                message: 'Students awaiting a follow-up call',
                 link: '/receptionist/calls',
             })
         }

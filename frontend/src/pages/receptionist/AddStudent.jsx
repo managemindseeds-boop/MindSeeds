@@ -10,44 +10,106 @@ const genders = [
     { label: 'Other', value: 'other' },
 ]
 
-const classes = ['8th', '9th', '10th', '11th', '12th']
+// Combined class + board options in one dropdown
+const classes = [
+    '9th',
+    '9th ICSE',
+    '10th',
+    '10th ICSE',
+    '11th',
+    '12th',
+    'Repeaters',
+]
 
 const branches = BRANCHES
 
-const DEMO_LECTURE_TIMES = ['10:00 AM', '11:30 AM', '1:00 PM', '2:30 PM']
+const DEMO_LECTURE_TIMES_24 = ['10:00', '11:30', '13:00', '14:30']
+const LS_TIMES_KEY = 'mindseeds_demo_times'
 
-// 4 demo subjects per class — 1 per lecture day
-const CLASS_SUBJECTS = {
-    '8th': ['Mathematics', 'Science', 'English', 'Social Studies'],
-    '9th': ['Mathematics', 'Physics', 'Chemistry', 'English'],
-    '10th': ['Mathematics', 'Physics', 'Chemistry', 'Biology'],
-    '11th': ['Mathematics', 'Physics', 'Chemistry', 'English'],
-    '12th': ['Mathematics', 'Physics', 'Chemistry', 'Biology'],
+// Convert "HH:MM" (24h) → "H:MM AM/PM"
+function to12h(val) {
+    if (!val) return ''
+    const [h, m] = val.split(':').map(Number)
+    const ampm = h >= 12 ? 'PM' : 'AM'
+    const h12 = h % 12 || 12
+    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`
 }
-const FALLBACK_SUBJECTS = ['Mathematics', 'Science', 'English', 'Reasoning']
 
-// All possible subjects a receptionist can choose from
-const ALL_SUBJECTS = [
-    'Mathematics', 'Physics', 'Chemistry', 'Biology',
-    'Science', 'English', 'Social Studies', 'Reasoning',
-    'History', 'Geography', 'Computer Science', 'Hindi',
-]
+// Convert "H:MM AM/PM" → "HH:MM" (24h) for input[type=time]
+function to24h(val) {
+    if (!val) return '10:00'
+    if (/^\d{2}:\d{2}$/.test(val)) return val   // already 24h
+    const parts = val.split(' ')
+    if (parts.length < 2) return '10:00'
+    const [time, ampm] = parts
+    let [h, m] = time.split(':').map(Number)
+    if (ampm === 'PM' && h !== 12) h += 12
+    if (ampm === 'AM' && h === 12) h = 0
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
 
-function generateDemoLectures(startDateStr, subjects) {
+function getSavedTimes() {
+    try {
+        const saved = localStorage.getItem(LS_TIMES_KEY)
+        if (saved) {
+            const arr = JSON.parse(saved)
+            // Normalise to 24h regardless of stored format
+            return arr.map(to24h)
+        }
+    } catch { }
+    return DEMO_LECTURE_TIMES_24
+}
+
+// Subjects pool per class (board already embedded in class name)
+const CLASS_SUBJECT_POOL = {
+    '9th': ['Maths 1', 'Maths 2', 'Science 1', 'Science 2', 'Hindi', 'English', 'Marathi', 'History', 'Political Geography', 'Urdu'],
+    '9th ICSE': ['Physics', 'Chemistry', 'Biology', 'Maths', 'Topography', 'History', 'Geography', 'Language', 'Literature', 'Hindi (Marathi Graded)', 'Computer'],
+    '10th': ['Maths 1', 'Maths 2', 'Science 1', 'Science 2', 'Hindi Higher', 'Hindi Lower', 'English', 'Marathi', 'History', 'Political Geography', 'Urdu'],
+    '10th ICSE': ['Physics', 'Chemistry', 'Biology', 'Maths', 'Topography', 'History', 'Geography', 'Language', 'Literature', 'Hindi (Marathi Graded)', 'Computer'],
+    '11th': ['Physics', 'Chemistry', 'Maths', 'Biology'],
+    '12th': ['Physics', 'Chemistry', 'Maths', 'Biology'],
+    'Repeaters': ['Physics', 'Chemistry', 'Maths'],
+}
+
+const FALLBACK_SUBJECTS = ['Mathematics', 'Science', 'English', 'Social Studies']
+
+// Returns the subject pool for a given class
+function getSubjectPool(studentClass) {
+    return CLASS_SUBJECT_POOL[studentClass] || FALLBACK_SUBJECTS
+}
+
+// Returns first 4 defaults for a class
+function getDefaultSubjects(studentClass) {
+    return getSubjectPool(studentClass).slice(0, 4)
+}
+
+// Skip Sundays — returns next valid weekday (Mon–Sat) on or after `date`
+function nextWeekday(date) {
+    const d = new Date(date)
+    while (d.getDay() === 0) {   // 0 = Sunday
+        d.setDate(d.getDate() + 1)
+    }
+    return d
+}
+
+function generateDemoLectures(startDateStr, subjects, times) {
     if (!startDateStr) return []
-    const base = new Date(startDateStr)
-    return Array.from({ length: 4 }, (_, i) => {
-        const d = new Date(base)
-        d.setDate(base.getDate() + i)
-        return {
+    const lectures = []
+    let current = nextWeekday(new Date(startDateStr))
+    for (let i = 0; i < 4; i++) {
+        const d = new Date(current)
+        lectures.push({
             day: i + 1,
-            scheduledDate: d.toISOString().split('T')[0],   // ISO date for backend
+            scheduledDate: d.toISOString().split('T')[0],
             date: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
             weekday: d.toLocaleDateString('en-IN', { weekday: 'long' }),
-            time: DEMO_LECTURE_TIMES[i],
-            subject: subjects[i],
-        }
-    })
+            time: to12h(times[i]) || to12h(DEMO_LECTURE_TIMES_24[i]),
+            subject: subjects[i] || subjects[0] || 'Mathematics',
+        })
+        current.setDate(current.getDate() + 1)
+        current = nextWeekday(current)
+    }
+    return lectures
 }
 
 function AddStudent() {
@@ -69,9 +131,8 @@ function AddStudent() {
     })
 
     const [demoStartDate, setDemoStartDate] = useState('')
-    const [customSubjects, setCustomSubjects] = useState(
-        CLASS_SUBJECTS[''] || FALLBACK_SUBJECTS
-    )
+    const [customSubjects, setCustomSubjects] = useState(FALLBACK_SUBJECTS)
+    const [customTimes, setCustomTimes] = useState(getSavedTimes)
     const [loading, setLoading] = useState(false)
     const [apiError, setApiError] = useState('')
     const [errors, setErrors] = useState({})
@@ -90,7 +151,7 @@ function AddStudent() {
 
         // Auto-refresh subjects when class changes
         if (name === 'studentClass') {
-            setCustomSubjects(CLASS_SUBJECTS[value] || FALLBACK_SUBJECTS)
+            setCustomSubjects(getDefaultSubjects(value))
         }
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: '' }))
@@ -100,6 +161,18 @@ function AddStudent() {
     const handleSubjectChange = (index, value) => {
         setCustomSubjects((prev) => {
             const updated = [...prev]
+            updated[index] = value
+            return updated
+        })
+    }
+
+    const handleTimeChange = (index, value) => {
+        setCustomTimes((prev) => {
+            const updated = [...prev]
+            if (index === 0) {
+                // Day 1 change → sync all 4 slots
+                return [value, value, value, value]
+            }
             updated[index] = value
             return updated
         })
@@ -135,7 +208,8 @@ function AddStudent() {
         setLoading(true)
         setApiError('')
         try {
-            const lectures = generateDemoLectures(demoStartDate, customSubjects)
+            const lectures = generateDemoLectures(demoStartDate, customSubjects, customTimes)
+            localStorage.setItem(LS_TIMES_KEY, JSON.stringify(customTimes))
             await addStudent({ ...form, demoStartDate, demoLectures: lectures })
             navigate('/receptionist/students')
         } catch (err) {
@@ -145,7 +219,7 @@ function AddStudent() {
         }
     }
 
-    const demoLectures = generateDemoLectures(demoStartDate, customSubjects)
+    const demoLectures = generateDemoLectures(demoStartDate, customSubjects, customTimes)
 
     return (
         <div className="max-w-3xl mx-auto space-y-3">
@@ -280,11 +354,17 @@ function AddStudent() {
                                         <div className="flex-1 min-w-0 space-y-1.5">
                                             <p className="text-sm font-semibold text-gray-900 truncate">{lec.date}</p>
                                             <p className="text-xs text-gray-500">{lec.weekday}</p>
-                                            <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-                                                <span className="flex items-center gap-1 text-xs text-gray-600 shrink-0">
-                                                    <Clock size={11} />
-                                                    {lec.time}
-                                                </span>
+                                            <div className="flex flex-col gap-1.5 pt-0.5">
+                                                {/* Editable time input */}
+                                                <div className="flex items-center gap-1">
+                                                    <Clock size={11} className="text-gray-500 shrink-0" />
+                                                    <input
+                                                        type="time"
+                                                        value={customTimes[idx] || ''}
+                                                        onChange={(e) => handleTimeChange(idx, e.target.value)}
+                                                        className="flex-1 text-xs text-gray-700 font-medium bg-white border border-gray-200 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer"
+                                                    />
+                                                </div>
                                                 {/* Editable subject dropdown */}
                                                 <div className="flex items-center gap-1 flex-1 min-w-0">
                                                     <BookOpen size={11} className="text-emerald-600 shrink-0" />
@@ -293,7 +373,7 @@ function AddStudent() {
                                                         onChange={(e) => handleSubjectChange(idx, e.target.value)}
                                                         className="flex-1 min-w-0 text-xs text-emerald-700 font-medium bg-emerald-50 border border-emerald-200 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-emerald-400 cursor-pointer appearance-none"
                                                     >
-                                                        {ALL_SUBJECTS.map((s) => (
+                                                        {getSubjectPool(form.studentClass).map((s) => (
                                                             <option key={s} value={s}>{s}</option>
                                                         ))}
                                                     </select>
