@@ -66,8 +66,8 @@ function StudentDetail() {
                     <ArrowLeft size={20} />
                 </button>
                 <div className="flex-1">
-                    <h1 className="text-xl font-bold text-gray-900">{student.name}</h1>
-                    <p className="text-sm text-gray-500">Student details & journey</p>
+                    <p className="text-sm font-semibold text-gray-900">{student.name}</p>
+                    <p className="text-xs text-gray-500">Student details & journey</p>
                 </div>
                 <span className={`px-3 py-1.5 rounded-full text-xs font-medium border ${statusColors[student.status]}`}>
                     {statusLabels[student.status]}

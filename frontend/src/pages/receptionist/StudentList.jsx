@@ -35,10 +35,7 @@ function StudentList() {
         <div className="space-y-5">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900">Students</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">{students.length} total students</p>
-                </div>
+                <p className="text-sm text-gray-500">{students.length} total students</p>
                 <button
                     onClick={() => navigate('/receptionist/students/add')}
                     className="flex items-center gap-2 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer"

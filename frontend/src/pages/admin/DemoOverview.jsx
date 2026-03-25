@@ -46,13 +46,10 @@ function AdminDemoOverview() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Demo Overview</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Monitor all demo lectures across all branches
-                        {demosLoading && <span className="ml-2 text-blue-500 text-xs">(loading...)</span>}
-                    </p>
-                </div>
+                <p className="text-sm text-gray-500">
+                    Monitor all demo lectures across all branches
+                    {demosLoading && <span className="ml-2 text-blue-500 text-xs">(loading...)</span>}
+                </p>
                 <button onClick={doFetch} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 cursor-pointer shadow-sm">
                     <RefreshCw size={16} className={demosLoading ? 'animate-spin' : ''} />
                 </button>
@@ -130,11 +127,25 @@ function AdminDemoOverview() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {demos.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
-                                        {demosLoading ? 'Loading demos...' : 'No demos found for this filter.'}
-                                    </td>
-                                </tr>
+                                demosLoading ? (
+                                    // Skeleton loading rows
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <tr key={i} className="animate-pulse">
+                                            <td className="px-6 py-4"><div className="space-y-1.5"><div className="h-3.5 bg-gray-200 rounded w-28" /><div className="h-2.5 bg-gray-200 rounded w-16" /></div></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-md w-20" /></td>
+                                            <td className="px-6 py-4 text-center"><div className="h-8 w-8 bg-gray-200 rounded-full mx-auto" /></td>
+                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-20" /></td>
+                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-24" /></td>
+                                            <td className="px-6 py-4 text-center"><div className="h-5 bg-gray-200 rounded-full w-20 mx-auto" /></td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
+                                            No demos found for this filter.
+                                        </td>
+                                    </tr>
+                                )
                             ) : (
                                 demos.map((demo) => (
                                     <tr key={demo._id} className="hover:bg-gray-50/50 transition-colors">

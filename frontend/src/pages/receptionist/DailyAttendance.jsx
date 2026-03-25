@@ -129,12 +129,9 @@ function DailyAttendance() {
     return (
         <div className="space-y-6 max-w-5xl mx-auto">
             {/* Header Section */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Daily Attendance</h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Manage daily attendance for <span className="font-bold text-emerald-600">{currentUser?.branches?.length > 0 ? currentUser.branches.join(', ') : 'All Branches'}</span>
-                </p>
-            </div>
+            <p className="text-sm text-gray-500">
+                Manage daily attendance for <span className="font-bold text-emerald-600">{currentUser?.branches?.length > 0 ? currentUser.branches.join(', ') : 'All Branches'}</span>
+            </p>
 
             {/* Filter Card */}
             <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">

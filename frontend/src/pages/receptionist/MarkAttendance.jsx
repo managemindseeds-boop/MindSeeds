@@ -74,8 +74,45 @@ function MarkAttendance() {
 
     if (loading && demos.length === 0) {
         return (
-            <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+            <div className="max-w-3xl mx-auto space-y-5">
+                {/* Skeleton header */}
+                <div className="flex items-center gap-3 animate-pulse">
+                    <div className="w-9 h-9 rounded-lg bg-gray-200" />
+                    <div className="space-y-1.5">
+                        <div className="h-3.5 bg-gray-200 rounded w-32" />
+                        <div className="h-2.5 bg-gray-200 rounded w-40" />
+                    </div>
+                </div>
+                {/* Skeleton stepper */}
+                <div className="bg-white rounded-xl border border-gray-200 p-5">
+                    <div className="flex items-center justify-between">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="flex flex-col items-center flex-1 animate-pulse">
+                                <div className="w-10 h-10 rounded-full bg-gray-200" />
+                                <div className="h-2.5 bg-gray-200 rounded w-14 mt-2" />
+                                <div className="h-2 bg-gray-200 rounded w-10 mt-1" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Skeleton lecture cards */}
+                {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-gray-50 animate-pulse">
+                        <div className="w-11 h-11 bg-gray-200 rounded-lg shrink-0" />
+                        <div className="flex-1 space-y-2">
+                            <div className="h-3.5 bg-gray-200 rounded w-36" />
+                            <div className="h-2.5 bg-gray-200 rounded w-20" />
+                            <div className="flex gap-2 mt-2">
+                                <div className="h-5 bg-gray-200 rounded w-16" />
+                                <div className="h-5 bg-gray-200 rounded w-12" />
+                            </div>
+                            <div className="flex gap-2 mt-2 pt-2 border-t border-gray-200">
+                                <div className="h-7 bg-gray-200 rounded flex-1" />
+                                <div className="h-7 bg-gray-200 rounded flex-1" />
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
         )
     }
@@ -145,8 +182,8 @@ function MarkAttendance() {
                     <PiArrowLeft size={20} />
                 </button>
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900">{studentName}</h1>
-                    <p className="text-sm text-gray-500">{studentClass} • Demo Attendance</p>
+                    <p className="text-sm font-semibold text-gray-900">{studentName}</p>
+                    <p className="text-xs text-gray-500">{studentClass} • Demo Attendance</p>
                 </div>
             </div>
 

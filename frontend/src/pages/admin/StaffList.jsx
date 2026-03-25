@@ -116,10 +116,7 @@ function AdminStaffList() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage receptionist accounts and access across all branches</p>
-                </div>
+                <p className="text-sm text-gray-500">Manage receptionist accounts and access across all branches</p>
                 <div className="flex items-center gap-2">
                     <button onClick={fetchStaff} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
                         <RefreshCw size={16} className={staffLoading ? 'animate-spin' : ''} />
@@ -170,11 +167,30 @@ function AdminStaffList() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {filtered.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
-                                        {staffLoading ? 'Loading staff...' : 'No staff members found.'}
-                                    </td>
-                                </tr>
+                                staffLoading ? (
+                                    // Skeleton loading rows
+                                    Array.from({ length: 4 }).map((_, i) => (
+                                        <tr key={i} className="animate-pulse">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-gray-200" />
+                                                    <div className="h-3.5 bg-gray-200 rounded w-24" />
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-md w-20" /></td>
+                                            <td className="px-6 py-4"><div className="flex gap-1"><div className="h-5 bg-gray-200 rounded-md w-16" /><div className="h-5 bg-gray-200 rounded-md w-16" /></div></td>
+                                            <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-full w-16" /></td>
+                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-20" /></td>
+                                            <td className="px-6 py-4"><div className="flex justify-center gap-1"><div className="h-8 w-8 bg-gray-200 rounded-lg" /><div className="h-8 w-8 bg-gray-200 rounded-lg" /><div className="h-8 w-8 bg-gray-200 rounded-lg" /></div></td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
+                                            No staff members found.
+                                        </td>
+                                    </tr>
+                                )
                             ) : (
                                 filtered.map((member) => (
                                     <tr key={member._id} className="hover:bg-gray-50/50 transition-colors">

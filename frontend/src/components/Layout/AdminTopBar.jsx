@@ -51,12 +51,12 @@ function AdminTopBar() {
         .slice(0, 2)
 
     return (
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10 w-full transition-all">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 w-full transition-all">
             {/* Page Title */}
-            <h2 className="text-lg font-semibold text-gray-800 hidden sm:block">{pageTitle}</h2>
+            <h2 className="text-lg font-semibold text-gray-800">{pageTitle}</h2>
 
             {/* Right Section */}
-            <div className="flex items-center gap-4 ml-auto">
+            <div className="flex items-center gap-2 md:gap-4 ml-auto">
 
                 {/* Admin Notification Bell */}
                 <button
@@ -77,7 +77,7 @@ function AdminTopBar() {
                 </button>
 
                 {/* User Profile Dropdown */}
-                <div className="relative pl-4 border-l border-gray-200" ref={profileRef}>
+                <div className="relative pl-2 md:pl-4 border-l border-gray-200" ref={profileRef}>
                     <button
                         onClick={() => setProfileOpen(prev => !prev)}
                         className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1.5 transition-colors"

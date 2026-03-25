@@ -160,17 +160,13 @@ function CallList() {
 
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Phone size={22} className="text-amber-500" />
-                        Call List
-                        {activeTab === 'pending' && pendingCount > 0 && (
-                            <span className="text-sm font-semibold bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full">
-                                {pendingCount}
-                            </span>
-                        )}
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Students pending a follow-up call</p>
+                <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-500">Students pending a follow-up call</p>
+                    {activeTab === 'pending' && pendingCount > 0 && (
+                        <span className="text-sm font-semibold bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full">
+                            {pendingCount}
+                        </span>
+                    )}
                 </div>
                 <button
                     onClick={fetchCalls}

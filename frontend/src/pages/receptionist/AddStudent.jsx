@@ -231,9 +231,7 @@ function AddStudent() {
                 >
                     <ArrowLeft size={20} />
                 </button>
-                <div className="flex-1">
-                    <h1 className="text-xl font-bold text-gray-900">Register a new student enquiry</h1>
-                </div>
+                <div className="flex-1" />
                 {/* Step indicator */}
                 <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                     <span

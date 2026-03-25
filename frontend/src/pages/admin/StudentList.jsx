@@ -75,13 +75,10 @@ function AdminStudentList() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Global Student Directory</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        All students across all branches
-                        {studentsLoading && <span className="ml-2 text-blue-500 text-xs">(loading...)</span>}
-                    </p>
-                </div>
+                <p className="text-sm text-gray-500">
+                    All students across all branches
+                    {studentsLoading && <span className="ml-2 text-blue-500 text-xs">(loading...)</span>}
+                </p>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={doFetch}
@@ -158,11 +155,25 @@ function AdminStudentList() {
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                             {students.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
-                                        {studentsLoading ? 'Loading students...' : 'No students found matching your filters.'}
-                                    </td>
-                                </tr>
+                                studentsLoading ? (
+                                    // Skeleton loading rows
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <tr key={i} className="animate-pulse">
+                                            <td className="px-6 py-4"><div className="space-y-1.5"><div className="h-3.5 bg-gray-200 rounded w-28" /><div className="h-2.5 bg-gray-200 rounded w-36" /></div></td>
+                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-24" /></td>
+                                            <td className="px-6 py-4"><div className="space-y-1"><div className="h-3.5 bg-gray-200 rounded w-16" /><div className="h-2.5 bg-gray-200 rounded w-20" /></div></td>
+                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-20" /></td>
+                                            <td className="px-6 py-4 text-center"><div className="h-6 bg-gray-200 rounded-full w-20 mx-auto" /></td>
+                                            <td className="px-6 py-4 text-center"><div className="h-8 w-8 bg-gray-200 rounded-lg mx-auto" /></td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
+                                            No students found matching your filters.
+                                        </td>
+                                    </tr>
+                                )
                             ) : (
                                 students.map((student) => (
                                     <tr key={student._id} className="hover:bg-gray-50/50 transition-colors">

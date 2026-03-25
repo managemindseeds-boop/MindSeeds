@@ -36,8 +36,44 @@ function DemoList() {
 
     if (loading && todayDemos.length === 0) {
         return (
-            <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+            <div className="space-y-6 max-w-3xl mx-auto">
+                <div className="animate-pulse space-y-2">
+                    <div className="h-3 bg-gray-200 rounded w-48" />
+                </div>
+                {/* Skeleton section header */}
+                <div className="flex items-center gap-2 animate-pulse">
+                    <div className="w-3 h-3 rounded-full bg-gray-200" />
+                    <div className="h-3 bg-gray-200 rounded w-28" />
+                </div>
+                {/* Skeleton demo cards */}
+                <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="flex items-center gap-4 px-4 py-3 animate-pulse">
+                            <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <div className="h-3.5 bg-gray-200 rounded w-32" />
+                                <div className="h-2.5 bg-gray-200 rounded w-48" />
+                            </div>
+                            <div className="h-5 w-14 bg-gray-200 rounded-full" />
+                        </div>
+                    ))}
+                </div>
+                {/* Skeleton upcoming section */}
+                <div className="flex items-center gap-2 animate-pulse">
+                    <div className="w-3 h-3 rounded-full bg-gray-200" />
+                    <div className="h-3 bg-gray-200 rounded w-20" />
+                </div>
+                <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+                    {[1, 2].map(i => (
+                        <div key={i} className="flex items-center gap-4 px-4 py-3 animate-pulse">
+                            <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <div className="h-3.5 bg-gray-200 rounded w-28" />
+                                <div className="h-2.5 bg-gray-200 rounded w-40" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         )
     }
@@ -54,10 +90,7 @@ function DemoList() {
         <div className="space-y-6 max-w-3xl mx-auto">
 
             {/* Header */}
-            <div>
-                <h1 className="text-xl font-bold text-gray-900">Demo Lectures</h1>
-                <p className="text-sm text-gray-500 mt-0.5">Manage demo schedules and attendance</p>
-            </div>
+            <p className="text-sm text-gray-500">Manage demo schedules and attendance</p>
 
             {/* ── Action Required (Absent) ── */}
             {absentDemos.length > 0 && (

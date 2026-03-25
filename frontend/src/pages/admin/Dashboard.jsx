@@ -15,8 +15,61 @@ function AdminDashboard() {
 
     if (dashLoading && !dashboard) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <RefreshCw className="animate-spin text-blue-500" size={28} />
+            <div className="space-y-6">
+                {/* Skeleton subtitle */}
+                <div className="flex items-center justify-between animate-pulse">
+                    <div className="h-3 bg-gray-200 rounded w-52" />
+                    <div className="h-9 w-20 bg-gray-200 rounded-lg" />
+                </div>
+                {/* Skeleton KPI cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 animate-pulse">
+                            <div className="flex justify-between items-start">
+                                <div className="space-y-3 flex-1">
+                                    <div className="h-3 bg-gray-200 rounded w-24" />
+                                    <div className="h-8 bg-gray-200 rounded w-16" />
+                                </div>
+                                <div className="w-11 h-11 bg-gray-200 rounded-lg" />
+                            </div>
+                            <div className="h-2.5 bg-gray-200 rounded w-20 mt-3" />
+                        </div>
+                    ))}
+                </div>
+                {/* Skeleton chart sections */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 lg:col-span-2 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-36 mb-5" />
+                        <div className="space-y-4">
+                            {[1, 2, 3].map(i => (
+                                <div key={i} className="space-y-2">
+                                    <div className="flex justify-between">
+                                        <div className="h-3 bg-gray-200 rounded w-20" />
+                                        <div className="h-3 bg-gray-200 rounded w-24" />
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-3">
+                                        <div className="h-3 bg-gray-200 rounded-full" style={{ width: `${80 - i * 20}%` }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-28 mb-5" />
+                        <div className="space-y-3">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-gray-200" />
+                                    <div className="flex-1 space-y-1">
+                                        <div className="h-2.5 bg-gray-200 rounded w-full" />
+                                        <div className="h-2 bg-gray-100 rounded-full" />
+                                    </div>
+                                    <div className="h-2.5 bg-gray-200 rounded w-8" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
         )
     }
@@ -83,13 +136,10 @@ function AdminDashboard() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">System Overview</h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Real-time metrics across all branches
-                        {dashLoading && <span className="ml-2 text-blue-500 text-xs">(refreshing...)</span>}
-                    </p>
-                </div>
+                <p className="text-sm text-gray-500">
+                    Real-time metrics across all branches
+                    {dashLoading && <span className="ml-2 text-blue-500 text-xs">(refreshing...)</span>}
+                </p>
                 <button
                     onClick={fetchDashboard}
                     className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm cursor-pointer shadow-sm"

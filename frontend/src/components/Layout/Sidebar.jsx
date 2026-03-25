@@ -1,11 +1,8 @@
-import { NavLink, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
+import { NavLink } from 'react-router-dom'
 import {
     LayoutDashboard,
     Users,
     CalendarCheck,
-    IndianRupee,
-    LogOut,
     ChevronLeft,
     ChevronRight,
     Phone,
@@ -22,14 +19,7 @@ const navItems = [
 ]
 
 function Sidebar() {
-    const { logout } = useAuth()
-    const navigate = useNavigate()
     const [collapsed, setCollapsed] = useState(false)
-
-    const handleLogout = () => {
-        logout()
-        navigate('/login')
-    }
 
     return (
         <aside
@@ -70,17 +60,6 @@ function Sidebar() {
                     </NavLink>
                 ))}
             </nav>
-
-            {/* Logout */}
-            <div className="px-3 py-4 border-t border-gray-800">
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full cursor-pointer"
-                >
-                    <LogOut size={20} />
-                    {!collapsed && <span>Logout</span>}
-                </button>
-            </div>
         </aside>
     )
 }
