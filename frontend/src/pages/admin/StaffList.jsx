@@ -115,8 +115,7 @@ function AdminStaffList() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <p className="text-sm text-gray-500">Manage receptionist accounts and access across all branches</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
                 <div className="flex items-center gap-2">
                     <button onClick={fetchStaff} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
                         <RefreshCw size={16} className={staffLoading ? 'animate-spin' : ''} />
@@ -227,7 +226,7 @@ function AdminStaffList() {
                                                     ? 'bg-[#f0e6f6] text-emerald-700 border border-emerald-200'
                                                     : 'bg-red-50 text-red-700 border border-red-200'
                                             }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${member.isActive !== false ? 'bg-[#5f3473]' : 'bg-red-500'}`} />
+                                                <span className={`w-1.5 h-1.5 rounded-full ${member.isActive !== false ? 'bg-[#5e3174]' : 'bg-red-500'}`} />
                                                 {member.isActive !== false ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
@@ -256,7 +255,7 @@ function AdminStaffList() {
                                                         className={`p-2 rounded-lg transition-colors cursor-pointer ${
                                                             member.isActive !== false
                                                                 ? 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                                                                : 'text-gray-400 hover:text-[#5f3473] hover:bg-[#f0e6f6]'
+                                                                : 'text-gray-400 hover:text-[#5e3174] hover:bg-[#f0e6f6]'
                                                         }`}
                                                         title={member.isActive !== false ? 'Deactivate' : 'Activate'}
                                                     >
@@ -275,7 +274,7 @@ function AdminStaffList() {
 
             {/* ── Add Staff Modal ──────────────────────────────────────────── */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5f3473]/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5e3174]/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <div>
@@ -352,7 +351,7 @@ function AdminStaffList() {
 
             {/* ── Edit Staff Modal ─────────────────────────────────────────── */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5f3473]/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5e3174]/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <h3 className="text-xl font-bold text-gray-900">Edit Staff</h3>
@@ -412,7 +411,7 @@ function AdminStaffList() {
 
             {/* ── Reset Password Modal ─────────────────────────────────────── */}
             {isResetModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5f3473]/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5e3174]/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden flex flex-col">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>

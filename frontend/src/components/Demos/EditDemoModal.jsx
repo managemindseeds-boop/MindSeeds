@@ -28,7 +28,7 @@ function EditDemoModal({ demo, onConfirm, onClose }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-[#5f3473]/40" onClick={onClose} />
+            <div className="absolute inset-0 bg-[#5e3174]/40" onClick={onClose} />
 
             {/* Modal */}
             <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">

@@ -33,21 +33,8 @@ function StudentList() {
 
     return (
         <div className="space-y-5">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <p className="text-sm text-gray-500">{students.length} total students</p>
-                <button
-                    onClick={() => navigate('/receptionist/students/add')}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#5f3473] text-white rounded-lg hover:bg-[#4a2860] transition-colors text-sm font-medium cursor-pointer"
-                >
-                    <Plus size={16} />
-                    Add Student
-                </button>
-            </div>
-
-            {/* Filters Row */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                {/* Search */}
+            {/* Filters & Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-5">
                 <div className="relative flex-1">
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -55,24 +42,16 @@ function StudentList() {
                         placeholder="Search by name, phone, or email..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent shadow-sm"
                     />
                 </div>
-
-                {/* Status Filter */}
-                <div className="relative">
-                    <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent appearance-none cursor-pointer"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="enquiry">Enquiry</option>
-                        <option value="demo_scheduled">Demo Scheduled</option>
-                        <option value="demo_completed">Demo Completed</option>
-                    </select>
-                </div>
+                <button
+                    onClick={() => navigate('/receptionist/students/add')}
+                    className="flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[#5e3174] text-white rounded-lg hover:bg-[#4a2860] transition-colors text-sm font-medium cursor-pointer shadow-sm min-w-[130px]"
+                >
+                    <Plus size={16} />
+                    Add Student
+                </button>
             </div>
 
             {/* Table */}
@@ -82,11 +61,30 @@ function StudentList() {
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
                                 <th className="text-left px-5 py-3 font-semibold text-gray-600">Name</th>
-                                <th className="text-left px-5 py-3 font-semibold text-gray-600">Phone</th>
-                                <th className="text-left px-5 py-3 font-semibold text-gray-600">Class</th>
-                                <th className="text-left px-5 py-3 font-semibold text-gray-600">Branch</th>
-                                <th className="text-left px-5 py-3 font-semibold text-gray-600">Status</th>
-                                <th className="text-left px-5 py-3 font-semibold text-gray-600">Action</th>
+                                <th className="hidden sm:table-cell text-left px-5 py-3 font-semibold text-gray-600">Phone</th>
+                                <th className="hidden sm:table-cell text-left px-5 py-3 font-semibold text-gray-600">Class</th>
+                                <th className="hidden sm:table-cell text-left px-5 py-3 font-semibold text-gray-600">Branch</th>
+                                <th className="hidden sm:table-cell text-left px-5 py-3 font-semibold text-gray-600">Status</th>
+                                <th className="text-right sm:text-left px-5 py-3 font-semibold text-gray-600 align-middle">
+                                    <div className="relative inline-flex flex-col sm:flex-row items-center sm:items-center justify-end sm:justify-start group focus-within:ring-2 focus-within:ring-[#5e3174] focus-within:ring-offset-1 rounded-sm">
+                                        <Filter size={16} className={statusFilter !== 'all' ? "text-[#5e3174]" : "text-gray-400 group-hover:text-gray-600 transition-colors"} />
+                                        {statusFilter !== 'all' && (
+                                            <span className="absolute -top-1 -right-1 sm:left-3 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                                        )}
+                                        <span className="hidden sm:inline sm:ml-2">Action</span>
+                                        <select
+                                            value={statusFilter}
+                                            onChange={(e) => setStatusFilter(e.target.value)}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            title="Filter Status"
+                                        >
+                                            <option value="all">All Status</option>
+                                            <option value="enquiry">Enquiry</option>
+                                            <option value="demo_scheduled">Demo Scheduled</option>
+                                            <option value="demo_completed">Demo Completed</option>
+                                        </select>
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -98,11 +96,11 @@ function StudentList() {
                                             <div className="h-3.5 bg-gray-100 rounded w-32 mb-1.5" />
                                             <div className="h-2.5 bg-gray-100 rounded w-24" />
                                         </td>
-                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-24" /></td>
-                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-10" /></td>
-                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-20" /></td>
-                                        <td className="px-5 py-3.5"><div className="h-5 bg-gray-100 rounded-full w-16" /></td>
-                                        <td className="px-5 py-3.5"><div className="h-7 w-7 bg-gray-100 rounded-lg" /></td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-24" /></td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-10" /></td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-20" /></td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5"><div className="h-5 bg-gray-100 rounded-full w-16" /></td>
+                                        <td className="px-5 py-3.5 flex justify-end sm:justify-start"><div className="h-7 w-7 bg-gray-100 rounded-lg" /></td>
                                     </tr>
                                 ))
                             ) : error ? (
@@ -119,29 +117,32 @@ function StudentList() {
                                 </tr>
                             ) : (
                                 filtered.map((student) => (
-                                    <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                                    <tr 
+                                        key={student.id} 
+                                        onClick={() => navigate(`/receptionist/students/${student.id}`)}
+                                        className="hover:bg-gray-50 transition-colors cursor-pointer group"
+                                    >
                                         <td className="px-5 py-3.5">
                                             <div>
                                                 <p className="font-medium text-gray-900">{student.name}</p>
                                                 <p className="text-xs text-gray-400">{student.email}</p>
                                             </div>
                                         </td>
-                                        <td className="px-5 py-3.5 text-gray-600">{student.phone}</td>
-                                        <td className="px-5 py-3.5 text-gray-600">{student.studentClass}</td>
-                                        <td className="px-5 py-3.5 text-gray-600">{student.branch}</td>
-                                        <td className="px-5 py-3.5">
+                                        <td className="hidden sm:table-cell px-5 py-3.5 text-gray-600">{student.phone}</td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5 text-gray-600">{student.studentClass}</td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5 text-gray-600">{student.branch}</td>
+                                        <td className="hidden sm:table-cell px-5 py-3.5">
                                             <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[student.status]}`}>
                                                 {statusLabels[student.status]}
                                             </span>
                                         </td>
-                                        <td className="px-5 py-3.5 flex items-center gap-2">
-                                            <button
-                                                onClick={() => navigate(`/receptionist/students/${student.id}`)}
-                                                className="p-1.5 text-gray-400 hover:text-[#5f3473] hover:bg-[#f0e6f6] rounded-lg transition-colors cursor-pointer"
+                                        <td className="px-5 py-3.5 flex items-center justify-end sm:justify-start gap-2">
+                                            <div
+                                                className="p-1.5 text-gray-400 group-hover:text-[#5e3174] group-hover:bg-[#f0e6f6] rounded-lg transition-colors"
                                                 title="View Details"
                                             >
                                                 <Eye size={16} />
-                                            </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

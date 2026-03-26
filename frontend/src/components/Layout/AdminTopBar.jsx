@@ -53,7 +53,10 @@ function AdminTopBar() {
     return (
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 w-full transition-all">
             {/* Page Title */}
-            <h2 className="text-lg font-semibold text-gray-800">{pageTitle}</h2>
+            <div className="flex items-center gap-2">
+                <img src="/4.svg" alt="MindSeeds" className="w-8 h-8 object-contain md:hidden" />
+                <h2 className="text-lg font-semibold text-gray-800">{pageTitle}</h2>
+            </div>
 
             {/* Right Section */}
             <div className="flex items-center gap-2 md:gap-4 ml-auto">
@@ -62,7 +65,7 @@ function AdminTopBar() {
                 <button
                     onClick={() => setIsOpen(prev => !prev)}
                     className={`relative p-2 rounded-lg transition-colors cursor-pointer ${isOpen
-                            ? 'text-[#5f3473] bg-[#f0e6f6]'
+                            ? 'text-[#5e3174] bg-[#f0e6f6]'
                             : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
                         }`}
                     aria-label={`Admin Notifications${notifications.length > 0 ? ` (${notifications.length})` : ''}`}
@@ -82,10 +85,9 @@ function AdminTopBar() {
                         onClick={() => setProfileOpen(prev => !prev)}
                         className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1.5 transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#f0e6f6] text-[#5f3473] font-semibold text-sm">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#f0e6f6] text-[#5e3174] font-semibold text-sm">
                             {initials}
                         </div>
-                        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {profileOpen && (
@@ -93,7 +95,7 @@ function AdminTopBar() {
                             {/* Profile Info */}
                             <div className="px-4 py-3 border-b border-gray-100">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#f0e6f6] text-[#5f3473] font-bold text-sm">
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#f0e6f6] text-[#5e3174] font-bold text-sm">
                                         {initials}
                                     </div>
                                     <div className="flex flex-col min-w-0">

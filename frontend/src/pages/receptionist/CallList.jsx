@@ -60,7 +60,7 @@ function CallCard({ call, onDone, onReopen, loading }) {
                     {phone ? (
                         <a
                             href={`tel:${phone}`}
-                            className="flex items-center gap-1 text-sm text-[#5f3473] font-medium hover:text-emerald-700 transition-colors"
+                            className="flex items-center gap-1 text-sm text-[#5e3174] font-medium hover:text-emerald-700 transition-colors"
                         >
                             <Phone size={13} />
                             {phone}
@@ -85,7 +85,7 @@ function CallCard({ call, onDone, onReopen, loading }) {
                     <button
                         onClick={() => onDone(call._id)}
                         disabled={loading === call._id}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-[#5f3473] hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#5e3174] hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         <CheckCircle2 size={15} />
                         {loading === call._id ? 'Saving...' : 'Mark Done'}
@@ -161,7 +161,7 @@ function CallList() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-500">Students pending a follow-up call</p>
+
                     {activeTab === 'pending' && pendingCount > 0 && (
                         <span className="text-sm font-semibold bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full">
                             {pendingCount}

@@ -36,27 +36,28 @@ const STATUS_COLORS = {
 // eslint-disable-next-line no-unused-vars
 function KpiCard({ label, value, icon: Icon, accentColor, subText, alert }) {
     return (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{label}</p>
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${accentColor}18` }}>
-                    <Icon size={18} style={{ color: accentColor }} />
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col">
+            <div className="flex justify-between items-start">
+                <div>
+                    <p className="text-sm font-medium text-gray-500">{label}</p>
+                    <h3 className="text-3xl font-bold text-gray-900 mt-2">{value}</h3>
+                </div>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: `${accentColor}18`, color: accentColor }}>
+                    <Icon size={22} />
                 </div>
             </div>
-            <div className="flex items-end justify-between">
-                <span className="text-4xl font-bold text-gray-900 leading-none">{value}</span>
-                {alert && value > 0 && (
-                    <span className="flex items-center gap-1 text-xs font-medium text-rose-500 bg-rose-50 px-2 py-1 rounded-full">
-                        <AlertCircle size={12} /> Needs attention
-                    </span>
-                )}
-                {!alert && subText && (
-                    <span className="flex items-center gap-1 text-xs text-[#5f3473] bg-[#f0e6f6] px-2 py-1 rounded-full font-medium">
-                        <TrendingUp size={12} /> {subText}
-                    </span>
-                )}
-            </div>
+            {(alert || subText) && (
+                <div className="mt-3 flex items-center gap-2">
+                    {alert && value > 0 && (
+                        <span className="flex items-center gap-1 text-xs font-medium text-rose-500">
+                            <AlertCircle size={14} /> Needs attention
+                        </span>
+                    )}
+                    {!alert && subText && (
+                        <span className="text-xs text-gray-400">{subText}</span>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
@@ -150,7 +151,7 @@ function Dashboard() {
             </div>
 
             {/* ── KPI Cards ────────────────────────────────────────────────── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
                     label="Total Students"
                     value={totalStudents}

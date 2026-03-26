@@ -123,7 +123,7 @@ function MarkAttendance() {
                 <p className="text-gray-500 mb-4">No demos found for this student</p>
                 <button
                     onClick={() => navigate('/receptionist/demos')}
-                    className="px-4 py-2 bg-[#5f3473] text-white rounded-lg text-sm cursor-pointer"
+                    className="px-4 py-2 bg-[#5e3174] text-white rounded-lg text-sm cursor-pointer"
                 >
                     Back to Demos
                 </button>
@@ -152,7 +152,7 @@ function MarkAttendance() {
     }
 
     const getStatusBg = (demo) => {
-        if (demo.attended === true) return 'bg-[#5f3473]'
+        if (demo.attended === true) return 'bg-[#5e3174]'
         if (demo.attended === false) return 'bg-red-500'
         return 'bg-white border-2 border-gray-300'
     }
@@ -165,7 +165,7 @@ function MarkAttendance() {
     }
 
     const getStatusColor = (demo) => {
-        if (demo.attended === true) return 'text-[#5f3473]'
+        if (demo.attended === true) return 'text-[#5e3174]'
         if (demo.attended === false) return 'text-red-600'
         if (demo.scheduledDate === today) return 'text-amber-600'
         return 'text-gray-400'
@@ -201,7 +201,7 @@ function MarkAttendance() {
                             <p className="text-xs font-medium text-gray-900 mt-2">Lecture {demo.lectureNumber}</p>
                             <p className="text-[10px] text-gray-500">{formatDate(demo.scheduledDate)}</p>
                             {demo.subject && (
-                                <p className="text-[10px] text-[#5f3473] font-medium mt-0.5 px-1 text-center">{demo.subject}</p>
+                                <p className="text-[10px] text-[#5e3174] font-medium mt-0.5 px-1 text-center">{demo.subject}</p>
                             )}
                             <span className={`text-[10px] font-medium mt-0.5 ${getStatusColor(demo)}`}>
                                 {getStatusLabel(demo)}
@@ -231,7 +231,7 @@ function MarkAttendance() {
                             className="flex items-start gap-3 p-3 rounded-xl border border-black bg-gray-50"
                         >
                             {/* Black square day badge */}
-                            <div className="flex-shrink-0 flex flex-col items-center justify-center w-11 h-11 bg-[#5f3473] text-white rounded-lg text-xs font-bold leading-tight">
+                            <div className="flex-shrink-0 flex flex-col items-center justify-center w-11 h-11 bg-[#5e3174] text-white rounded-lg text-xs font-bold leading-tight">
                                 <span className="text-[10px] font-normal opacity-60">Day</span>
                                 <span>{demo.lectureNumber}</span>
                             </div>
@@ -275,7 +275,7 @@ function MarkAttendance() {
                                 {/* Actions */}
                                 <div className="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-gray-200">
                                     {demo.attended === true && (
-                                        <span className="flex items-center gap-1 text-xs font-medium text-[#5f3473]">
+                                        <span className="flex items-center gap-1 text-xs font-medium text-[#5e3174]">
                                             <PiCheckCircle size={14} /> Present
                                         </span>
                                     )}
@@ -296,7 +296,7 @@ function MarkAttendance() {
                                         <div className="flex items-center gap-1.5 w-full">
                                             <button
                                                 onClick={() => handleMarkPresent(demo.id)}
-                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-[#5f3473] text-white rounded-md text-xs font-medium hover:bg-[#5f3473] transition-colors cursor-pointer"
+                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-[#5e3174] text-white rounded-md text-xs font-medium hover:bg-[#5e3174] transition-colors cursor-pointer"
                                             >
                                                 <PiCheck size={13} /> Present
                                             </button>

@@ -45,11 +45,7 @@ function AdminDemoOverview() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <p className="text-sm text-gray-500">
-                    Monitor all demo lectures across all branches
-                    {demosLoading && <span className="ml-2 text-blue-500 text-xs">(loading...)</span>}
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
                 <button onClick={doFetch} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 cursor-pointer shadow-sm">
                     <RefreshCw size={16} className={demosLoading ? 'animate-spin' : ''} />
                 </button>

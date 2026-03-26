@@ -15,7 +15,7 @@ function RescheduleModal({ demo, onConfirm, onClose }) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-[#5f3473]/40" onClick={onClose} />
+            <div className="absolute inset-0 bg-[#5e3174]/40" onClick={onClose} />
 
             {/* Modal */}
             <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
@@ -45,7 +45,7 @@ function RescheduleModal({ demo, onConfirm, onClose }) {
                             value={newDate}
                             onChange={(e) => setNewDate(e.target.value)}
                             min={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent"
                         />
                     </div>
 
@@ -58,7 +58,7 @@ function RescheduleModal({ demo, onConfirm, onClose }) {
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Reason for absence..."
                             rows={3}
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent resize-none"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent resize-none"
                         />
                     </div>
 
@@ -73,7 +73,7 @@ function RescheduleModal({ demo, onConfirm, onClose }) {
                         <button
                             type="submit"
                             disabled={!newDate}
-                            className="px-4 py-2 bg-[#5f3473] text-white rounded-lg text-sm font-medium hover:bg-[#4a2860] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="px-4 py-2 bg-[#5e3174] text-white rounded-lg text-sm font-medium hover:bg-[#4a2860] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                             Reschedule
                         </button>

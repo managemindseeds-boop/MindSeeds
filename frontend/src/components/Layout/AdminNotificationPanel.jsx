@@ -138,7 +138,7 @@ export default function AdminNotificationPanel() {
                 {/* ── Header ── */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#f0e6f6] bg-white/80 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#5f3473] to-[#7a4d91] flex items-center justify-center shadow-sm">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#5e3174] to-[#7a4d91] flex items-center justify-center shadow-sm">
                             <Bell size={17} className="text-white" />
                         </div>
                         <div>
@@ -160,7 +160,7 @@ export default function AdminNotificationPanel() {
                     {notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-8">
                             <div className="w-16 h-16 rounded-full bg-[#f0e6f6] flex items-center justify-center">
-                                <CheckCircle2 size={32} className="text-[#5f3473]" />
+                                <CheckCircle2 size={32} className="text-[#5e3174]" />
                             </div>
                             <p className="text-sm font-semibold text-gray-700">All caught up!</p>
                             <p className="text-xs text-gray-400">No pending alerts across any branch.</p>
@@ -211,7 +211,7 @@ export default function AdminNotificationPanel() {
                                                         {/* Arrow */}
                                                         <ChevronRight
                                                             size={14}
-                                                            className="flex-shrink-0 text-gray-300 group-hover:text-[#5f3473] transition-colors mt-2"
+                                                            className="flex-shrink-0 text-gray-300 group-hover:text-[#5e3174] transition-colors mt-2"
                                                         />
                                                     </div>
                                                 </button>

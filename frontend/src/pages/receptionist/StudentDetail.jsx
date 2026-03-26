@@ -35,7 +35,7 @@ function StudentDetail() {
                 <p className="text-gray-500 mb-4">Student not found</p>
                 <button
                     onClick={() => navigate('/receptionist/students')}
-                    className="px-4 py-2 bg-[#5f3473] text-white rounded-lg text-sm cursor-pointer"
+                    className="px-4 py-2 bg-[#5e3174] text-white rounded-lg text-sm cursor-pointer"
                 >
                     Back to Students
                 </button>
@@ -81,7 +81,7 @@ function StudentDetail() {
                     {/* Connecting line */}
                     <div className="absolute top-2 left-0 right-0 h-0.5 bg-gray-200 z-0" />
                     <div
-                        className="absolute top-2 left-0 h-0.5 bg-[#5f3473] z-0 transition-all duration-300"
+                        className="absolute top-2 left-0 h-0.5 bg-[#5e3174] z-0 transition-all duration-300"
                         style={{ width: `${(currentStepIndex / (timelineSteps.length - 1)) * 100}%` }}
                     />
 
@@ -95,7 +95,7 @@ function StudentDetail() {
                                 <div
                                     className={`w-4 h-4 rounded-full border-2 flex-shrink-0
                                         ${isCompleted
-                                            ? 'bg-[#5f3473] border-[#5f3473]'
+                                            ? 'bg-[#5e3174] border-[#5e3174]'
                                             : 'bg-white border-gray-300'
                                         }`}
                                 />
@@ -107,7 +107,7 @@ function StudentDetail() {
                                     {step.description}
                                 </p>
                                 {isCurrent && (
-                                    <span className="mt-1.5 px-2 py-0.5 bg-[#f0e6f6] text-[#5f3473] rounded text-[10px] font-medium">
+                                    <span className="mt-1.5 px-2 py-0.5 bg-[#f0e6f6] text-[#5e3174] rounded text-[10px] font-medium">
                                         Current Stage
                                     </span>
                                 )}

@@ -236,14 +236,14 @@ function AddStudent() {
                 <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
                     <span
                         className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold transition-all
-                            ${page === 1 ? 'bg-[#5f3473] text-white' : 'bg-[#5f3473] text-white'}`}
+                            ${page === 1 ? 'bg-[#5e3174] text-white' : 'bg-[#5e3174] text-white'}`}
                     >
                         {page === 1 ? '1' : '✓'}
                     </span>
                     <div className={`w-8 h-0.5 rounded ${page === 2 ? 'bg-[#c9a0dc]' : 'bg-gray-200'}`} />
                     <span
                         className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold transition-all
-                            ${page === 2 ? 'bg-[#5f3473] text-white' : 'bg-gray-200 text-gray-400'}`}
+                            ${page === 2 ? 'bg-[#5e3174] text-white' : 'bg-gray-200 text-gray-400'}`}
                     >
                         2
                     </span>
@@ -289,7 +289,7 @@ function AddStudent() {
                         <button
                             type="button"
                             onClick={handleNextPage}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-[#5f3473] text-white rounded-lg text-sm font-medium hover:bg-[#4a2860] transition-colors cursor-pointer"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#5e3174] text-white rounded-lg text-sm font-medium hover:bg-[#4a2860] transition-colors cursor-pointer"
                         >
                             Next
                             <ArrowRight size={16} />
@@ -321,7 +321,7 @@ function AddStudent() {
                                 value={demoStartDate}
                                 onChange={(e) => setDemoStartDate(e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all cursor-pointer"
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent transition-all cursor-pointer"
                             />
                         </div>
                     </div>
@@ -330,7 +330,7 @@ function AddStudent() {
                     {demoLectures.length > 0 ? (
                         <div>
                             <div className="flex items-center gap-2 mb-3">
-                                <CalendarDays size={15} className="text-[#5f3473]" />
+                                <CalendarDays size={15} className="text-[#5e3174]" />
                                 <span className="text-sm font-semibold text-gray-800">Scheduled Demo Lectures</span>
                                 <span className="ml-auto text-xs bg-[#f0e6f6] text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-medium">
                                     4 lectures
@@ -344,7 +344,7 @@ function AddStudent() {
                                         className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50 hover:border-emerald-200 transition-all"
                                     >
                                         {/* Day badge */}
-                                        <div className="flex-shrink-0 flex flex-col items-center justify-center w-10 h-10 bg-[#5f3473] text-white rounded-lg text-xs font-bold leading-tight">
+                                        <div className="flex-shrink-0 flex flex-col items-center justify-center w-10 h-10 bg-[#5e3174] text-white rounded-lg text-xs font-bold leading-tight">
                                             <span className="text-[10px] font-normal opacity-70">Day</span>
                                             <span>{lec.day}</span>
                                         </div>
@@ -365,7 +365,7 @@ function AddStudent() {
                                                 </div>
                                                 {/* Editable subject dropdown */}
                                                 <div className="flex items-center gap-1 flex-1 min-w-0">
-                                                    <BookOpen size={11} className="text-[#5f3473] shrink-0" />
+                                                    <BookOpen size={11} className="text-[#5e3174] shrink-0" />
                                                     <select
                                                         value={customSubjects[idx]}
                                                         onChange={(e) => handleSubjectChange(idx, e.target.value)}
@@ -403,7 +403,7 @@ function AddStudent() {
                         <button
                             type="submit"
                             disabled={loading || !demoStartDate}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-[#5f3473] text-white rounded-lg text-sm font-medium hover:bg-[#4a2860] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#5e3174] text-white rounded-lg text-sm font-medium hover:bg-[#4a2860] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Save size={16} />
                             {loading ? 'Registering...' : 'Register Student'}
@@ -427,7 +427,7 @@ function FieldInput({ label, name, value, onChange, error, placeholder, type = '
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
-                className={`w-full px-3 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all
+                className={`w-full px-3 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent transition-all
                     ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                 {...props}
             />
@@ -447,7 +447,7 @@ function FieldSelect({ label, name, value, onChange, error, options, placeholder
                     name={name}
                     value={value}
                     onChange={onChange}
-                    className={`w-full pl-3 pr-10 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent appearance-none cursor-pointer transition-all
+                    className={`w-full pl-3 pr-10 py-2 bg-gray-50 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent appearance-none cursor-pointer transition-all
                         ${error ? 'border-red-300 bg-red-50' : 'border-gray-200'}
                         ${!value ? 'text-gray-400' : 'text-gray-900'}`}
                 >

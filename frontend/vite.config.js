@@ -15,7 +15,7 @@ export default defineConfig({
         name: 'MindSeeds',
         short_name: 'MindSeeds',
         description: 'MindSeeds Receptionist & Admin Panel',
-        theme_color: '#5f3473',
+        theme_color: '#5e3174',
         background_color: '#ffffff',
         display: 'standalone',
         scope: '/',

@@ -74,11 +74,7 @@ function AdminStudentList() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <p className="text-sm text-gray-500">
-                    All students across all branches
-                    {studentsLoading && <span className="ml-2 text-blue-500 text-xs">(loading...)</span>}
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
                 <div className="flex items-center gap-2">
                     <button
                         onClick={doFetch}
@@ -146,11 +142,11 @@ function AdminStudentList() {
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
                                 <th className="text-left px-6 py-4 font-semibold text-gray-700">Student Info</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Contact</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Class & Branch</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Registered</th>
-                                <th className="text-center px-6 py-4 font-semibold text-gray-700">Status</th>
-                                <th className="text-center px-6 py-4 font-semibold text-gray-700">Action</th>
+                                <th className="hidden sm:table-cell text-left px-6 py-4 font-semibold text-gray-700">Contact</th>
+                                <th className="hidden sm:table-cell text-left px-6 py-4 font-semibold text-gray-700">Class & Branch</th>
+                                <th className="hidden sm:table-cell text-left px-6 py-4 font-semibold text-gray-700">Registered</th>
+                                <th className="hidden sm:table-cell text-center px-6 py-4 font-semibold text-gray-700">Status</th>
+                                <th className="text-right sm:text-center px-6 py-4 font-semibold text-gray-700">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -160,11 +156,11 @@ function AdminStudentList() {
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
                                             <td className="px-6 py-4"><div className="space-y-1.5"><div className="h-3.5 bg-gray-200 rounded w-28" /><div className="h-2.5 bg-gray-200 rounded w-36" /></div></td>
-                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-24" /></td>
-                                            <td className="px-6 py-4"><div className="space-y-1"><div className="h-3.5 bg-gray-200 rounded w-16" /><div className="h-2.5 bg-gray-200 rounded w-20" /></div></td>
-                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-20" /></td>
-                                            <td className="px-6 py-4 text-center"><div className="h-6 bg-gray-200 rounded-full w-20 mx-auto" /></td>
-                                            <td className="px-6 py-4 text-center"><div className="h-8 w-8 bg-gray-200 rounded-lg mx-auto" /></td>
+                                            <td className="hidden sm:table-cell px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-24" /></td>
+                                            <td className="hidden sm:table-cell px-6 py-4"><div className="space-y-1"><div className="h-3.5 bg-gray-200 rounded w-16" /><div className="h-2.5 bg-gray-200 rounded w-20" /></div></td>
+                                            <td className="hidden sm:table-cell px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-20" /></td>
+                                            <td className="hidden sm:table-cell px-6 py-4 text-center"><div className="h-6 bg-gray-200 rounded-full w-20 mx-auto" /></td>
+                                            <td className="px-6 py-4 flex justify-end sm:justify-center"><div className="h-8 w-8 bg-gray-200 rounded-lg sm:mx-auto" /></td>
                                         </tr>
                                     ))
                                 ) : (
@@ -176,36 +172,39 @@ function AdminStudentList() {
                                 )
                             ) : (
                                 students.map((student) => (
-                                    <tr key={student._id} className="hover:bg-gray-50/50 transition-colors">
+                                    <tr 
+                                        key={student._id} 
+                                        onClick={() => navigate(`/admin/students/${student._id}`)}
+                                        className="hover:bg-gray-50 cursor-pointer transition-colors group"
+                                    >
                                         <td className="px-6 py-4">
                                             <div>
                                                 <p className="font-semibold text-gray-900">{student.fullName}</p>
                                                 <p className="text-xs text-gray-500">{student.email || '—'}</p>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-700">{student.phone}</td>
-                                        <td className="px-6 py-4">
+                                        <td className="hidden sm:table-cell px-6 py-4 text-gray-700">{student.phone}</td>
+                                        <td className="hidden sm:table-cell px-6 py-4">
                                             <div>
                                                 <p className="font-medium text-gray-900">{student.class}</p>
                                                 <p className="text-xs text-blue-600 font-medium">{student.branch}</p>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
+                                        <td className="hidden sm:table-cell px-6 py-4 text-gray-500">
                                             {new Date(student.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
-                                        <td className="px-6 py-4 text-center">
+                                        <td className="hidden sm:table-cell px-6 py-4 text-center">
                                             <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold border ${statusColors[student.status] || 'bg-gray-100 text-gray-600'}`}>
                                                 {statusLabels[student.status] || student.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <button
-                                                onClick={() => navigate(`/admin/students/${student._id}`)}
-                                                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer inline-flex"
+                                        <td className="px-6 py-4 text-right sm:text-center">
+                                            <div
+                                                className="p-2 text-gray-400 group-hover:text-blue-600 group-hover:bg-blue-50 rounded-lg transition-colors inline-flex"
                                                 title="View Details"
                                             >
                                                 <Eye size={18} />
-                                            </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))

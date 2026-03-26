@@ -90,7 +90,7 @@ function DemoList() {
         <div className="space-y-6 max-w-3xl mx-auto">
 
             {/* Header */}
-            <p className="text-sm text-gray-500">Manage demo schedules and attendance</p>
+
 
             {/* ── Action Required (Absent) ── */}
             {absentDemos.length > 0 && (
@@ -142,9 +142,9 @@ function DemoList() {
             {/* ── Today's Demos ── */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="w-3 h-3 rounded-full bg-[#5f3473] shrink-0" />
+                    <span className="w-3 h-3 rounded-full bg-[#5e3174] shrink-0" />
                     <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Today's Demos</h2>
-                    <span className="ml-1 px-2 py-0.5 bg-[#f0e6f6] text-[#5f3473] rounded-full text-xs font-medium">
+                    <span className="ml-1 px-2 py-0.5 bg-[#f0e6f6] text-[#5e3174] rounded-full text-xs font-medium">
                         {todayDemos.length}
                     </span>
                     <span className="ml-auto text-xs text-gray-400 flex items-center gap-1">
@@ -168,7 +168,7 @@ function DemoList() {
                             >
                                 {/* Date Badge */}
                                 <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-[#f0e6f6] shrink-0">
-                                    <span className="text-base font-bold text-[#5f3473] leading-none">
+                                    <span className="text-base font-bold text-[#5e3174] leading-none">
                                         {new Date(demo.scheduledDate).getDate()}
                                     </span>
                                     <span className="text-[10px] text-[#c9a0dc] uppercase tracking-wide mt-0.5">
@@ -181,7 +181,7 @@ function DemoList() {
                                     <p className="text-sm font-semibold text-gray-900 truncate">{demo.studentName}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">
                                         Class {demo.studentClass}&nbsp;•&nbsp;Lecture {demo.lectureNumber}/4
-                                        {demo.subject && <>&nbsp;•&nbsp;<span className="text-[#5f3473] font-medium">{demo.subject}</span></>}
+                                        {demo.subject && <>&nbsp;•&nbsp;<span className="text-[#5e3174] font-medium">{demo.subject}</span></>}
                                     </p>
                                 </div>
 

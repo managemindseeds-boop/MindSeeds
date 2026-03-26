@@ -241,7 +241,7 @@ function AdminStudentDetail() {
 
                                     {/* Status dot */}
                                     <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 z-10 ${
-                                        demo.attended === true ? 'bg-[#f0e6f6] text-[#5f3473]'
+                                        demo.attended === true ? 'bg-[#f0e6f6] text-[#5e3174]'
                                         : demo.attended === false ? 'bg-red-100 text-red-600'
                                         : 'bg-gray-100 text-gray-400'
                                     }`}>
@@ -299,7 +299,7 @@ function AdminStudentDetail() {
                                 </div>
                                 <div className="bg-[#f0e6f6] rounded-lg p-4 text-center">
                                     <p className="text-2xl font-bold text-emerald-700">{stats.present}</p>
-                                    <p className="text-xs text-[#5f3473]">Present</p>
+                                    <p className="text-xs text-[#5e3174]">Present</p>
                                 </div>
                                 <div className="bg-red-50 rounded-lg p-4 text-center">
                                     <p className="text-2xl font-bold text-red-700">{stats.absent}</p>
@@ -316,7 +316,7 @@ function AdminStudentDetail() {
                                 <div className="w-full bg-gray-100 rounded-full h-3">
                                     <div
                                         className={`h-3 rounded-full transition-all duration-500 ${
-                                            stats.percentage >= 75 ? 'bg-[#5f3473]'
+                                            stats.percentage >= 75 ? 'bg-[#5e3174]'
                                             : stats.percentage >= 50 ? 'bg-amber-500'
                                             : 'bg-red-500'
                                         }`}

@@ -36,15 +36,19 @@ function MobileNavBar({ isAdmin = false }) {
                         to={item.path}
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive
-                                ? 'text-[#5f3473]'
+                                ? 'text-[#5e3174]'
                                 : 'text-gray-500 hover:text-gray-900'
                             }`
                         }
                     >
-                        <item.icon size={20} />
-                        <span className="text-[10px] font-medium tracking-wide">
-                            {item.label}
-                        </span>
+                        {({ isActive }) => (
+                            <>
+                                <item.icon size={20} fill={isActive ? "currentColor" : "none"} />
+                                <span className="text-[10px] font-medium tracking-wide">
+                                    {item.label}
+                                </span>
+                            </>
+                        )}
                     </NavLink>
                 ))}
             </div>
