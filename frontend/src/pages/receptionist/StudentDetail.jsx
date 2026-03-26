@@ -103,9 +103,6 @@ function StudentDetail() {
                                 <p className={`text-xs font-medium mt-2 ${isCompleted ? 'text-gray-900' : 'text-gray-400'}`}>
                                     {step.label}
                                 </p>
-                                <p className={`text-[10px] mt-0.5 ${isCompleted ? 'text-gray-500' : 'text-gray-300'}`}>
-                                    {step.description}
-                                </p>
                                 {isCurrent && (
                                     <span className="mt-1.5 px-2 py-0.5 bg-[#f0e6f6] text-[#5e3174] rounded text-[10px] font-medium">
                                         Current Stage
