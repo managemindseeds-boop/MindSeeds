@@ -4,6 +4,12 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 
 const app = express()
+app.get("/", (req, res) => {
+  res.json({
+    status: "success",
+    message: "Mindseeds API is running 🚀"
+  });
+});
 
 //Configurations set
 app.use(cors({
