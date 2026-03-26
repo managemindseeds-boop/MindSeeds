@@ -51,7 +51,7 @@ function CallCard({ call, onDone, onReopen, loading }) {
                         </span>
                     )}
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full
-                        ${isPending ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                        ${isPending ? 'bg-amber-50 text-amber-700' : 'bg-[#f0e6f6] text-emerald-700'}`}>
                         {isPending ? '⏳ Pending' : '✅ Done'}
                     </span>
                 </div>
@@ -60,7 +60,7 @@ function CallCard({ call, onDone, onReopen, loading }) {
                     {phone ? (
                         <a
                             href={`tel:${phone}`}
-                            className="flex items-center gap-1 text-sm text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
+                            className="flex items-center gap-1 text-sm text-[#5f3473] font-medium hover:text-emerald-700 transition-colors"
                         >
                             <Phone size={13} />
                             {phone}
@@ -85,7 +85,7 @@ function CallCard({ call, onDone, onReopen, loading }) {
                     <button
                         onClick={() => onDone(call._id)}
                         disabled={loading === call._id}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-[#5f3473] hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         <CheckCircle2 size={15} />
                         {loading === call._id ? 'Saving...' : 'Mark Done'}

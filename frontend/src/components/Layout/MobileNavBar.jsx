@@ -36,7 +36,7 @@ function MobileNavBar({ isAdmin = false }) {
                         to={item.path}
                         className={({ isActive }) =>
                             `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive
-                                ? 'text-emerald-500'
+                                ? 'text-[#5f3473]'
                                 : 'text-gray-500 hover:text-gray-900'
                             }`
                         }

@@ -86,8 +86,8 @@ function AdminDashboard() {
             title: 'Total Students',
             value: kpi.totalStudents ?? '—',
             icon: Users,
-            color: 'bg-emerald-500',
-            lightColor: 'bg-emerald-50 text-emerald-600',
+            color: 'bg-[#5f3473]',
+            lightColor: 'bg-[#f0e6f6] text-[#5f3473]',
             sub: `${statusBreakdown.admitted || 0} admitted`,
         },
         {
@@ -121,7 +121,7 @@ function AdminDashboard() {
         enquiry: 'bg-blue-500',
         demo_scheduled: 'bg-amber-500',
         demo_completed: 'bg-purple-500',
-        admitted: 'bg-emerald-500',
+        admitted: 'bg-[#5f3473]',
     }
     const statusLabels = {
         enquiry: 'Enquiry',
@@ -164,7 +164,7 @@ function AdminDashboard() {
                         </div>
                         <div className="mt-3 flex items-center gap-2">
                             {kpi.trendUp !== undefined && (
-                                <span className={`flex items-center text-xs font-medium ${kpi.trendUp ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                <span className={`flex items-center text-xs font-medium ${kpi.trendUp ? 'text-[#5f3473]' : 'text-amber-600'}`}>
                                     {kpi.trendUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                                 </span>
                             )}
@@ -238,7 +238,7 @@ function AdminDashboard() {
                     <div className="space-y-4">
                         {[
                             { label: 'Pending', value: demoStats.pending, icon: Clock, color: 'text-amber-600 bg-amber-50' },
-                            { label: 'Completed', value: demoStats.completed, icon: CheckCircle2, color: 'text-emerald-600 bg-emerald-50' },
+                            { label: 'Completed', value: demoStats.completed, icon: CheckCircle2, color: 'text-[#5f3473] bg-[#f0e6f6]' },
                             { label: 'Absent', value: demoStats.absent, icon: XCircle, color: 'text-red-600 bg-red-50' },
                         ].map((item) => (
                             <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
@@ -281,14 +281,14 @@ function AdminDashboard() {
                         {/* Recent Demo Activity */}
                         {(recentActivity.demos || []).map((d, i) => (
                             <div key={`d-${i}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                                <div className={`p-2 rounded-lg ${d.attended ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                <div className={`p-2 rounded-lg ${d.attended ? 'bg-[#f0e6f6] text-[#5f3473]' : 'bg-red-50 text-red-600'}`}>
                                     {d.attended ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-900 truncate">{d.studentName}</p>
                                     <p className="text-xs text-gray-500">Demo #{d.lectureNumber} · {d.branch}</p>
                                 </div>
-                                <span className={`text-xs font-medium ${d.attended ? 'text-emerald-600' : 'text-red-600'}`}>
+                                <span className={`text-xs font-medium ${d.attended ? 'text-[#5f3473]' : 'text-red-600'}`}>
                                     {d.attended ? 'Attended' : 'Absent'}
                                 </span>
                             </div>

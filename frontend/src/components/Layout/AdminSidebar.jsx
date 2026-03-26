@@ -31,21 +31,16 @@ function AdminSidebar() {
     return (
         <aside
             className={`hidden md:flex ${collapsed ? 'w-20' : 'w-64'} 
-                h-screen sticky top-0 bg-blue-950 text-white flex-col transition-all duration-300 ease-in-out z-20`}
+                h-screen sticky top-0 bg-[#5f3473] text-white flex-col transition-all duration-300 ease-in-out z-20 overflow-hidden`}
         >
             {/* Logo / Brand */}
-            <div className="flex items-center justify-between px-5 py-6 border-b border-blue-900">
-                {!collapsed && (
-                    <div className="flex flex-col">
-                        <h1 className="text-xl font-bold tracking-wide">
-                            Mind<span className="text-blue-400">Seeds</span>
-                        </h1>
-                        <span className="text-xs text-blue-300 font-medium tracking-widest uppercase mt-1">Admin Portal</span>
-                    </div>
-                )}
+            <div className={`flex items-center ${collapsed ? 'justify-center px-0' : 'justify-between px-5'} py-6 min-h-[73px] transition-all duration-300`}>
+                <div className={`flex flex-col overflow-hidden transition-all duration-300 ${collapsed ? 'w-0 opacity-0' : 'w-[160px] opacity-100'}`}>
+                    <img src="/1.svg" alt="MindSeeds" className="h-11 w-auto max-w-[160px] object-contain object-left" />
+                </div>
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="text-blue-300 hover:text-white transition-colors cursor-pointer"
+                    className="text-[#d4b5e6] hover:text-white transition-colors cursor-pointer shrink-0"
                 >
                     {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                 </button>
@@ -58,29 +53,31 @@ function AdminSidebar() {
                         key={item.path}
                         to={item.path}
                         className={({ isActive }) =>
-                            `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200
+                            `flex items-center ${collapsed ? 'justify-center px-0' : 'px-3'} py-3 rounded-lg text-sm font-medium transition-all duration-300
                             ${isActive
-                                ? 'bg-blue-500/20 text-blue-400'
-                                : 'text-blue-200 hover:bg-blue-900 hover:text-white'
+                                ? 'bg-white/15 text-white'
+                                : 'text-[#d4b5e6] hover:bg-[#4a2860] hover:text-white'
                             }`
                         }
                     >
-                        <item.icon size={20} />
-                        {!collapsed && <span>{item.label}</span>}
+                        <item.icon size={20} className="shrink-0" />
+                        <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${collapsed ? 'max-w-0 opacity-0 ml-0' : 'max-w-[200px] opacity-100 ml-3'}`}>
+                            {item.label}
+                        </span>
                     </NavLink>
                 ))}
             </nav>
 
-
-
             {/* Logout */}
-            <div className="px-3 py-4 border-t border-blue-900">
+            <div className="px-3 py-4 border-t border-[#4a2860]">
                 <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-blue-300 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 w-full cursor-pointer"
+                    className={`flex items-center ${collapsed ? 'justify-center px-0' : 'px-3'} py-3 rounded-lg text-sm font-medium text-[#d4b5e6] hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 w-full cursor-pointer`}
                 >
-                    <LogOut size={20} />
-                    {!collapsed && <span>Logout</span>}
+                    <LogOut size={20} className="shrink-0" />
+                    <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ${collapsed ? 'max-w-0 opacity-0 ml-0' : 'max-w-[200px] opacity-100 ml-3'}`}>
+                        Logout
+                    </span>
                 </button>
             </div>
         </aside>

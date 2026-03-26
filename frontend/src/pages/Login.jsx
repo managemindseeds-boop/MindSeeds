@@ -87,9 +87,7 @@ function Login() {
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 md:p-10">
                     {/* Brand */}
                     <div className="flex flex-col items-center mb-8">
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Mind<span className="text-emerald-500">Seeds</span>
-                        </h1>
+                        <img src="/1.svg" alt="MindSeeds" className="h-10" />
                         <p className="text-gray-500 mt-2 text-sm">Sign in to your account</p>
                     </div>
 
@@ -108,7 +106,7 @@ function Login() {
                             </label>
                             <input
                                 list="username-suggestions"
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 type="text"
@@ -130,7 +128,7 @@ function Login() {
                             </label>
                             <div className="relative">
                                 <input
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all pr-12"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all pr-12"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     type={showPass ? 'text' : 'password'}
@@ -154,7 +152,7 @@ function Login() {
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={(e) => setRememberMe(e.target.checked)}
-                                className="w-4 h-4 rounded border-gray-300 text-emerald-500 accent-emerald-500 cursor-pointer"
+                                className="w-4 h-4 rounded border-gray-300 text-[#5f3473] accent-[#5f3473] cursor-pointer"
                             />
                             <label
                                 htmlFor="remember-me"
@@ -167,7 +165,7 @@ function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="w-full py-3 bg-[#5f3473] text-white font-semibold rounded-lg hover:bg-[#4a2860] disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                             {loading ? 'Signing in...' : 'Sign In'}
                         </button>

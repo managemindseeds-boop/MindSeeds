@@ -169,7 +169,7 @@ function AdminDemoOverview() {
                                         <td className="px-6 py-4 text-gray-700">{formatDate(demo.scheduledDate)}</td>
                                         <td className="px-6 py-4 text-center">
                                             {demo.attended === true ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0e6f6] text-emerald-700">
                                                     <CheckCircle2 size={12} /> Attended
                                                 </span>
                                             ) : demo.attended === false ? (

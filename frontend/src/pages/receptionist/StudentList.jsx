@@ -38,7 +38,7 @@ function StudentList() {
                 <p className="text-sm text-gray-500">{students.length} total students</p>
                 <button
                     onClick={() => navigate('/receptionist/students/add')}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium cursor-pointer"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#5f3473] text-white rounded-lg hover:bg-[#4a2860] transition-colors text-sm font-medium cursor-pointer"
                 >
                     <Plus size={16} />
                     Add Student
@@ -55,7 +55,7 @@ function StudentList() {
                         placeholder="Search by name, phone, or email..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent"
                     />
                 </div>
 
@@ -65,7 +65,7 @@ function StudentList() {
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none cursor-pointer"
+                        className="pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5f3473] focus:border-transparent appearance-none cursor-pointer"
                     >
                         <option value="all">All Status</option>
                         <option value="enquiry">Enquiry</option>
@@ -137,7 +137,7 @@ function StudentList() {
                                         <td className="px-5 py-3.5 flex items-center gap-2">
                                             <button
                                                 onClick={() => navigate(`/receptionist/students/${student.id}`)}
-                                                className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                                                className="p-1.5 text-gray-400 hover:text-[#5f3473] hover:bg-[#f0e6f6] rounded-lg transition-colors cursor-pointer"
                                                 title="View Details"
                                             >
                                                 <Eye size={16} />

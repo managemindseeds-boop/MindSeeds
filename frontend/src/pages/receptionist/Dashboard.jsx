@@ -52,7 +52,7 @@ function KpiCard({ label, value, icon: Icon, accentColor, subText, alert }) {
                     </span>
                 )}
                 {!alert && subText && (
-                    <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full font-medium">
+                    <span className="flex items-center gap-1 text-xs text-[#5f3473] bg-[#f0e6f6] px-2 py-1 rounded-full font-medium">
                         <TrendingUp size={12} /> {subText}
                     </span>
                 )}
@@ -142,7 +142,7 @@ function Dashboard() {
                     </button>
                     <button
                         onClick={() => navigate('/receptionist/demos')}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 text-sm font-medium rounded-lg hover:bg-emerald-100 transition-colors shadow-sm cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#f0e6f6] text-emerald-700 border border-[#f0e6f6] text-sm font-medium rounded-lg hover:bg-[#f0e6f6] transition-colors shadow-sm cursor-pointer"
                     >
                         <CalendarPlus size={15} /> View Demos
                     </button>
@@ -312,7 +312,7 @@ function Dashboard() {
                                         </td>
                                         <td className="py-3 text-center">
                                             {demo.attended === true ? (
-                                                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 bg-[#f0e6f6] px-2 py-0.5 rounded-full">
                                                     <CheckCircle2 size={10} /> Present
                                                 </span>
                                             ) : (

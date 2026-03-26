@@ -133,7 +133,7 @@ function AdminStaffList() {
 
             {/* Success Toast */}
             {formSuccess && (
-                <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+                <div className="bg-[#f0e6f6] border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
                     <ShieldCheck size={16} />
                     {formSuccess}
                 </div>
@@ -224,10 +224,10 @@ function AdminStaffList() {
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                                                 member.isActive !== false
-                                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                    ? 'bg-[#f0e6f6] text-emerald-700 border border-emerald-200'
                                                     : 'bg-red-50 text-red-700 border border-red-200'
                                             }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${member.isActive !== false ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                                <span className={`w-1.5 h-1.5 rounded-full ${member.isActive !== false ? 'bg-[#5f3473]' : 'bg-red-500'}`} />
                                                 {member.isActive !== false ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
@@ -256,7 +256,7 @@ function AdminStaffList() {
                                                         className={`p-2 rounded-lg transition-colors cursor-pointer ${
                                                             member.isActive !== false
                                                                 ? 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                                                                : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50'
+                                                                : 'text-gray-400 hover:text-[#5f3473] hover:bg-[#f0e6f6]'
                                                         }`}
                                                         title={member.isActive !== false ? 'Deactivate' : 'Activate'}
                                                     >
@@ -275,7 +275,7 @@ function AdminStaffList() {
 
             {/* ── Add Staff Modal ──────────────────────────────────────────── */}
             {isAddModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5f3473]/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <div>
@@ -352,7 +352,7 @@ function AdminStaffList() {
 
             {/* ── Edit Staff Modal ─────────────────────────────────────────── */}
             {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5f3473]/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <h3 className="text-xl font-bold text-gray-900">Edit Staff</h3>
@@ -412,7 +412,7 @@ function AdminStaffList() {
 
             {/* ── Reset Password Modal ─────────────────────────────────────── */}
             {isResetModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5f3473]/50 backdrop-blur-sm">
                     <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden flex flex-col">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>

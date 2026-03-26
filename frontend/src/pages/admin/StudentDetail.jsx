@@ -16,7 +16,7 @@ const statusColors = {
     enquiry: 'bg-blue-50 text-blue-700 border-blue-200',
     demo_scheduled: 'bg-amber-50 text-amber-700 border-amber-200',
     demo_completed: 'bg-purple-50 text-purple-700 border-purple-200',
-    admitted: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    admitted: 'bg-[#f0e6f6] text-emerald-700 border-emerald-200',
 }
 
 function AdminStudentDetail() {
@@ -241,7 +241,7 @@ function AdminStudentDetail() {
 
                                     {/* Status dot */}
                                     <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 z-10 ${
-                                        demo.attended === true ? 'bg-emerald-100 text-emerald-600'
+                                        demo.attended === true ? 'bg-[#f0e6f6] text-[#5f3473]'
                                         : demo.attended === false ? 'bg-red-100 text-red-600'
                                         : 'bg-gray-100 text-gray-400'
                                     }`}>
@@ -258,7 +258,7 @@ function AdminStudentDetail() {
                                                 {demo.subject && <span className="text-gray-500 font-normal"> · {demo.subject}</span>}
                                             </p>
                                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                                demo.attended === true ? 'bg-emerald-50 text-emerald-700'
+                                                demo.attended === true ? 'bg-[#f0e6f6] text-emerald-700'
                                                 : demo.attended === false ? 'bg-red-50 text-red-700'
                                                 : 'bg-gray-50 text-gray-600'
                                             }`}>
@@ -297,9 +297,9 @@ function AdminStudentDetail() {
                                     <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
                                     <p className="text-xs text-gray-500">Total Days</p>
                                 </div>
-                                <div className="bg-emerald-50 rounded-lg p-4 text-center">
+                                <div className="bg-[#f0e6f6] rounded-lg p-4 text-center">
                                     <p className="text-2xl font-bold text-emerald-700">{stats.present}</p>
-                                    <p className="text-xs text-emerald-600">Present</p>
+                                    <p className="text-xs text-[#5f3473]">Present</p>
                                 </div>
                                 <div className="bg-red-50 rounded-lg p-4 text-center">
                                     <p className="text-2xl font-bold text-red-700">{stats.absent}</p>
@@ -316,7 +316,7 @@ function AdminStudentDetail() {
                                 <div className="w-full bg-gray-100 rounded-full h-3">
                                     <div
                                         className={`h-3 rounded-full transition-all duration-500 ${
-                                            stats.percentage >= 75 ? 'bg-emerald-500'
+                                            stats.percentage >= 75 ? 'bg-[#5f3473]'
                                             : stats.percentage >= 50 ? 'bg-amber-500'
                                             : 'bg-red-500'
                                         }`}
@@ -336,7 +336,7 @@ function AdminStudentDetail() {
                                                     {formatDate(r.date)}
                                                 </span>
                                                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                                    r.status === 'present' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+                                                    r.status === 'present' ? 'bg-[#f0e6f6] text-emerald-700' : 'bg-red-50 text-red-700'
                                                 }`}>
                                                     {r.status === 'present' ? 'Present' : 'Absent'}
                                                 </span>

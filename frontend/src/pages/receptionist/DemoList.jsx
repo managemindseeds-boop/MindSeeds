@@ -142,13 +142,13 @@ function DemoList() {
             {/* ── Today's Demos ── */}
             <section>
                 <div className="flex items-center gap-2 mb-3">
-                    <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+                    <span className="w-3 h-3 rounded-full bg-[#5f3473] shrink-0" />
                     <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Today's Demos</h2>
-                    <span className="ml-1 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-medium">
+                    <span className="ml-1 px-2 py-0.5 bg-[#f0e6f6] text-[#5f3473] rounded-full text-xs font-medium">
                         {todayDemos.length}
                     </span>
                     <span className="ml-auto text-xs text-gray-400 flex items-center gap-1">
-                        <CalendarCheck size={13} className="text-emerald-400" />
+                        <CalendarCheck size={13} className="text-[#c9a0dc]" />
                         {today}
                     </span>
                 </div>
@@ -167,11 +167,11 @@ function DemoList() {
                                 className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer group"
                             >
                                 {/* Date Badge */}
-                                <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-emerald-50 shrink-0">
-                                    <span className="text-base font-bold text-emerald-600 leading-none">
+                                <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg bg-[#f0e6f6] shrink-0">
+                                    <span className="text-base font-bold text-[#5f3473] leading-none">
                                         {new Date(demo.scheduledDate).getDate()}
                                     </span>
-                                    <span className="text-[10px] text-emerald-400 uppercase tracking-wide mt-0.5">
+                                    <span className="text-[10px] text-[#c9a0dc] uppercase tracking-wide mt-0.5">
                                         {new Date(demo.scheduledDate).toLocaleDateString('en-IN', { month: 'short' })}
                                     </span>
                                 </div>
@@ -181,12 +181,12 @@ function DemoList() {
                                     <p className="text-sm font-semibold text-gray-900 truncate">{demo.studentName}</p>
                                     <p className="text-xs text-gray-500 mt-0.5">
                                         Class {demo.studentClass}&nbsp;•&nbsp;Lecture {demo.lectureNumber}/4
-                                        {demo.subject && <>&nbsp;•&nbsp;<span className="text-emerald-600 font-medium">{demo.subject}</span></>}
+                                        {demo.subject && <>&nbsp;•&nbsp;<span className="text-[#5f3473] font-medium">{demo.subject}</span></>}
                                     </p>
                                 </div>
 
                                 {demo.attended === true && (
-                                    <span className="text-[10px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                                    <span className="text-[10px] font-medium text-emerald-700 bg-[#f0e6f6] border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0">
                                         <CheckCircle2 size={9} /> Present
                                     </span>
                                 )}

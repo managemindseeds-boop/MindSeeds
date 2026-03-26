@@ -130,7 +130,7 @@ function DailyAttendance() {
         <div className="space-y-6 max-w-5xl mx-auto">
             {/* Header Section */}
             <p className="text-sm text-gray-500">
-                Manage daily attendance for <span className="font-bold text-emerald-600">{currentUser?.branches?.length > 0 ? currentUser.branches.join(', ') : 'All Branches'}</span>
+                Manage daily attendance for <span className="font-bold text-[#5f3473]">{currentUser?.branches?.length > 0 ? currentUser.branches.join(', ') : 'All Branches'}</span>
             </p>
 
             {/* Filter Card */}
@@ -144,7 +144,7 @@ function DailyAttendance() {
                         <select
                             value={selectedClass}
                             onChange={(e) => setSelectedClass(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
+                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all outline-none"
                         >
                             <option value="">-- Choose Class --</option>
                             {CLASSES.map(c => (
@@ -162,7 +162,7 @@ function DailyAttendance() {
                                 type="date"
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
-                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all outline-none"
                             />
                         </div>
                     </div>
@@ -171,7 +171,7 @@ function DailyAttendance() {
                         <button
                             onClick={fetchStudents}
                             disabled={isFetching}
-                            className="w-full py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full py-2 bg-[#5f3473] text-white rounded-lg font-medium hover:bg-[#4a2860] transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {isFetching ? (
                                 <span className="animate-pulse">Loading...</span>
@@ -202,7 +202,7 @@ function DailyAttendance() {
                         </div>
                         <button
                             onClick={handleMarkAllPresent}
-                            className="text-sm text-emerald-600 font-medium hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-md transition-colors cursor-pointer"
+                            className="text-sm text-[#5f3473] font-medium hover:text-emerald-700 hover:bg-[#f0e6f6] px-3 py-1.5 rounded-md transition-colors cursor-pointer"
                         >
                             Mark All Present
                         </button>
@@ -231,7 +231,7 @@ function DailyAttendance() {
                                                     {/* Animated Background Slider */}
                                                     <div
                                                         className={`absolute top-1 bottom-1 w-[74px] rounded-md transition-all duration-100 ease-in-out shadow-sm
-                                                            ${isPresent ? 'left-[81px] bg-emerald-500' : 'left-1 bg-red-500'}
+                                                            ${isPresent ? 'left-[81px] bg-[#5f3473]' : 'left-1 bg-red-500'}
                                                         `}
                                                     />
 
@@ -275,7 +275,7 @@ function DailyAttendance() {
                                         {/* Animated Background Slider */}
                                         <div
                                             className={`absolute top-1 bottom-1 w-[64px] rounded-md transition-all duration-100 ease-in-out shadow-sm
-                                                ${isPresent ? 'left-[71px] bg-emerald-500' : 'left-1 bg-red-500'}
+                                                ${isPresent ? 'left-[71px] bg-[#5f3473]' : 'left-1 bg-red-500'}
                                             `}
                                         />
 
@@ -311,14 +311,14 @@ function DailyAttendance() {
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Add any specific observations for today's batch..."
-                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none resize-none h-24 mb-4"
+                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#5f3473] focus:border-transparent transition-all outline-none resize-none h-24 mb-4"
                         />
 
                         <div className="flex justify-end">
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
-                                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-emerald-600/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="px-6 py-2.5 bg-[#5f3473] hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 shadow-sm shadow-[#5f3473]/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <Save size={18} />
                                 {isSaving ? 'Saving...' : hasExisting ? 'Update Attendance' : 'Save Attendance'}

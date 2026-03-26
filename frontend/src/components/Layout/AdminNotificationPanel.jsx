@@ -129,16 +129,16 @@ export default function AdminNotificationPanel() {
                     width: '40%',
                     minWidth: 360,
                     transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-                    background: 'linear-gradient(160deg, #f0f4ff 0%, #f1f5f9 100%)',
+                    background: 'linear-gradient(160deg, #f0e6f6 0%, #f1f5f9 100%)',
                 }}
                 role="dialog"
                 aria-modal="true"
                 aria-label="Admin Notifications panel"
             >
                 {/* ── Header ── */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-blue-100 bg-white/80 backdrop-blur-sm">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[#f0e6f6] bg-white/80 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-800 to-blue-600 flex items-center justify-center shadow-sm">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#5f3473] to-[#7a4d91] flex items-center justify-center shadow-sm">
                             <Bell size={17} className="text-white" />
                         </div>
                         <div>
@@ -159,8 +159,8 @@ export default function AdminNotificationPanel() {
                 <div className="flex-1 overflow-y-auto">
                     {notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-8">
-                            <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center">
-                                <CheckCircle2 size={32} className="text-emerald-500" />
+                            <div className="w-16 h-16 rounded-full bg-[#f0e6f6] flex items-center justify-center">
+                                <CheckCircle2 size={32} className="text-[#5f3473]" />
                             </div>
                             <p className="text-sm font-semibold text-gray-700">All caught up!</p>
                             <p className="text-xs text-gray-400">No pending alerts across any branch.</p>
@@ -181,7 +181,7 @@ export default function AdminNotificationPanel() {
                                                 <button
                                                     key={notification.id}
                                                     onClick={() => handleItemClick(notification.link)}
-                                                    className="w-full text-left bg-white rounded-xl border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all duration-150 group overflow-hidden cursor-pointer"
+                                                    className="w-full text-left bg-white rounded-xl border border-gray-100 hover:border-[#c9a0dc] hover:shadow-md transition-all duration-150 group overflow-hidden cursor-pointer"
                                                 >
                                                     <div className="flex items-start gap-3 p-3.5">
                                                         {/* Icon */}
@@ -211,7 +211,7 @@ export default function AdminNotificationPanel() {
                                                         {/* Arrow */}
                                                         <ChevronRight
                                                             size={14}
-                                                            className="flex-shrink-0 text-gray-300 group-hover:text-blue-500 transition-colors mt-2"
+                                                            className="flex-shrink-0 text-gray-300 group-hover:text-[#5f3473] transition-colors mt-2"
                                                         />
                                                     </div>
                                                 </button>
@@ -225,7 +225,7 @@ export default function AdminNotificationPanel() {
                 </div>
 
                 {/* ── Footer ── */}
-                <div className="px-6 py-3 border-t border-blue-100 bg-white/80 backdrop-blur-sm">
+                <div className="px-6 py-3 border-t border-[#f0e6f6] bg-white/80 backdrop-blur-sm">
                     <p className="text-[11px] text-center text-gray-400">
                         Admin Portal · Real-time notifications across all branches
                     </p>
