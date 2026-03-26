@@ -352,24 +352,24 @@ function AddStudent() {
                                         <div className="flex-1 min-w-0 space-y-1.5">
                                             <p className="text-sm font-semibold text-gray-900 truncate">{lec.date}</p>
                                             <p className="text-xs text-gray-500">{lec.weekday}</p>
-                                            <div className="flex flex-col gap-1.5 pt-0.5">
+                                            <div className="flex flex-col gap-2.5 pt-1">
                                                 {/* Editable time input */}
-                                                <div className="flex items-center gap-1">
-                                                    <Clock size={11} className="text-gray-500 shrink-0" />
+                                                <div className="flex items-center gap-2">
+                                                    <Clock size={14} className="text-gray-500 shrink-0" />
                                                     <input
                                                         type="time"
                                                         value={customTimes[idx] || ''}
                                                         onChange={(e) => handleTimeChange(idx, e.target.value)}
-                                                        className="flex-1 text-xs text-gray-700 font-medium bg-white border border-gray-200 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#c9a0dc] cursor-pointer"
+                                                        className="flex-1 text-sm text-gray-700 font-medium bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#c9a0dc] cursor-pointer"
                                                     />
                                                 </div>
                                                 {/* Editable subject dropdown */}
-                                                <div className="flex items-center gap-1 flex-1 min-w-0">
-                                                    <BookOpen size={11} className="text-[#5e3174] shrink-0" />
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <BookOpen size={14} className="text-[#5e3174] shrink-0" />
                                                     <select
                                                         value={customSubjects[idx]}
                                                         onChange={(e) => handleSubjectChange(idx, e.target.value)}
-                                                        className="flex-1 min-w-0 text-xs text-emerald-700 font-medium bg-[#f0e6f6] border border-emerald-200 rounded-md px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-[#c9a0dc] cursor-pointer appearance-none"
+                                                        className="flex-1 min-w-0 text-sm text-emerald-700 font-medium bg-[#f0e6f6] border border-emerald-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#c9a0dc] cursor-pointer"
                                                     >
                                                         {getSubjectPool(form.studentClass).map((s) => (
                                                             <option key={s} value={s}>{s}</option>
