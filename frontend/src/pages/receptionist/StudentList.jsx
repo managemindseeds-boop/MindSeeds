@@ -45,13 +45,38 @@ function StudentList() {
                         className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5e3174] focus:border-transparent shadow-sm"
                     />
                 </div>
-                <button
-                    onClick={() => navigate('/receptionist/students/add')}
-                    className="flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[#5e3174] text-white rounded-lg hover:bg-[#4a2860] transition-colors text-sm font-medium cursor-pointer shadow-sm min-w-[130px]"
-                >
-                    <Plus size={16} />
-                    Add Student
-                </button>
+                <div className="flex gap-2 sm:gap-3 shrink-0">
+                    <div className="relative">
+                        <div className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-600 shadow-sm hover:bg-gray-50 transition-colors h-full">
+                            <Filter size={16} className={statusFilter !== 'all' ? "text-[#5e3174]" : "text-gray-400"} />
+                            <span className="font-medium whitespace-nowrap">
+                                {statusFilter === 'all' ? 'All Status' : statusLabels[statusFilter]}
+                            </span>
+                            {statusFilter !== 'all' && (
+                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+                            )}
+                        </div>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            title="Filter Status"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="enquiry">Enquiry</option>
+                            <option value="demo_scheduled">Demo Scheduled</option>
+                            <option value="demo_completed">Demo Completed</option>
+                        </select>
+                    </div>
+                    <button
+                        onClick={() => navigate('/receptionist/students/add')}
+                        className="flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[#5e3174] text-white rounded-lg hover:bg-[#4a2860] transition-colors text-sm font-medium cursor-pointer shadow-sm"
+                    >
+                        <Plus size={16} />
+                        <span className="hidden sm:inline">Add Student</span>
+                        <span className="sm:hidden">Add</span>
+                    </button>
+                </div>
             </div>
 
             {/* Table */}
@@ -66,24 +91,7 @@ function StudentList() {
                                 <th className="hidden sm:table-cell text-left px-5 py-3 font-semibold text-gray-600">Branch</th>
                                 <th className="hidden sm:table-cell text-left px-5 py-3 font-semibold text-gray-600">Status</th>
                                 <th className="text-right sm:text-left px-5 py-3 font-semibold text-gray-600 align-middle">
-                                    <div className="relative inline-flex flex-col sm:flex-row items-center sm:items-center justify-end sm:justify-start group focus-within:ring-2 focus-within:ring-[#5e3174] focus-within:ring-offset-1 rounded-sm">
-                                        <Filter size={16} className={statusFilter !== 'all' ? "text-[#5e3174]" : "text-gray-400 group-hover:text-gray-600 transition-colors"} />
-                                        {statusFilter !== 'all' && (
-                                            <span className="absolute -top-1 -right-1 sm:left-3 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
-                                        )}
-                                        <span className="hidden sm:inline sm:ml-2">Action</span>
-                                        <select
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            title="Filter Status"
-                                        >
-                                            <option value="all">All Status</option>
-                                            <option value="enquiry">Enquiry</option>
-                                            <option value="demo_scheduled">Demo Scheduled</option>
-                                            <option value="demo_completed">Demo Completed</option>
-                                        </select>
-                                    </div>
+                                    Action
                                 </th>
                             </tr>
                         </thead>
