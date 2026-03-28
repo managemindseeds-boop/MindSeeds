@@ -5,16 +5,16 @@ import {
     CalendarCheck,
     UsersRound,
     BookOpen,
-    Phone,
+    IndianRupee,
     ClipboardCheck,
 } from 'lucide-react'
 
 const receptionistNavItems = [
-    { label: 'Dashboard',  path: '/receptionist/dashboard',  icon: LayoutDashboard },
-    { label: 'Students',   path: '/receptionist/students',   icon: Users },
-    { label: 'Demos',      path: '/receptionist/demos',      icon: CalendarCheck },
+    { label: 'Dashboard', path: '/receptionist/dashboard', icon: LayoutDashboard },
+    { label: 'Students', path: '/receptionist/students', icon: Users },
+    { label: 'Demos', path: '/receptionist/demos', icon: CalendarCheck },
     { label: 'Attendance', path: '/receptionist/attendance', icon: ClipboardCheck },
-    { label: 'Calls',      path: '/receptionist/calls',      icon: Phone },
+    { label: 'Fees', path: '/receptionist/fees', icon: IndianRupee },
 ]
 
 const adminNavItems = [
@@ -43,7 +43,7 @@ function MobileNavBar({ isAdmin = false }) {
                     >
                         {({ isActive }) => (
                             <>
-                                <item.icon size={20} fill={isActive ? "currentColor" : "none"} />
+                                <item.icon size={20} />
                                 <span className="text-[10px] font-medium tracking-wide">
                                     {item.label}
                                 </span>

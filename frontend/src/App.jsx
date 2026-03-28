@@ -15,7 +15,7 @@ import StudentDetail from './pages/receptionist/StudentDetail'
 import DemoList from './pages/receptionist/DemoList'
 import MarkAttendance from './pages/receptionist/MarkAttendance'
 import DailyAttendance from './pages/receptionist/DailyAttendance'
-import CallList from './pages/receptionist/CallList'
+import FeeManagement from './pages/receptionist/FeeManagement'
 
 import AdminLayout from './components/Layout/AdminLayout'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -52,7 +52,7 @@ function App() {
                     <Route path="demos" element={<DemoList />} />
                     <Route path="demos/:studentId" element={<MarkAttendance />} />
                     <Route path="attendance" element={<DailyAttendance />} />
-                    <Route path="calls" element={<CallList />} />
+                    <Route path="fees" element={<FeeManagement />} />
                   </Route>
 
                   {/* Protected admin routes */}
@@ -79,7 +79,7 @@ function App() {
           </AdminProvider>
         </NotificationProvider>
       </DashboardProvider>
-    </AuthProvider>
+    </AuthProvider >
   )
 }
 
