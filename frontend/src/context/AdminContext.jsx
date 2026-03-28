@@ -56,7 +56,7 @@ export function AdminProvider({ children }) {
     }, [currentUser?.token])
 
     const fetchStudents = useCallback(async (params = {}) => {
-        if (!currentUser?.token) return
+        if (!currentUser?.token || currentUser?.role !== 'admin') return
         setStudentsLoading(true)
         try {
             const res = await axios.get('/api/v1/admin/students', {
@@ -81,7 +81,7 @@ export function AdminProvider({ children }) {
     }, [currentUser?.token])
 
     const fetchStudentDetail = useCallback(async (id) => {
-        if (!currentUser?.token) return null
+        if (!currentUser?.token || currentUser?.role !== 'admin') return null
         try {
             const res = await axios.get(`/api/v1/admin/students/${id}`, { headers })
             return res.data.data
@@ -92,7 +92,7 @@ export function AdminProvider({ children }) {
     }, [currentUser?.token])
 
     const fetchDemos = useCallback(async (params = {}) => {
-        if (!currentUser?.token) return
+        if (!currentUser?.token || currentUser?.role !== 'admin') return
         setDemosLoading(true)
         try {
             const res = await axios.get('/api/v1/admin/demos', {
@@ -114,7 +114,7 @@ export function AdminProvider({ children }) {
     }, [currentUser?.token])
 
     const fetchStaff = useCallback(async () => {
-        if (!currentUser?.token) return
+        if (!currentUser?.token || currentUser?.role !== 'admin') return
         setStaffLoading(true)
         try {
             const res = await axios.get('/api/v1/admin/staff', { headers })
@@ -133,18 +133,21 @@ export function AdminProvider({ children }) {
     // ════════════════════════════════════════════════════════════════════════
 
     const createStaffMember = async (data) => {
+        if (currentUser?.role !== 'admin') throw new Error('Access denied')
         const res = await axios.post('/api/v1/admin/staff', data, { headers })
         await fetchStaff()
         return res.data
     }
 
     const updateStaffMember = async (id, data) => {
+        if (currentUser?.role !== 'admin') throw new Error('Access denied')
         const res = await axios.patch(`/api/v1/admin/staff/${id}`, data, { headers })
         await fetchStaff()
         return res.data
     }
 
     const resetStaffPassword = async (id, newPassword) => {
+        if (currentUser?.role !== 'admin') throw new Error('Access denied')
         const res = await axios.patch(`/api/v1/admin/staff/${id}/reset-password`, { newPassword }, { headers })
         return res.data
     }
