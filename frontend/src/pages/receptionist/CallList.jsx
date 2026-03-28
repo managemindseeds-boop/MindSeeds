@@ -158,41 +158,34 @@ function CallList() {
     return (
         <div className="space-y-5 max-w-4xl mx-auto">
 
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-
-                    {activeTab === 'pending' && pendingCount > 0 && (
-                        <span className="text-sm font-semibold bg-amber-100 text-amber-700 px-2.5 py-0.5 rounded-full">
-                            {pendingCount}
-                        </span>
-                    )}
+            {/* Tabs + Refresh — one row */}
+            <div className="flex items-center gap-2">
+                <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-1 w-fit">
+                    {STATUS_TABS.map(tab => (
+                        <button
+                            key={tab.value}
+                            onClick={() => setActiveTab(tab.value)}
+                            className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer
+                                ${activeTab === tab.value
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            {tab.label}
+                            {tab.value === 'pending' && pendingCount > 0 && (
+                                <span className="ml-1.5 text-xs font-semibold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">{pendingCount}</span>
+                            )}
+                        </button>
+                    ))}
                 </div>
                 <button
                     onClick={fetchCalls}
                     disabled={loading}
-                    className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-60"
+                    className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer disabled:opacity-60 shrink-0 bg-white"
                 >
                     <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                    Refresh
+                    <span className="hidden sm:inline">Refresh</span>
                 </button>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
-                {STATUS_TABS.map(tab => (
-                    <button
-                        key={tab.value}
-                        onClick={() => setActiveTab(tab.value)}
-                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all cursor-pointer
-                            ${activeTab === tab.value
-                                ? 'bg-white text-gray-900 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
             </div>
 
             {/* List */}

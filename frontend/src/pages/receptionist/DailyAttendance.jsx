@@ -229,7 +229,7 @@ function DailyAttendance() {
                                                     {/* Animated Background Slider */}
                                                     <div
                                                         className={`absolute top-1 bottom-1 w-[74px] rounded-md transition-all duration-100 ease-in-out shadow-sm
-                                                            ${isPresent ? 'left-[81px] bg-[#5e3174]' : 'left-1 bg-red-500'}
+                                                            ${isPresent ? 'left-[81px] bg-emerald-500' : 'left-1 bg-red-500'}
                                                         `}
                                                     />
 
@@ -273,7 +273,7 @@ function DailyAttendance() {
                                         {/* Animated Background Slider */}
                                         <div
                                             className={`absolute top-1 bottom-1 w-[64px] rounded-md transition-all duration-100 ease-in-out shadow-sm
-                                                ${isPresent ? 'left-[71px] bg-[#5e3174]' : 'left-1 bg-red-500'}
+                                                ${isPresent ? 'left-[71px] bg-emerald-500' : 'left-1 bg-red-500'}
                                             `}
                                         />
 

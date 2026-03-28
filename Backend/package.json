@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "STMS",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "type": "module",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

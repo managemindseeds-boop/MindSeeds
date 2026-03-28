@@ -44,14 +44,52 @@ function AdminDemoOverview() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
-                <button onClick={doFetch} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 cursor-pointer shadow-sm">
-                    <RefreshCw size={16} className={demosLoading ? 'animate-spin' : ''} />
-                </button>
+            {/* Tabs + Branch Filter + Refresh — one row */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex bg-white rounded-lg border border-gray-200 p-1 overflow-x-auto flex-1">
+                    {tabConfig.map(({ key, label, icon: Icon }) => (
+                        <button
+                            key={key}
+                            onClick={() => setActiveTab(key)}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                                activeTab === key
+                                    ? 'bg-blue-600 text-white shadow-sm'
+                                    : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                        >
+                            <Icon size={14} />
+                            {label}
+                            {demoStats[key] !== undefined && (
+                                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-xs ${
+                                    activeTab === key ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600'
+                                }`}>
+                                    {demoStats[key]}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                    <div className="relative w-40 sm:w-48">
+                        <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <select
+                            value={branchFilter}
+                            onChange={(e) => setBranchFilter(e.target.value)}
+                            className="w-full pl-10 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer shadow-sm"
+                        >
+                            <option value="all">All Branches</option>
+                            {officialBranches.map(b => (
+                                <option key={b} value={b}>{b}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button onClick={doFetch} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 cursor-pointer shadow-sm shrink-0">
+                        <RefreshCw size={16} className={demosLoading ? 'animate-spin' : ''} />
+                    </button>
+                </div>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: "Today", value: demoStats.today, color: 'bg-blue-50 text-blue-700 border-blue-100' },

@@ -114,20 +114,29 @@ function AdminStaffList() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
-                <div className="flex items-center gap-2">
-                    <button onClick={fetchStaff} className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shadow-sm">
-                        <RefreshCw size={16} className={staffLoading ? 'animate-spin' : ''} />
-                    </button>
-                    <button
-                        onClick={() => { setIsAddModalOpen(true); setFormError(''); setAddForm({ username: '', password: '', branches: [] }) }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer shadow-sm"
-                    >
-                        <Plus size={16} />
-                        Add New Staff
-                    </button>
+            {/* Header + Search — one row */}
+            <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Search by username or branch..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                    />
                 </div>
+                <button onClick={fetchStaff} className="p-2.5 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shadow-sm shrink-0">
+                    <RefreshCw size={16} className={staffLoading ? 'animate-spin' : ''} />
+                </button>
+                <button
+                    onClick={() => { setIsAddModalOpen(true); setFormError(''); setAddForm({ username: '', password: '', branches: [] }) }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer shadow-sm shrink-0"
+                >
+                    <Plus size={16} />
+                    <span className="hidden sm:inline">Add New Staff</span>
+                    <span className="sm:hidden">Add</span>
+                </button>
             </div>
 
             {/* Success Toast */}
@@ -138,20 +147,8 @@ function AdminStaffList() {
                 </div>
             )}
 
-            {/* Search */}
-            <div className="relative max-w-md">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                    type="text"
-                    placeholder="Search by username or branch..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-                />
-            </div>
-
-            {/* Staff Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            {/* Staff Table — desktop */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hidden sm:block">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
@@ -270,6 +267,97 @@ function AdminStaffList() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Staff Cards — mobile only */}
+            <div className="sm:hidden space-y-3">
+                {filtered.length === 0 ? (
+                    staffLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse space-y-2">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gray-200" />
+                                    <div className="h-3.5 bg-gray-200 rounded w-28" />
+                                </div>
+                                <div className="h-3 bg-gray-200 rounded w-20" />
+                                <div className="h-3 bg-gray-200 rounded w-32" />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-white rounded-xl border border-gray-200 px-6 py-10 text-center text-gray-400 text-sm">
+                            No staff members found.
+                        </div>
+                    )
+                ) : (
+                    filtered.map((member) => (
+                        <div key={member._id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+                            {/* Avatar + username + role */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold uppercase shrink-0">
+                                        {member.username?.charAt(0) || '?'}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-gray-900 text-sm">@{member.username}</p>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 capitalize mt-0.5">
+                                            {member.role}
+                                        </span>
+                                    </div>
+                                </div>
+                                {/* Status badge */}
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
+                                    member.isActive !== false
+                                        ? 'bg-[#f0e6f6] text-emerald-700 border border-emerald-200'
+                                        : 'bg-red-50 text-red-700 border border-red-200'
+                                }`}>
+                                    <span className={`w-1.5 h-1.5 rounded-full ${member.isActive !== false ? 'bg-[#5e3174]' : 'bg-red-500'}`} />
+                                    {member.isActive !== false ? 'Active' : 'Inactive'}
+                                </span>
+                            </div>
+
+                            {/* Branches */}
+                            <div className="flex flex-wrap gap-1">
+                                {(member.branches || []).length > 0
+                                    ? member.branches.map((b, i) => (
+                                        <span key={i} className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">{b}</span>
+                                    ))
+                                    : <span className="text-gray-400 text-xs">No branches</span>
+                                }
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                                <button
+                                    onClick={() => openEditModal(member)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer border border-gray-200"
+                                    title="Edit"
+                                >
+                                    <Edit2 size={15} /> Edit
+                                </button>
+                                <button
+                                    onClick={() => openResetModal(member)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer border border-gray-200"
+                                    title="Reset Password"
+                                >
+                                    <KeyRound size={15} /> Reset
+                                </button>
+                                {member.role !== 'admin' && (
+                                    <button
+                                        onClick={() => handleToggleActive(member)}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer border ${
+                                            member.isActive !== false
+                                                ? 'text-gray-600 hover:text-red-600 hover:bg-red-50 border-gray-200'
+                                                : 'text-gray-600 hover:text-[#5e3174] hover:bg-[#f0e6f6] border-gray-200'
+                                        }`}
+                                        title={member.isActive !== false ? 'Deactivate' : 'Activate'}
+                                    >
+                                        {member.isActive !== false ? <><ShieldAlert size={15} /> Deactivate</> : <><ShieldCheck size={15} /> Activate</>}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* ── Add Staff Modal ──────────────────────────────────────────── */}

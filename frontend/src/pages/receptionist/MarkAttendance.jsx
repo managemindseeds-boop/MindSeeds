@@ -295,16 +295,16 @@ function MarkAttendance() {
                                     {isPending && isToday && (
                                         <div className="flex items-center gap-1.5 w-full">
                                             <button
-                                                onClick={() => handleMarkPresent(demo.id)}
-                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-[#5e3174] text-white rounded-md text-xs font-medium hover:bg-[#5e3174] transition-colors cursor-pointer"
+                                                onClick={() => handleMarkAbsent(demo.id)}
+                                                className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
                                             >
-                                                <PiCheck size={13} /> Present
+                                                <PiX size={15} /> Absent
                                             </button>
                                             <button
-                                                onClick={() => handleMarkAbsent(demo.id)}
-                                                className="flex-1 flex items-center justify-center gap-1 py-1.5 bg-red-500 text-white rounded-md text-xs font-medium hover:bg-red-600 transition-colors cursor-pointer"
+                                                onClick={() => handleMarkPresent(demo.id)}
+                                                className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-emerald-500 text-white rounded-md text-sm font-medium hover:bg-emerald-600 transition-colors cursor-pointer"
                                             >
-                                                <PiX size={13} /> Absent
+                                                <PiCheck size={15} /> Present
                                             </button>
                                         </div>
                                     )}

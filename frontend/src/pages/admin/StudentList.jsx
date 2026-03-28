@@ -73,65 +73,65 @@ function AdminStudentList() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
+            {/* Filters + Actions — one row */}
+            <div className="flex flex-col gap-3">
+                {/* Row 1: search + action buttons */}
                 <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by name, phone, or email..."
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow shadow-sm"
+                        />
+                    </div>
                     <button
                         onClick={doFetch}
-                        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm cursor-pointer shadow-sm"
+                        className="p-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer shadow-sm shrink-0"
                     >
                         <RefreshCw size={14} className={studentsLoading ? 'animate-spin' : ''} />
                     </button>
                     <button
                         onClick={handleExport}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium cursor-pointer shadow-sm"
+                        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium cursor-pointer shadow-sm shrink-0"
                     >
                         <Download size={16} />
-                        Export CSV
+                        <span className="hidden sm:inline">Export CSV</span>
                     </button>
                 </div>
-            </div>
 
-            {/* Filters Row */}
-            <div className="flex flex-col sm:flex-row gap-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Search by name, phone, or email..."
-                        value={search}
-                        onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                    />
-                </div>
+                {/* Row 2: filter dropdowns */}
+                <div className="flex gap-2">
+                    <div className="relative flex-1">
+                        <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <select
+                            value={branchFilter}
+                            onChange={(e) => { setBranchFilter(e.target.value); setPage(1) }}
+                            className="w-full pl-10 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-shadow shadow-sm"
+                        >
+                            <option value="all">All Branches</option>
+                            {officialBranches.map(b => (
+                                <option key={b} value={b}>{b}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div className="relative sm:w-48">
-                    <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <select
-                        value={branchFilter}
-                        onChange={(e) => { setBranchFilter(e.target.value); setPage(1) }}
-                        className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-shadow"
-                    >
-                        <option value="all">All Branches</option>
-                        {officialBranches.map(b => (
-                            <option key={b} value={b}>{b}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="relative sm:w-48">
-                    <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
-                        className="w-full pl-10 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-shadow"
-                    >
-                        <option value="all">All Statuses</option>
-                        <option value="enquiry">Enquiry</option>
-                        <option value="demo_scheduled">Demo Scheduled</option>
-                        <option value="demo_completed">Demo Completed</option>
-                        <option value="admitted">Admitted</option>
-                    </select>
+                    <div className="relative flex-1">
+                        <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+                            className="w-full pl-10 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-shadow shadow-sm"
+                        >
+                            <option value="all">All Statuses</option>
+                            <option value="enquiry">Enquiry</option>
+                            <option value="demo_scheduled">Demo Scheduled</option>
+                            <option value="demo_completed">Demo Completed</option>
+                            <option value="admitted">Admitted</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -172,8 +172,8 @@ function AdminStudentList() {
                                 )
                             ) : (
                                 students.map((student) => (
-                                    <tr 
-                                        key={student._id} 
+                                    <tr
+                                        key={student._id}
                                         onClick={() => navigate(`/admin/students/${student._id}`)}
                                         className="hover:bg-gray-50 cursor-pointer transition-colors group"
                                     >
