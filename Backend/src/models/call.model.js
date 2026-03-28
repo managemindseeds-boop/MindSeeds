@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 // Maps to existing 'calls' collection created by external fee system
 const callSchema = new mongoose.Schema(
     {
+        // Link to students collection
+        student_mongo_id: { type: mongoose.Schema.Types.ObjectId, ref: "Student", default: null },
+
         student_name: { type: String, required: true },
         student_phone: { type: String, default: "" },
         parent_phone: { type: String, default: "" },

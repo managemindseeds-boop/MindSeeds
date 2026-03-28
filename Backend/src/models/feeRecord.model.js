@@ -22,6 +22,11 @@ const feeRecordSchema = new mongoose.Schema(
         // Actual due date for this month (may differ if rescheduled)
         dueDate: { type: Date, required: true },
 
+        // Installment details (written by FMS pipeline)
+        installmentAmount: { type: Number, default: 0 },
+        installmentNumber: { type: Number, default: null },
+        totalInstallments: { type: Number, default: null },
+
         status: {
             type: String,
             enum: ["pending", "paid", "rescheduled"],
