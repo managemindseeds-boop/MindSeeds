@@ -23,7 +23,7 @@ const callSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["pending", "called", "will_pay", "no_answer", "rescheduled", "done"],
+            enum: ["pending", "called", "will_pay", "no_answer", "rescheduled", "done", "paid"],
             default: "pending",
         },
 
@@ -39,7 +39,7 @@ const callSchema = new mongoose.Schema(
         updated_at: { type: Date, default: null },
     },
     {
-        collection: "calls",   // exact collection name in MongoDB
+        collection: "fee_call_reminders",   // exact collection name in MongoDB
         timestamps: false,
     }
 );
