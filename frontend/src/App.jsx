@@ -23,6 +23,7 @@ import AdminStaffList from './pages/admin/StaffList'
 import AdminStudentList from './pages/admin/StudentList'
 import AdminStudentDetail from './pages/admin/StudentDetail'
 import AdminDemoOverview from './pages/admin/DemoOverview'
+import StaffAttendance from './pages/admin/StaffAttendance'
 
 function App() {
   return (
@@ -69,6 +70,7 @@ function App() {
                     <Route path="students/:id" element={<AdminStudentDetail />} />
                     <Route path="demos" element={<AdminDemoOverview />} />
                     <Route path="staff" element={<AdminStaffList />} />
+                    <Route path="staff-attendance" element={<StaffAttendance />} />
                   </Route>
 
                   {/* Catch-all → redirect to login */}

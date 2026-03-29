@@ -113,15 +113,20 @@ export function AdminProvider({ children }) {
         }
     }, [currentUser?.token])
 
+    // ── Staff Attendance API (BLE system) ──────────────────────────────────
+    // Separate axios instance without withCredentials for cross-origin staff API
+    const STAFF_ATTENDANCE_API = 'https://staffattendance-api.onrender.com'
+    const staffApi = axios.create({ baseURL: STAFF_ATTENDANCE_API, withCredentials: false })
+
     const fetchStaff = useCallback(async () => {
         if (!currentUser?.token || currentUser?.role !== 'admin') return
         setStaffLoading(true)
         try {
-            const res = await axios.get('/api/v1/admin/staff', { headers })
-            setStaff(res.data.data || [])
+            const res = await staffApi.get('/api/admin/staff')
+            setStaff(res.data.staff || [])
             setError(null)
         } catch (err) {
-            console.error('Admin staff error:', err)
+            console.error('Staff attendance API fetch error:', err)
             setError(err.response?.data?.message || err.message)
         } finally {
             setStaffLoading(false)
@@ -129,19 +134,31 @@ export function AdminProvider({ children }) {
     }, [currentUser?.token])
 
     // ════════════════════════════════════════════════════════════════════════
-    // STAFF ACTIONS
+    // STAFF ACTIONS (via Staff Attendance API)
     // ════════════════════════════════════════════════════════════════════════
 
     const createStaffMember = async (data) => {
         if (currentUser?.role !== 'admin') throw new Error('Access denied')
-        const res = await axios.post('/api/v1/admin/staff', data, { headers })
+        const res = await staffApi.post('/api/admin/add-staff', {
+            name: data.name,
+            phone: data.phone,
+            password: data.password,
+            branch: data.branches,
+        })
         await fetchStaff()
         return res.data
     }
 
     const updateStaffMember = async (id, data) => {
         if (currentUser?.role !== 'admin') throw new Error('Access denied')
-        const res = await axios.patch(`/api/v1/admin/staff/${id}`, data, { headers })
+        const res = await staffApi.put(`/api/admin/staff/${id}`, data)
+        await fetchStaff()
+        return res.data
+    }
+
+    const deleteStaffMember = async (id) => {
+        if (currentUser?.role !== 'admin') throw new Error('Access denied')
+        const res = await staffApi.delete(`/api/admin/staff/${id}`)
         await fetchStaff()
         return res.data
     }
@@ -177,7 +194,7 @@ export function AdminProvider({ children }) {
             demos, demoStats, demosLoading, fetchDemos,
             // Staff
             staff, staffLoading, fetchStaff,
-            createStaffMember, updateStaffMember, resetStaffPassword,
+            createStaffMember, updateStaffMember, deleteStaffMember, resetStaffPassword,
             // General
             error,
         }}>

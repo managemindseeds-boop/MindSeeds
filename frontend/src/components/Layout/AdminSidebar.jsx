@@ -5,6 +5,7 @@ import {
     Users,
     UsersRound,
     BookOpen,
+    ClipboardCheck,
     LogOut,
     ChevronLeft,
     ChevronRight
@@ -16,6 +17,7 @@ const navItems = [
     { label: 'Students', path: '/admin/students', icon: Users },
     { label: 'Demos', path: '/admin/demos', icon: BookOpen },
     { label: 'Staff', path: '/admin/staff', icon: UsersRound },
+    { label: 'Staff Attendance', path: '/admin/staff-attendance', icon: ClipboardCheck },
 ]
 
 function AdminSidebar() {

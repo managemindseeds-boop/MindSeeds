@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Staff Attendance | MindSeeds</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-primary": "#e9b3ff",
+                        "surface-tint": "#7a4b90",
+                        "on-secondary-fixed": "#26152e",
+                        "surface-bright": "#f8f9fb",
+                        "surface-container-low": "#f3f4f6",
+                        "on-background": "#191c1e",
+                        "tertiary-fixed": "#ede691",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#f5d9fc",
+                        "on-surface": "#191c1e",
+                        "tertiary": "#65601b",
+                        "surface-variant": "#e1e2e4",
+                        "tertiary-container": "#b4ae60",
+                        "inverse-on-surface": "#f0f1f3",
+                        "primary-container": "#5e3174",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#cfc3cf",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "primary": "#46195c",
+                        "on-primary-container": "#d39eea",
+                        "secondary": "#6c5774",
+                        "inverse-surface": "#2e3132",
+                        "on-secondary-container": "#725d7a",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#310148",
+                        "surface-container": "#edeef0",
+                        "background": "#f8f9fb",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#4c444e",
+                        "on-tertiary-fixed": "#1e1c00",
+                        "secondary-fixed": "#f5d9fc",
+                        "surface-container-highest": "#e1e2e4",
+                        "outline": "#7e747f",
+                        "surface-container-high": "#e7e8ea",
+                        "surface": "#f8f9fb",
+                        "primary-fixed": "#f7d9ff",
+                        "surface-dim": "#d9dadc",
+                        "primary-fixed-dim": "#e9b3ff",
+                        "tertiary-fixed-dim": "#d0c978",
+                        "on-primary-fixed-variant": "#613377",
+                        "on-tertiary-container": "#454100",
+                        "on-tertiary-fixed-variant": "#4c4802",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#d8bee0",
+                        "on-secondary-fixed-variant": "#53405b"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .signature-cta {
+            background: linear-gradient(135deg, #46195c 0%, #5e3174 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0 10px 30px rgba(94, 49, 116, 0.05);
+        }
+        @keyframes pulse-dot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+        .pulse-active {
+            animation: pulse-dot 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Sidebar Navigation -->
+<aside class="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 bg-slate-50 border-r border-slate-200 z-40 transition-transform duration-300 ease-in-out">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg signature-cta flex items-center justify-center text-white font-headline font-bold text-xl">M</div>
+<div>
+<h1 class="font-headline font-bold text-primary leading-tight">MindSeeds</h1>
+<p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">Editorial Intelligence</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 bg-white text-purple-800 shadow-sm rounded-lg mx-0 px-4 py-2 font-semibold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span class="text-sm">Attendance</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="text-sm font-medium">Branches</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-sm font-medium">Staff Directory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-sm font-medium">Payroll</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-600 hover:bg-purple-50 hover:text-purple-700 transition-colors rounded-lg" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+</nav>
+<div class="p-4 mt-auto space-y-2 border-t border-slate-100">
+<button class="w-full py-2.5 px-4 signature-cta text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+                Mark Attendance
+            </button>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-primary" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm font-medium">Help Center</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-error hover:opacity-80" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="md:ml-64 min-h-screen">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-30 flex justify-between items-center w-full px-6 py-4 bg-white/80 backdrop-blur-md shadow-sm">
+<div class="flex items-center gap-4">
+<button class="md:hidden p-2 text-slate-600">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h2 class="font-headline text-xl font-bold text-primary">Staff Attendance</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center bg-surface-container-low px-3 py-1.5 rounded-full border border-outline-variant/20">
+<span class="material-symbols-outlined text-slate-400 text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 text-on-surface" placeholder="Search staff..." type="text"/>
+</div>
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="professional portrait of a confident female administrator in a clean modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZkSKsl1_9BeGIvPYK6qZGa9HX7buYNQXxCUwTQYBUlBwv0DEZPJHPCaPHBxfnQCLB2SU1qMwTL2a7bW_babNQEat0Rs3Tjvad888dDTVchlrOqLr9SdMLu02D5Acgp3qb7QmGeSt8pe2F3sQYDp9onAus2OzioDBFkrQV57q7QjYzaJnNw3ng_-GJhW0zAYobeXJ1mzxDCZMiVnsReMzdYTPP7WF3FgRwK9-rrvOlpoJYU61mRFhq7itDKPfa335l-4iiq2m0dCc"/>
+</div>
+</div>
+</header>
+<div class="p-6 md:p-12 space-y-8">
+<!-- KPI Section -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Total Staff -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow flex flex-col justify-between h-32 group hover:-translate-y-1 transition-transform">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 bg-secondary-container flex items-center justify-center rounded-lg text-primary">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest font-label">Total Staff</span>
+</div>
+<div class="text-right">
+<span class="font-headline text-3xl font-extrabold text-on-primary-fixed">124</span>
+</div>
+</div>
+<!-- Present -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow flex flex-col justify-between h-32 group hover:-translate-y-1 transition-transform">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 bg-emerald-100 flex items-center justify-center rounded-lg text-emerald-700">
+<span class="material-symbols-outlined">person_check</span>
+</div>
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest font-label">Present</span>
+</div>
+<div class="text-right">
+<span class="font-headline text-3xl font-extrabold text-emerald-700">98</span>
+</div>
+</div>
+<!-- Absent -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow flex flex-col justify-between h-32 group hover:-translate-y-1 transition-transform">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 bg-rose-100 flex items-center justify-center rounded-lg text-rose-700">
+<span class="material-symbols-outlined">person_cancel</span>
+</div>
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest font-label">Absent</span>
+</div>
+<div class="text-right">
+<span class="font-headline text-3xl font-extrabold text-rose-700">26</span>
+</div>
+</div>
+<!-- Active Now -->
+<div class="bg-surface-container-lowest p-6 rounded-xl ambient-shadow flex flex-col justify-between h-32 group hover:-translate-y-1 transition-transform border-b-4 border-emerald-500">
+<div class="flex justify-between items-start">
+<div class="w-12 h-12 bg-emerald-50 flex items-center justify-center rounded-lg text-emerald-600 relative">
+<span class="material-symbols-outlined">radio</span>
+<span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full pulse-active"></span>
+</div>
+<span class="text-xs font-semibold text-on-surface-variant uppercase tracking-widest font-label">Active Now</span>
+</div>
+<div class="text-right">
+<span class="font-headline text-3xl font-extrabold text-on-primary-fixed">42</span>
+</div>
+</div>
+</section>
+<!-- Filters Section -->
+<section class="glass-panel p-4 rounded-xl ambient-shadow flex flex-wrap items-center gap-4">
+<div class="flex flex-col gap-1 flex-1 min-w-[200px]">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Select Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg text-sm px-4 py-2 focus:ring-2 focus:ring-primary/20" type="date" value="2023-10-27"/>
+</div>
+</div>
+<div class="flex flex-col gap-1 flex-1 min-w-[200px]">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Filter Branch</label>
+<select class="w-full bg-surface-container-low border-none rounded-lg text-sm px-4 py-2 focus:ring-2 focus:ring-primary/20">
+<option>All Branches</option>
+<option>Mawaddah</option>
+<option>E Ward</option>
+<option>Aghadi</option>
+<option>Gordon Hall</option>
+</select>
+</div>
+<div class="flex items-end h-full mt-auto">
+<button class="bg-surface-container-low p-2.5 rounded-lg text-primary hover:bg-primary hover:text-white transition-all duration-300">
+<span class="material-symbols-outlined text-xl">refresh</span>
+</button>
+</div>
+</section>
+<!-- Data Display -->
+<section class="space-y-4">
+<div class="flex justify-between items-center px-2">
+<h3 class="font-headline text-lg font-bold text-on-primary-fixed">Attendance Log</h3>
+<div class="flex items-center gap-2">
+<button class="text-xs font-medium text-primary bg-primary-fixed px-3 py-1 rounded-full hover:opacity-80">Export CSV</button>
+</div>
+</div>
+<!-- Desktop Table -->
+<div class="hidden lg:block overflow-hidden bg-surface-container-lowest rounded-xl ambient-shadow">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Name &amp; ID</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Branch</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Status</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider text-center">Device</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Today's Sessions</th>
+<th class="px-6 py-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider text-right">Total Hours</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-high/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full signature-cta flex items-center justify-center text-white text-xs font-bold">AJ</div>
+<div>
+<p class="font-semibold text-sm">Amara Jenson</p>
+<p class="text-[10px] text-on-surface-variant font-medium">MS-2024-089</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-1 rounded">Mawaddah</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex items-center justify-center gap-2">
+<span class="w-2 h-2 bg-emerald-500 rounded-full pulse-active"></span>
+<span class="text-xs font-bold text-emerald-600">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-wrap gap-1.5">
+<div class="px-2 py-1 bg-emerald-50 border border-emerald-100 rounded text-[10px] flex flex-col">
+<span class="font-bold text-emerald-700">08:45 AM - 12:30 PM</span>
+<span class="text-emerald-600/70">Completed</span>
+</div>
+<div class="px-2 py-1 bg-primary-fixed border border-primary/10 rounded text-[10px] flex flex-col">
+<span class="font-bold text-primary">01:15 PM - Now</span>
+<span class="text-primary/70">Checked-in</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="font-headline font-bold text-on-primary-fixed">6.5 hrs</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-high/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Staff" class="w-10 h-10 rounded-full object-cover" data-alt="close up headshot of a smiling middle aged man with professional attire in daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5bD774P1PAEkzcval9YK2Jxza8QosBQmf3KVs_MWqZKyLYwFQUpxF4TJzmHo5LvqTqEcC3qLj5ITtzEooSvqHZqw87tKBNz4kvazKXq7O-7oGHtCxqtUWF7Gwgu_HjzimMtk5UNgqEf-KG4bt0pHsGusH2ajQp51edmFQOzXe-5bZ1dy6aEQKnO5QLhvT-K2IcepaaLxfBM8x1-x4680tdoHfulEWrfDEX3h96CQzkDCKpJByy-rtiH4WQ1So90555IozxXbTWa8"/>
+<div>
+<p class="font-semibold text-sm">Marcus Thorne</p>
+<p class="text-[10px] text-on-surface-variant font-medium">MS-2024-012</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-1 rounded">E Ward</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex items-center justify-center gap-2">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-xs font-bold text-primary">Present</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="material-symbols-outlined text-slate-300">cancel</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-wrap gap-1.5">
+<div class="px-2 py-1 bg-amber-50 border border-amber-100 rounded text-[10px] flex flex-col">
+<span class="font-bold text-amber-700">09:00 AM - 05:00 PM</span>
+<span class="text-amber-600/70">Cron-closed</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="font-headline font-bold text-on-primary-fixed">8.0 hrs</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-high/30 transition-colors opacity-60">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 text-xs font-bold">SL</div>
+<div>
+<p class="font-semibold text-sm">Sarah Linn</p>
+<p class="text-[10px] text-on-surface-variant font-medium">MS-2024-105</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-1 rounded">Aghadi</span>
+</td>
+<td class="px-6 py-4 text-center">
+<div class="flex items-center justify-center gap-2">
+<span class="w-2 h-2 bg-error rounded-full"></span>
+<span class="text-xs font-bold text-error">Absent</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="material-symbols-outlined text-slate-300">cancel</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-[10px] italic text-on-surface-variant">No sessions recorded</span>
+</td>
+<td class="px-6 py-4 text-right">
+<span class="font-headline font-bold text-slate-400">0.0 hrs</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Mobile Cards -->
+<div class="lg:hidden space-y-4">
+<!-- Mobile Card 1 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl ambient-shadow border-l-4 border-emerald-500">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-lg signature-cta flex items-center justify-center text-white text-sm font-bold">AJ</div>
+<div>
+<h4 class="font-bold text-sm">Amara Jenson</h4>
+<p class="text-[10px] text-on-surface-variant">ID: MS-2024-089 • Mawaddah</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 bg-emerald-500 rounded-full pulse-active"></span>
+<span class="text-[10px] font-bold text-emerald-600 uppercase">Active</span>
+</div>
+<span class="material-symbols-outlined text-emerald-500 text-lg">verified_user</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs border-b border-slate-50 pb-1">
+<span class="text-on-surface-variant font-medium">Latest Session</span>
+<span class="font-bold text-primary">01:15 PM - Now</span>
+</div>
+<div class="flex justify-between items-center pt-1">
+<span class="text-xs text-on-surface-variant">Total Today</span>
+<span class="font-headline font-extrabold text-on-primary-fixed">6.5 hrs</span>
+</div>
+</div>
+</div>
+<!-- Mobile Card 2 -->
+<div class="bg-surface-container-lowest p-5 rounded-xl ambient-shadow border-l-4 border-primary">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<img alt="Staff" class="w-12 h-12 rounded-lg object-cover" data-alt="professional male profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR1lBK77gbiI0NDbDKyYm9eUpE09QMiA1XsYryo5ZhDdb8WMCMTmhBSQKeANiELhe126Go7KSLDUtHrvn8UuaBw2UaRzxy3gvoOpLPOGfSt_mVLwSHM9abKScUHAFfaUwXSLOQlha9v2ZXSjb8HC2xoHxHq_ho0q5cUw81S3SwmU6ZhIRY4-p9Myr58HgYqIoGqqH1m2047rp1cdYboqpSvOiE4Vha42NfFiLbK2WS6K6SdSjxDJ5_zsRvx4AUO5WQ5lONXZ7H6-I"/>
+<div>
+<h4 class="font-bold text-sm">Marcus Thorne</h4>
+<p class="text-[10px] text-on-surface-variant">ID: MS-2024-012 • E Ward</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-[10px] font-bold text-primary uppercase">Present</span>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-lg">no_accounts</span>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs border-b border-slate-50 pb-1">
+<span class="text-on-surface-variant font-medium">Latest Session</span>
+<span class="font-bold text-amber-700">09:00 AM - 05:00 PM</span>
+</div>
+<div class="flex justify-between items-center pt-1">
+<span class="text-xs text-on-surface-variant">Total Today</span>
+<span class="font-headline font-extrabold text-on-primary-fixed">8.0 hrs</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Skeleton/Loading State Example (Hidden by default) -->
+<div class="hidden space-y-4">
+<div class="animate-pulse bg-surface-container-lowest p-6 rounded-xl ambient-shadow h-24 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-slate-200 rounded-full"></div>
+<div class="space-y-2">
+<div class="h-4 w-32 bg-slate-200 rounded"></div>
+<div class="h-3 w-20 bg-slate-100 rounded"></div>
+</div>
+</div>
+<div class="h-8 w-24 bg-slate-100 rounded-full"></div>
+</div>
+</div>
+<!-- Empty State Example (Hidden) -->
+<div class="hidden flex-col items-center justify-center py-20 bg-surface-container-lowest rounded-xl ambient-shadow text-center">
+<div class="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center text-slate-300 mb-4">
+<span class="material-symbols-outlined text-4xl">search_off</span>
+</div>
+<h4 class="font-headline font-bold text-lg text-on-primary-fixed">No Staff Found</h4>
+<p class="text-on-surface-variant text-sm max-w-xs">There is no attendance data for the selected date or branch. Please try adjusting your filters.</p>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t-0 py-3 px-6 flex justify-between items-center z-50 ambient-shadow">
+<a class="flex flex-col items-center text-slate-400" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Home</span>
+</a>
+<a class="flex flex-col items-center text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Atten</span>
+</a>
+<div class="-mt-12 bg-white p-2 rounded-full ambient-shadow">
+<button class="w-12 h-12 signature-cta rounded-full flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center text-slate-400" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Staff</span>
+</a>
+<a class="flex flex-col items-center text-slate-400" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold mt-1 uppercase">Set</span>
+</a>
+</nav>
+<!-- FAB (Suppressed on Details) - Primary Dashboard FAB -->
+<div class="hidden lg:block fixed bottom-8 right-8 z-40">
+<button class="w-16 h-16 signature-cta rounded-full ambient-shadow flex items-center justify-center text-white hover:scale-105 transition-transform group">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-90 transition-transform">add</span>
+</button>
+</div>
+</body></html>
