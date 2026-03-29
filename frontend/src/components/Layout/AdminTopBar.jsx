@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 const pageTitles = {
     '/admin/dashboard': 'Admin Dashboard',
     '/admin/staff': 'Staff Management',
+    '/admin/staff-attendance': 'Staff Attendance',
     '/admin/students': 'Global Students',
     '/admin/demos': 'Demo Overview',
 }
