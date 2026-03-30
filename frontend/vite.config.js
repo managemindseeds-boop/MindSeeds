@@ -36,9 +36,11 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
-            urlPattern: /^https?:\/\/.*\/api\/.*/i,
+            // Only cache same-origin API calls, NOT external APIs like staffattendance-api
+            urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.startsWith('/api/'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',

@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 // Maps to existing 'calls' collection created by external fee system
 const callSchema = new mongoose.Schema(
     {
+        // Link to students collection
+        student_mongo_id: { type: mongoose.Schema.Types.ObjectId, ref: "Student", default: null },
+
         student_name: { type: String, required: true },
         student_phone: { type: String, default: "" },
         parent_phone: { type: String, default: "" },
@@ -20,7 +23,7 @@ const callSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["pending", "called", "will_pay", "no_answer", "rescheduled", "done"],
+            enum: ["pending", "called", "will_pay", "no_answer", "rescheduled", "done", "paid"],
             default: "pending",
         },
 
@@ -36,7 +39,7 @@ const callSchema = new mongoose.Schema(
         updated_at: { type: Date, default: null },
     },
     {
-        collection: "calls",   // exact collection name in MongoDB
+        collection: "fee_call_reminders",   // exact collection name in MongoDB
         timestamps: false,
     }
 );

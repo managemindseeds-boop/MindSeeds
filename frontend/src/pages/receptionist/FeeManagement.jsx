@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
     IndianRupee, Phone, CalendarClock, CheckCircle2,
     CalendarDays, StickyNote, Check, ChevronRight, ArrowLeft,
-    RefreshCw, PhoneOff, Clock
+    RefreshCw, BadgeIndianRupee
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -171,12 +171,12 @@ function DetailPage({ student, timelineItem, note, onBack, onMarkDone, onResched
             </div>
 
             <button
-                onClick={() => handleAction(() => { onMarkDone(student._id, 'done'); onBack(); })}
+                onClick={() => handleAction(() => { onMarkDone(student._id, 'paid'); onBack(); })}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-[#5e3174] hover:bg-[#4a2860] text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
             >
-                <CheckCircle2 size={16} />
-                Mark as Done
+                <BadgeIndianRupee size={16} />
+                Mark as Paid
             </button>
         </div>
     );
@@ -273,27 +273,54 @@ function FeeManagement() {
 
     const fetchCalls = useCallback(async () => {
         try {
-            const res = await axios.get(`/api/v1/calls?status=pending`);
-            const mapped = (res.data.data || []).map(call => ({
-                _id: call._id,
-                fullName: call.student_name,
-                class: call.student_class || 'N/A',
-                branch: call.branch,
-                phone: call.student_phone,
-                parentPhone: call.parent_phone,
-                feesDate: call.due_date ? call.due_date.split('T')[0] : new Date().toISOString().split('T')[0],
-                installment: call.installment_amount || 0,
-                note: call.call_notes || ''
-            }));
+            // Fetch both pending and rescheduled calls together
+            const [pendingRes, rescheduledRes] = await Promise.all([
+                axios.get(`/api/v1/calls?status=pending`),
+                axios.get(`/api/v1/calls?status=rescheduled`),
+            ]);
 
-            // Map notes directly
+            const allCalls = [
+                ...(pendingRes.data.data || []),
+                ...(rescheduledRes.data.data || []),
+            ];
+
+            const mapped = allCalls.map(call => {
+                // For rescheduled calls, use rescheduled_to as the effective due date
+                const effectiveDate =
+                    call.status === 'rescheduled' && call.rescheduled_to
+                        ? call.rescheduled_to.split('T')[0]
+                        : call.due_date
+                        ? call.due_date.split('T')[0]
+                        : new Date().toISOString().split('T')[0];
+
+                return {
+                    _id: call._id,
+                    fullName: call.student_name,
+                    class: call.student_class || 'N/A',
+                    branch: call.branch,
+                    phone: call.student_phone,
+                    parentPhone: call.parent_phone,
+                    feesDate: effectiveDate,
+                    installment: call.installment_amount || 0,
+                    note: call.call_notes || '',
+                    isRescheduled: call.status === 'rescheduled',
+                };
+            });
+
+            // Only keep rescheduled calls that are within 0-2 days window
+            // (pending ones are already filtered by backend)
+            const filtered = mapped.filter(s => {
+                if (!s.isRescheduled) return true; // pending — always show
+                return getDaysUntil(s.feesDate) !== null; // rescheduled — only if 0-2 days
+            });
+
             const mappedNotes = {};
-            mapped.forEach(s => {
+            filtered.forEach(s => {
                 if (s.note) mappedNotes[s._id] = s.note;
             });
 
             setNotes(mappedNotes);
-            setStudents(mapped);
+            setStudents(filtered);
         } catch (err) {
             toast.error(err.response?.data?.message || 'Failed to fetch fee reminders');
         } finally {

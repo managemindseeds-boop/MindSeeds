@@ -15,8 +15,8 @@ export const getCalls = asyncHandler(async (req, res) => {
     const filter = { ...branchFilter(req) };
 
     if (status !== "all") {
-        if (!["pending", "done"].includes(status)) {
-            throw new ApiError(400, "status must be pending, done, or all");
+        if (!["pending", "done", "rescheduled", "will_pay", "no_answer", "called", "paid"].includes(status)) {
+            throw new ApiError(400, "Invalid status value");
         }
         filter.status = status;
     }
@@ -88,9 +88,18 @@ export const updateCall = asyncHandler(async (req, res) => {
     if (call_notes) updates.call_notes = call_notes;
     if (rescheduled_to) updates.rescheduled_to = rescheduled_to;
 
-    if (status === "done") {
+    if (status === "done" || status === "paid") {
         updates.done_at = new Date();
         updates.done_by = req.user?.username || 'Receptionist';
+
+        // ✅ Mark the linked FeeRecord as PAID
+        if (call.mongo_fee_id) {
+            await FeeRecord.findByIdAndUpdate(call.mongo_fee_id, {
+                status: "paid",
+                paidAt: new Date(),
+                notes: call_notes || call.call_notes || "",
+            });
+        }
     }
 
     Object.assign(call, updates);
@@ -98,7 +107,6 @@ export const updateCall = asyncHandler(async (req, res) => {
 
     // If rescheduled, update the underlying fee record's due_date
     if (status === 'rescheduled' && rescheduled_to && call.mongo_fee_id) {
-        // Find the specific month record linked to the pipeline via string ID or Object ID
         await FeeRecord.findByIdAndUpdate(call.mongo_fee_id, {
             dueDate: new Date(rescheduled_to),
             status: "rescheduled",
@@ -108,7 +116,7 @@ export const updateCall = asyncHandler(async (req, res) => {
 
     // Log to activity
     await FeeActivityLog.create({
-        student_mongo_id: call.student_mongo_id, // Might not exist on old schema, but we log what we have
+        student_mongo_id: call.student_mongo_id,
         student_name: call.student_name,
         fee_record_id: call.mongo_fee_id,
         installment_number: call.installment_number,

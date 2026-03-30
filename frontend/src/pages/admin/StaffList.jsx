@@ -1,25 +1,23 @@
 import { useState, useEffect } from 'react'
 import { useAdmin } from '../../context/AdminContext'
 import { BRANCHES } from '../../constants/branches'
-import { Plus, Search, Edit2, ShieldAlert, ShieldCheck, KeyRound, X, RefreshCw, AlertCircle } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, ShieldAlert, ShieldCheck, X, RefreshCw, AlertCircle } from 'lucide-react'
 
 function AdminStaffList() {
-    const { staff, staffLoading, fetchStaff, createStaffMember, updateStaffMember, resetStaffPassword } = useAdmin()
+    const { staff, staffLoading, fetchStaff, createStaffMember, updateStaffMember, deleteStaffMember } = useAdmin()
 
     const [search, setSearch] = useState('')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [isResetModalOpen, setIsResetModalOpen] = useState(false)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [selectedStaff, setSelectedStaff] = useState(null)
     const [formError, setFormError] = useState('')
     const [formSuccess, setFormSuccess] = useState('')
 
     // Add form
-    const [addForm, setAddForm] = useState({ username: '', password: '', branches: [] })
+    const [addForm, setAddForm] = useState({ name: '', phone: '', password: '', branches: [] })
     // Edit form
-    const [editForm, setEditForm] = useState({ username: '', branches: [] })
-    // Reset form
-    const [newPassword, setNewPassword] = useState('')
+    const [editForm, setEditForm] = useState({ name: '', phone: '', branches: [] })
 
     useEffect(() => {
         fetchStaff()
@@ -32,8 +30,10 @@ function AdminStaffList() {
     }, [fetchStaff])
 
     const filtered = staff.filter(s =>
-        s.username?.toLowerCase().includes(search.toLowerCase()) ||
-        (s.branches || []).some(b => b.toLowerCase().includes(search.toLowerCase()))
+        s.name?.toLowerCase().includes(search.toLowerCase()) ||
+        s.phone?.includes(search) ||
+        s.employeeId?.toLowerCase().includes(search.toLowerCase()) ||
+        (s.branch || []).some(b => b.toLowerCase().includes(search.toLowerCase()))
     )
 
     // ── Add Staff ───────────────────────────────────────────────────────────
@@ -42,16 +42,17 @@ function AdminStaffList() {
         setFormError('')
         try {
             await createStaffMember({
-                username: addForm.username.trim(),
+                name: addForm.name.trim(),
+                phone: addForm.phone.trim(),
                 password: addForm.password,
                 branches: addForm.branches,
             })
             setIsAddModalOpen(false)
-            setAddForm({ username: '', password: '', branches: [] })
-            setFormSuccess('Staff account created successfully!')
+            setAddForm({ name: '', phone: '', password: '', branches: [] })
+            setFormSuccess('Staff added successfully!')
             setTimeout(() => setFormSuccess(''), 3000)
         } catch (err) {
-            setFormError(err.response?.data?.message || 'Failed to create staff')
+            setFormError(err.response?.data?.message || 'Failed to add staff')
         }
     }
 
@@ -59,8 +60,9 @@ function AdminStaffList() {
     const openEditModal = (member) => {
         setSelectedStaff(member)
         setEditForm({
-            username: member.username,
-            branches: member.branches || [],
+            name: member.name || '',
+            phone: member.phone || '',
+            branches: member.branch || [],
         })
         setFormError('')
         setIsEditModalOpen(true)
@@ -70,9 +72,10 @@ function AdminStaffList() {
         e.preventDefault()
         setFormError('')
         try {
-            await updateStaffMember(selectedStaff._id, {
-                username: editForm.username.trim(),
-                branches: editForm.branches,
+            await updateStaffMember(selectedStaff.id || selectedStaff._id, {
+                name: editForm.name.trim(),
+                phone: editForm.phone.trim(),
+                branch: editForm.branches,
             })
             setIsEditModalOpen(false)
             setFormSuccess('Staff updated successfully!')
@@ -85,30 +88,27 @@ function AdminStaffList() {
     // ── Toggle Active ───────────────────────────────────────────────────────
     const handleToggleActive = async (member) => {
         try {
-            await updateStaffMember(member._id, { isActive: !member.isActive })
+            await updateStaffMember(member.id || member._id, { isActive: !member.isActive })
         } catch (err) {
             console.error('Toggle error:', err)
         }
     }
 
-    // ── Reset Password ──────────────────────────────────────────────────────
-    const openResetModal = (member) => {
+    // ── Delete Staff ─────────────────────────────────────────────────────────
+    const openDeleteModal = (member) => {
         setSelectedStaff(member)
-        setNewPassword('')
-        setFormError('')
-        setIsResetModalOpen(true)
+        setIsDeleteModalOpen(true)
     }
 
-    const handleResetSubmit = async (e) => {
-        e.preventDefault()
-        setFormError('')
+    const handleDelete = async () => {
         try {
-            await resetStaffPassword(selectedStaff._id, newPassword)
-            setIsResetModalOpen(false)
-            setFormSuccess('Password reset successfully!')
+            await deleteStaffMember(selectedStaff.id || selectedStaff._id)
+            setIsDeleteModalOpen(false)
+            setFormSuccess(`${selectedStaff.name} removed successfully!`)
             setTimeout(() => setFormSuccess(''), 3000)
         } catch (err) {
-            setFormError(err.response?.data?.message || 'Failed to reset password')
+            console.error('Delete error:', err)
+            setIsDeleteModalOpen(false)
         }
     }
 
@@ -120,7 +120,7 @@ function AdminStaffList() {
                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Search by username or branch..."
+                        placeholder="Search by name, phone or branch..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
@@ -130,7 +130,7 @@ function AdminStaffList() {
                     <RefreshCw size={16} className={staffLoading ? 'animate-spin' : ''} />
                 </button>
                 <button
-                    onClick={() => { setIsAddModalOpen(true); setFormError(''); setAddForm({ username: '', password: '', branches: [] }) }}
+                    onClick={() => { setIsAddModalOpen(true); setFormError(''); setAddForm({ name: '', phone: '', password: '', branches: [] }) }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium cursor-pointer shadow-sm shrink-0"
                 >
                     <Plus size={16} />
@@ -153,11 +153,11 @@ function AdminStaffList() {
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Username</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Role</th>
+                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Name</th>
+                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Phone</th>
+                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Employee ID</th>
                                 <th className="text-left px-6 py-4 font-semibold text-gray-700">Branches</th>
                                 <th className="text-left px-6 py-4 font-semibold text-gray-700">Status</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Created</th>
                                 <th className="text-center px-6 py-4 font-semibold text-gray-700">Actions</th>
                             </tr>
                         </thead>
@@ -189,26 +189,27 @@ function AdminStaffList() {
                                 )
                             ) : (
                                 filtered.map((member) => (
-                                    <tr key={member._id} className="hover:bg-gray-50/50 transition-colors">
+                                    <tr key={member.id || member._id} className="hover:bg-gray-50/50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold uppercase">
-                                                    {member.username?.charAt(0) || '?'}
+                                                    {member.name?.charAt(0) || '?'}
                                                 </div>
                                                 <div>
-                                                    <p className="font-semibold text-gray-900">@{member.username}</p>
+                                                    <p className="font-semibold text-gray-900">{member.name}</p>
                                                 </div>
                                             </div>
                                         </td>
+                                        <td className="px-6 py-4 text-gray-700">{member.phone}</td>
                                         <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800 capitalize">
-                                                {member.role}
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
+                                                {member.employeeId || '—'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-wrap gap-1">
-                                                {(member.branches || []).length > 0
-                                                    ? member.branches.map((b, i) => (
+                                                {(member.branch || []).length > 0
+                                                    ? member.branch.map((b, i) => (
                                                         <span key={i} className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
                                                             {b}
                                                         </span>
@@ -227,9 +228,6 @@ function AdminStaffList() {
                                                 {member.isActive !== false ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-500">
-                                            {new Date(member.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                        </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-center gap-1">
                                                 <button
@@ -240,25 +238,23 @@ function AdminStaffList() {
                                                     <Edit2 size={16} />
                                                 </button>
                                                 <button
-                                                    onClick={() => openResetModal(member)}
-                                                    className="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer"
-                                                    title="Reset Password"
+                                                    onClick={() => handleToggleActive(member)}
+                                                    className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                                                        member.isActive !== false
+                                                            ? 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                                            : 'text-gray-400 hover:text-[#5e3174] hover:bg-[#f0e6f6]'
+                                                    }`}
+                                                    title={member.isActive !== false ? 'Deactivate' : 'Activate'}
                                                 >
-                                                    <KeyRound size={16} />
+                                                    {member.isActive !== false ? <ShieldAlert size={16} /> : <ShieldCheck size={16} />}
                                                 </button>
-                                                {member.role !== 'admin' && (
-                                                    <button
-                                                        onClick={() => handleToggleActive(member)}
-                                                        className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                                                            member.isActive !== false
-                                                                ? 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                                                                : 'text-gray-400 hover:text-[#5e3174] hover:bg-[#f0e6f6]'
-                                                        }`}
-                                                        title={member.isActive !== false ? 'Deactivate' : 'Activate'}
-                                                    >
-                                                        {member.isActive !== false ? <ShieldAlert size={16} /> : <ShieldCheck size={16} />}
-                                                    </button>
-                                                )}
+                                                <button
+                                                    onClick={() => openDeleteModal(member)}
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -290,18 +286,16 @@ function AdminStaffList() {
                     )
                 ) : (
                     filtered.map((member) => (
-                        <div key={member._id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
-                            {/* Avatar + username + role */}
+                        <div key={member.id || member._id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+                            {/* Avatar + name + employeeId */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold uppercase shrink-0">
-                                        {member.username?.charAt(0) || '?'}
+                                        {member.name?.charAt(0) || '?'}
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-gray-900 text-sm">@{member.username}</p>
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700 capitalize mt-0.5">
-                                            {member.role}
-                                        </span>
+                                        <p className="font-semibold text-gray-900 text-sm">{member.name}</p>
+                                        <span className="text-xs text-gray-500">{member.phone} · {member.employeeId || '—'}</span>
                                     </div>
                                 </div>
                                 {/* Status badge */}
@@ -317,8 +311,8 @@ function AdminStaffList() {
 
                             {/* Branches */}
                             <div className="flex flex-wrap gap-1">
-                                {(member.branches || []).length > 0
-                                    ? member.branches.map((b, i) => (
+                                {(member.branch || []).length > 0
+                                    ? member.branch.map((b, i) => (
                                         <span key={i} className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">{b}</span>
                                     ))
                                     : <span className="text-gray-400 text-xs">No branches</span>
@@ -335,25 +329,23 @@ function AdminStaffList() {
                                     <Edit2 size={15} /> Edit
                                 </button>
                                 <button
-                                    onClick={() => openResetModal(member)}
-                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer border border-gray-200"
-                                    title="Reset Password"
+                                    onClick={() => handleToggleActive(member)}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer border ${
+                                        member.isActive !== false
+                                            ? 'text-gray-600 hover:text-red-600 hover:bg-red-50 border-gray-200'
+                                            : 'text-gray-600 hover:text-[#5e3174] hover:bg-[#f0e6f6] border-gray-200'
+                                    }`}
+                                    title={member.isActive !== false ? 'Deactivate' : 'Activate'}
                                 >
-                                    <KeyRound size={15} /> Reset
+                                    {member.isActive !== false ? <><ShieldAlert size={15} /> Deactivate</> : <><ShieldCheck size={15} /> Activate</>}
                                 </button>
-                                {member.role !== 'admin' && (
-                                    <button
-                                        onClick={() => handleToggleActive(member)}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer border ${
-                                            member.isActive !== false
-                                                ? 'text-gray-600 hover:text-red-600 hover:bg-red-50 border-gray-200'
-                                                : 'text-gray-600 hover:text-[#5e3174] hover:bg-[#f0e6f6] border-gray-200'
-                                        }`}
-                                        title={member.isActive !== false ? 'Deactivate' : 'Activate'}
-                                    >
-                                        {member.isActive !== false ? <><ShieldAlert size={15} /> Deactivate</> : <><ShieldCheck size={15} /> Activate</>}
-                                    </button>
-                                )}
+                                <button
+                                    onClick={() => openDeleteModal(member)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer border border-gray-200"
+                                    title="Delete"
+                                >
+                                    <Trash2 size={15} /> Delete
+                                </button>
                             </div>
                         </div>
                     ))
@@ -367,7 +359,7 @@ function AdminStaffList() {
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
                             <div>
                                 <h3 className="text-xl font-bold text-gray-900">Add New Staff</h3>
-                                <p className="text-sm text-gray-500 mt-1">Create a new receptionist account</p>
+                                <p className="text-sm text-gray-500 mt-1">Register staff for attendance tracking</p>
                             </div>
                             <button onClick={() => setIsAddModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
                                 <X size={20} />
@@ -381,11 +373,18 @@ function AdminStaffList() {
                             )}
                             <form id="add-staff-form" onSubmit={handleAddSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
-                                    <input type="text" required value={addForm.username}
-                                        onChange={(e) => setAddForm({ ...addForm, username: e.target.value })}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+                                    <input type="text" required value={addForm.name}
+                                        onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                                        placeholder="e.g. rahul.s" />
+                                        placeholder="e.g. Ravi Kumar" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+                                    <input type="tel" required value={addForm.phone}
+                                        onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                                        placeholder="e.g. 9876543210" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
@@ -455,9 +454,15 @@ function AdminStaffList() {
                             )}
                             <form id="edit-staff-form" onSubmit={handleEditSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Username</label>
-                                    <input type="text" required value={editForm.username}
-                                        onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Name</label>
+                                    <input type="text" required value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                                    <input type="tel" required value={editForm.phone}
+                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                                         className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
                                 </div>
                                 <div>
@@ -497,37 +502,37 @@ function AdminStaffList() {
                 </div>
             )}
 
-            {/* ── Reset Password Modal ─────────────────────────────────────── */}
-            {isResetModalOpen && (
+            {/* ── Delete Confirmation Modal ────────────────────────────────── */}
+            {isDeleteModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#5e3174]/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden flex flex-col">
-                        <div className="flex items-center justify-between p-6 border-b border-gray-100 shrink-0">
-                            <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>
-                            <button onClick={() => setIsResetModalOpen(false)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors cursor-pointer">
-                                <X size={20} />
+                    <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+                        <div className="p-6 text-center">
+                            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                                <Trash2 size={24} className="text-red-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Staff</h3>
+                            <p className="text-sm text-gray-500">
+                                Are you sure you want to permanently remove <strong>{selectedStaff?.name}</strong>? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-3">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+                            >
+                                Cancel
                             </button>
-                        </div>
-                        <div className="p-6">
-                            {formError && (
-                                <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-                                    <AlertCircle size={16} /> {formError}
-                                </div>
-                            )}
-                            <p className="text-sm text-gray-500 mb-4">Reset password for <strong>@{selectedStaff?.username}</strong></p>
-                            <form id="reset-pwd-form" onSubmit={handleResetSubmit}>
-                                <input type="password" required value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-                                    placeholder="New password (min 6 chars)" minLength={6} />
-                            </form>
-                        </div>
-                        <div className="p-6 border-t border-gray-100 bg-gray-50 shrink-0 flex justify-end gap-3">
-                            <button type="button" onClick={() => setIsResetModalOpen(false)} className="px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg cursor-pointer">Cancel</button>
-                            <button type="submit" form="reset-pwd-form" className="px-5 py-2.5 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm cursor-pointer">Reset Password</button>
+                            <button
+                                onClick={handleDelete}
+                                className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm transition-colors cursor-pointer"
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
         </div>
     )
 }
