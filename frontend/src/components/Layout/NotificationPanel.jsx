@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     X, Bell, Calendar, AlertCircle,
-    Clock, ChevronRight, CheckCircle2, Phone, UserPlus, Users
+    Clock, ChevronRight, CheckCircle2, Phone, UserPlus, Users, IndianRupee
 } from 'lucide-react'
 import { useNotifications } from '../../context/NotificationContext'
 
@@ -49,6 +49,13 @@ const typeConfig = {
         iconColor: 'text-indigo-600',
         badge: 'bg-indigo-100 text-indigo-700',
         label: 'Staff',
+    },
+    fee: {
+        icon: IndianRupee,
+        bg: 'bg-emerald-50',
+        iconColor: 'text-emerald-600',
+        badge: 'bg-emerald-100 text-emerald-700',
+        label: 'Fee',
     },
 }
 

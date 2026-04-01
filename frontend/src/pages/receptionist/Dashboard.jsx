@@ -95,7 +95,11 @@ function Dashboard() {
 
     useEffect(() => {
         axios.get('/api/v1/calls/count')
-            .then(res => setPendingCalls(res.data.data?.count || 0))
+            .then(res => {
+                const data = res.data.data || {}
+                const totalPendingApps = (data.pending || 0) + (data.rescheduled || 0) + (data.contacted || 0)
+                setPendingCalls(totalPendingApps)
+            })
             .catch(() => {})
     }, [])
 
@@ -174,11 +178,11 @@ function Dashboard() {
                     alert={completedDemos > 0}
                 />
                 <div
-                    onClick={() => navigate('/receptionist/calls')}
+                    onClick={() => navigate('/receptionist/fees')}
                     className="cursor-pointer"
                 >
                     <KpiCard
-                        label="Pending Calls"
+                        label="Fee Reminders"
                         value={pendingCalls}
                         icon={Phone}
                         accentColor="#ef4444"

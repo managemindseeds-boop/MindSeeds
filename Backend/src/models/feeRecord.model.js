@@ -27,9 +27,15 @@ const feeRecordSchema = new mongoose.Schema(
         installmentNumber: { type: Number, default: null },
         totalInstallments: { type: Number, default: null },
 
+        // Partial payment tracking
+        paidAmount: { type: Number, default: 0 },          // kitna diya gaya
+        remainingAmount: { type: Number, default: 0 },     // kitna bacha (carry forward)
+        isPartial: { type: Boolean, default: false },      // kya partial payment thi
+        carryForwardAmount: { type: Number, default: 0 },  // is installment me kitna carry forward se aaya
+
         status: {
             type: String,
-            enum: ["pending", "paid", "rescheduled"],
+            enum: ["pending", "paid", "rescheduled", "partial"],
             default: "pending",
         },
 
