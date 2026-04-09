@@ -247,10 +247,11 @@ function MarkAttendance() {
                                     {demo.attended !== true && (
                                         <button
                                             onClick={() => setEditTarget(demo)}
-                                            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-white rounded-md transition-colors cursor-pointer shrink-0"
+                                            className="flex items-center gap-1 px-2 py-1 text-gray-400 hover:text-gray-600 hover:bg-white rounded-md transition-colors cursor-pointer shrink-0"
                                             title="Edit"
                                         >
-                                            <PiPencilSimpleLine size={14} />
+                                            <PiPencilSimpleLine size={17} />
+                                            <span className="text-xs font-medium">Edit</span>
                                         </button>
                                     )}
                                 </div>
@@ -296,7 +297,7 @@ function MarkAttendance() {
                                         <div className="flex items-center gap-1.5 w-full">
                                             <button
                                                 onClick={() => handleMarkAbsent(demo.id)}
-                                                className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-red-500 text-white rounded-md text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer"
+                                                className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-transparent border border-red-500 text-red-500 rounded-md text-sm font-medium hover:bg-red-50 transition-colors cursor-pointer"
                                             >
                                                 <PiX size={15} /> Absent
                                             </button>
