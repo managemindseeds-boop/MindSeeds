@@ -60,7 +60,7 @@ function TopBar() {
         .slice(0, 2)
 
     return (
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 sticky top-0 z-10 w-full transition-all">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 w-full transition-all">
             {/* Page Title */}
             <div className="flex items-center gap-2">
                 <img src="/4.svg" alt="MindSeeds" className="w-8 h-8 object-contain md:hidden" />
