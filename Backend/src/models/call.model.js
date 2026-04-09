@@ -23,7 +23,7 @@ const callSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["pending", "called", "will_pay", "no_answer", "rescheduled", "done", "paid"],
+            enum: ["pending", "called", "will_pay", "no_answer", "rescheduled", "done", "paid", "partial_paid"],
             default: "pending",
         },
 
@@ -37,6 +37,10 @@ const callSchema = new mongoose.Schema(
         done_at: { type: Date, default: null },
         done_by: { type: String, default: "" },
         updated_at: { type: Date, default: null },
+
+        // Partial payment tracking — sync_service in fields se partial amount padhega
+        amountPaid: { type: Number, default: null },
+        partial_amount_paid: { type: Number, default: null },
     },
     {
         collection: "fee_call_reminders",   // exact collection name in MongoDB

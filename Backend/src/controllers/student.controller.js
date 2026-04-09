@@ -30,8 +30,9 @@ const scheduleDemos = async (student, demoLecturesFromFrontend) => {
                 studentClass: student.class,
                 branch: student.branch,
                 lectureNumber: i + 1,
-                scheduledDate: new Date(lec.date || lec.scheduledDate),
-                subject: subjects[i],
+                // prefer YYYY-MM-DD for safest parsing
+                scheduledDate: new Date(lec.scheduledDate || lec.date),
+                subject: lec.subject || subjects[i],
                 attended: null,
             });
         });

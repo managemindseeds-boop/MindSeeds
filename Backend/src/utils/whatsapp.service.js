@@ -4,7 +4,7 @@
 // Fee reminder is handled by a separate external system.
 // This file handles: generic send + demo lecture reminders.
 
-const CHDS_BASE_URL = "https://whatsapp-integration-system-chds.vercel.app";
+const CHDS_BASE_URL = "https://outvia-crm.vercel.app";
 
 /**
  * Normalize a phone number to the format expected by CHDS API
@@ -64,8 +64,10 @@ export const sendWhatsAppMessage = async (phone, message) => {
 
 
 // Call this when a demo is created / rescheduled / updated.
-// CHDS will automatically send WhatsApp 1 day before scheduledDate at 9:00 AM IST.
-// Sends to BOTH student phone and parent phone.
+// Template: demo_class_scheduled (Approved ✅)
+// Variables: {{1}}=studentName, {{2}}=subject, {{3}}=date, {{4}}=time
+// Sends to BOTH student phone and parent phone — same template, same values.
+// Scheduled 1 day before demo at 9:00 AM IST via CHDS API.
 /**
  * @param {{ studentName: string, studentPhone: string, parentPhone: string, scheduledDate: Date, lectureNumber: number, subject?: string }} param0
  * @returns {{ success: boolean, results: Array }}
@@ -96,55 +98,65 @@ export const scheduleDemoReminder = async ({
         timeZone: "Asia/Kolkata",
     });
 
-    // 1 din pehle subah 9:00 AM IST
+    // 1 din pehle subah 9:00 AM IST pe reminder bhejo
+    const now = new Date();
     const parts = demoDateISTStr.split("-");
-    const dayBefore = new Date(
-        parseInt(parts[0]),
-        parseInt(parts[1]) - 1,
-        parseInt(parts[2]) - 1
-    );
+    const dayBefore = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]) - 1);
     const yyyy = dayBefore.getFullYear();
     const mm = String(dayBefore.getMonth() + 1).padStart(2, "0");
     const dd = String(dayBefore.getDate()).padStart(2, "0");
     const scheduledTime = new Date(`${yyyy}-${mm}-${dd}T09:00:00+05:30`);
-    const now = new Date();
 
-    const subjectLine = subject ? `📖 *Subject:* ${subject}\n` : "";
-    const lectureLabel = `Demo Lecture ${lectureNumber}`;
+    // Template variables — same for both student and parent
+    // {{1}} = Name, {{2}} = Subject, {{3}} = Date, {{4}} = Time
+    const templateValues = [
+        studentName,                    // {{1}}
+        subject || "Demo Class",         // {{2}}
+        demoDateDisplay,                // {{3}} e.g. "5 April 2026"
+        "9:00 AM",                      // {{4}}
+    ];
 
-    // Student ko message
-    const studentMessage =
-        `🎓 *MindSeeds Demo Reminder*\n\n` +
-        `Hi *${studentName}*,\n\n` +
-        `Kal aapka *${lectureLabel}* scheduled hai!\n\n` +
-        `📅 *Date:* ${demoDateDisplay}\n` +
-        `⏰ *Time:* 9:00 AM\n` +
-        subjectLine +
-        `\nKripaya samay par aayein.\nDhanyavaad! 🙏`;
-
-    // Parent ko message
-    const parentMessage =
-        `🎓 *MindSeeds Demo Reminder*\n\n` +
-        `Dear Parent,\n\n` +
-        `Kal aapke bache *${studentName}* ka *${lectureLabel}* scheduled hai!\n\n` +
-        `📅 *Date:* ${demoDateDisplay}\n` +
-        `⏰ *Time:* 9:00 AM\n` +
-        subjectLine +
-        `\nKripaya unhe samay par bhejein.\nDhanyavaad! 🙏`;
-
-    // Helper: schedule OR immediate send
-    const scheduleOne = async (phone, message, label) => {
+    // Helper: send template (scheduled or immediate)
+    const sendTemplateToPhone = async (phone, label) => {
         const normalizedPhone = normalizePhone(phone);
 
-        // Agar time already past ho toh turant bhejo
+        // Agar schedule time past ho chuki ho — turant template bhejo
         if (scheduledTime <= now) {
-            console.warn(`[WhatsApp] Demo reminder time already past for ${studentName} (${label}) — sending immediately`);
-            return sendWhatsAppMessage(phone, message);
+            console.warn(`[WhatsApp] Demo reminder time already past for ${studentName} (${label}) — sending immediately via template`);
+            try {
+                const res = await fetch(`${CHDS_BASE_URL}/api/messages/send-template`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${apiKey}`,
+                    },
+                    body: JSON.stringify({
+                        phone: normalizedPhone,
+                        template_name: "demo_class_scheduled",
+                        language: "en",
+                        template_values: templateValues,
+                    }),
+                });
+                const rawText = await res.text();
+                console.log(`[WhatsApp] Immediate template raw response (${label}):`, rawText);
+                let data;
+                try { data = JSON.parse(rawText); } catch { data = { message: rawText }; }
+                if (!res.ok) {
+                    console.error(`[WhatsApp] Immediate template send failed (${label}):`, data);
+                    return { success: false, error: data?.message || rawText };
+                }
+                console.log(`[WhatsApp] ✅ Template sent immediately (${label}) for ${studentName}`);
+                return { success: true, data };
+            } catch (err) {
+                console.error(`[WhatsApp] Network error on immediate template (${label}):`, err.message);
+                return { success: false, error: err.message };
+            }
         }
 
+        // Future time hai — schedule karo
         const sendAt = scheduledTime.toISOString();
         try {
-            const res = await fetch(`https://whatsapp-integration-system-chds.vercel.app/api/scheduled-messages`, {
+            const res = await fetch(`${CHDS_BASE_URL}/api/scheduled-messages`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -153,28 +165,33 @@ export const scheduleDemoReminder = async ({
                 body: JSON.stringify({
                     contact_phone: normalizedPhone,
                     send_at: sendAt,
-                    message,
-                    message_type: "text",
+                    message_type: "template",
+                    template_name: "demo_class_scheduled",
+                    language: "en",
+                    template_values: templateValues,
                 }),
             });
 
-            const data = await res.json();
+            const rawText = await res.text();
+            console.log(`[WhatsApp] Scheduled template raw response (${label}):`, rawText);
+            let data;
+            try { data = JSON.parse(rawText); } catch { data = { message: rawText }; }
             if (!res.ok) {
-                console.error(`[WhatsApp] Demo reminder schedule failed (${label}) for ${studentName}:`, data);
-                return { success: false, error: data?.message || "Unknown error" };
+                console.error(`[WhatsApp] Demo template schedule failed (${label}) for ${studentName}:`, data);
+                return { success: false, error: data?.message || rawText };
             }
 
-            console.log(`[WhatsApp] ✅ Demo reminder scheduled (${label}) for ${studentName} on ${sendAt}`);
+            console.log(`[WhatsApp] ✅ Demo template scheduled (${label}) for ${studentName} on ${sendAt}`);
             return { success: true, scheduledId: data?.id || data?.data?.id };
         } catch (err) {
-            console.error(`[WhatsApp] Network error (${label}) for ${studentName}:`, err.message);
+            console.error(`[WhatsApp] Network error scheduling template (${label}) for ${studentName}:`, err.message);
             return { success: false, error: err.message };
         }
     };
 
     const [studentResult, parentResult] = await Promise.all([
-        scheduleOne(studentPhone, studentMessage, "student"),
-        scheduleOne(parentPhone, parentMessage, "parent"),
+        sendTemplateToPhone(studentPhone, "student"),
+        sendTemplateToPhone(parentPhone, "parent"),
     ]);
 
     return {

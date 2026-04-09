@@ -106,6 +106,7 @@ export function DashboardProvider({ children }) {
             parentPhone: formData.parentPhone,
             class: formData.studentClass,
             branch: formData.branch,
+            demoLectures: formData.demoLectures,
         }, { headers: { Authorization: `Bearer ${currentUser.token}` } })
         await fetchDashboard()
         return res.data
