@@ -99,8 +99,91 @@ function AdminDemoOverview() {
                 </div>
             </div>
 
-            {/* Demos Table */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            {/* ── Mobile cards (hidden on sm+) ── */}
+            <div className="sm:hidden space-y-3">
+                {demos.length === 0 ? (
+                    demosLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse space-y-3">
+                                <div className="flex justify-between">
+                                    <div className="space-y-1.5">
+                                        <div className="h-3.5 bg-gray-200 rounded w-28" />
+                                        <div className="h-2.5 bg-gray-200 rounded w-16" />
+                                    </div>
+                                    <div className="h-5 bg-gray-200 rounded-full w-20" />
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div className="h-3.5 bg-gray-200 rounded w-full" />
+                                    <div className="h-3.5 bg-gray-200 rounded w-full" />
+                                    <div className="h-3.5 bg-gray-200 rounded w-full" />
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400 text-sm">
+                            No demos found for this filter.
+                        </div>
+                    )
+                ) : (
+                    demos.map((demo) => (
+                        <div key={demo._id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
+                            {/* Top row: name + status */}
+                            <div className="flex items-start justify-between gap-2">
+                                <div>
+                                    <p className="font-semibold text-gray-900 text-sm">{demo.studentName}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{demo.studentClass}</p>
+                                </div>
+                                {demo.attended === true ? (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0e6f6] text-emerald-700 shrink-0">
+                                        <CheckCircle2 size={11} /> Attended
+                                    </span>
+                                ) : demo.attended === false ? (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 shrink-0">
+                                        <XCircle size={11} /> Absent
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 shrink-0">
+                                        <Clock size={11} /> Pending
+                                    </span>
+                                )}
+                            </div>
+                            {/* Detail rows */}
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                                <div>
+                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Branch</span>
+                                    <p className="mt-0.5">
+                                        <span className="inline-block px-2 py-0.5 rounded-md font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                            {demo.branch}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Demo #</span>
+                                    <p className="mt-0.5">
+                                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-bold text-sm">
+                                            {demo.lectureNumber}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Subject</span>
+                                    <p className="mt-0.5 text-gray-700 font-medium">{demo.subject || '—'}</p>
+                                </div>
+                                <div>
+                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Date</span>
+                                    <p className="mt-0.5 text-gray-700 font-medium">{formatDate(demo.scheduledDate)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+                <p className="text-sm text-gray-500 px-1">
+                    Showing <span className="font-medium text-gray-900">{demos.length}</span> demos
+                </p>
+            </div>
+
+            {/* ── Desktop table (hidden on mobile) ── */}
+            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
@@ -116,7 +199,6 @@ function AdminDemoOverview() {
                         <tbody className="divide-y divide-gray-100">
                             {demos.length === 0 ? (
                                 demosLoading ? (
-                                    // Skeleton loading rows
                                     Array.from({ length: 5 }).map((_, i) => (
                                         <tr key={i} className="animate-pulse">
                                             <td className="px-6 py-4"><div className="space-y-1.5"><div className="h-3.5 bg-gray-200 rounded w-28" /><div className="h-2.5 bg-gray-200 rounded w-16" /></div></td>
