@@ -440,49 +440,41 @@ function StaffAttendance() {
             </div>
 
             {/* ══════════ SLIDE-IN DETAIL PANEL ══════════ */}
-            <div
-                className={`
-                    fixed top-0 right-0 h-full bg-white z-50 overflow-y-auto
-                    border-l border-gray-200
-                    transition-transform duration-300 ease-in-out
-                    w-full sm:w-[420px]
-                    ${panelOpen ? 'translate-x-0' : 'translate-x-full'}
-                `}
-            >
-                {selectedStaff && (
-                    <div>
-                        {/* Panel Header */}
-                        <div className="sticky top-0 bg-white z-10 px-5 py-4 border-b border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                                        style={{ backgroundColor: '#5e3174' }}
-                                    >
-                                        {selectedStaff.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-sm text-gray-900">{selectedStaff.name}</h3>
-                                        <p className="text-[10px] text-gray-400">{selectedStaff.employeeId} · {(selectedStaff.branch || []).join(', ')}</p>
-                                    </div>
+            {panelOpen && selectedStaff && (
+                <div
+                    className="fixed top-0 right-0 h-full bg-white z-50 overflow-y-auto border-l border-gray-200 w-full sm:w-[420px] animate-slide-in-right"
+                >
+                    {/* Panel Header */}
+                    <div className="sticky top-0 bg-white z-10 px-5 py-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                                    style={{ backgroundColor: '#5e3174' }}
+                                >
+                                    {selectedStaff.name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                                 </div>
-                                <button onClick={handleClosePanel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
-                                    <X size={16} className="text-gray-400" />
-                                </button>
+                                <div>
+                                    <h3 className="font-bold text-sm text-gray-900">{selectedStaff.name}</h3>
+                                    <p className="text-[10px] text-gray-400">{selectedStaff.employeeId} · {(selectedStaff.branch || []).join(', ')}</p>
+                                </div>
                             </div>
-                        </div>
-                        {/* Panel Body */}
-                        <div className="px-5 py-4">
-                            <StaffHistory
-                                key={selectedStaff.phone + '-' + Date.now()}
-                                staff={selectedStaff}
-                                onClose={handleClosePanel}
-                                isPanel={true}
-                            />
+                            <button onClick={handleClosePanel} className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
+                                <X size={16} className="text-gray-400" />
+                            </button>
                         </div>
                     </div>
-                )}
-            </div>
+                    {/* Panel Body */}
+                    <div className="px-5 py-4">
+                        <StaffHistory
+                            key={selectedStaff.phone + '-' + Date.now()}
+                            staff={selectedStaff}
+                            onClose={handleClosePanel}
+                            isPanel={true}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
