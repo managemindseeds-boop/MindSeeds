@@ -22,6 +22,7 @@ const adminNavItems = [
     { label: 'Students', path: '/admin/students', icon: Users },
     { label: 'Demos', path: '/admin/demos', icon: BookOpen },
     { label: 'Staff', path: '/admin/staff', icon: UsersRound },
+    { label: 'Attendance', path: '/admin/staff-attendance', icon: ClipboardCheck },
 ]
 
 function MobileNavBar({ isAdmin = false }) {
