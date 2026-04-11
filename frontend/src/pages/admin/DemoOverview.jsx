@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAdmin } from '../../context/AdminContext'
 import { BRANCHES } from '../../constants/branches'
-import { BookOpen, Filter, RefreshCw, CheckCircle2, XCircle, Clock, Calendar } from 'lucide-react'
+import {
+    BookOpen, Filter, CheckCircle2, XCircle, Clock, Calendar,
+    ChevronDown, User
+} from 'lucide-react'
 
 const tabConfig = [
     { key: 'today', label: "Today's Demos", icon: Calendar },
@@ -9,6 +12,210 @@ const tabConfig = [
     { key: 'absent', label: 'Absent', icon: XCircle },
     { key: 'all', label: 'All Demos', icon: BookOpen },
 ]
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+const IST_OFFSET = 5.5 * 60 * 60 * 1000
+const formatDate = (d) => {
+    if (!d) return '—'
+    const ist = new Date(new Date(d).getTime() + IST_OFFSET)
+    return ist.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function groupByStudent(demos) {
+    const map = new Map()
+    demos.forEach((demo) => {
+        const key = `${demo.studentName}||${demo.studentClass}`
+        if (!map.has(key)) map.set(key, { studentName: demo.studentName, studentClass: demo.studentClass, branch: demo.branch, demos: [] })
+        map.get(key).demos.push(demo)
+    })
+    return Array.from(map.values())
+}
+
+function SummaryBadge({ demos }) {
+    const attended = demos.filter(d => d.attended === true).length
+    const absent   = demos.filter(d => d.attended === false).length
+    const pending  = demos.length - attended - absent
+    return (
+        <div className="flex items-center gap-1.5 flex-wrap">
+            {attended > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    <CheckCircle2 size={10} /> {attended} Attended
+                </span>
+            )}
+            {absent > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+                    <XCircle size={10} /> {absent} Absent
+                </span>
+            )}
+            {pending > 0 && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                    <Clock size={10} /> {pending} Pending
+                </span>
+            )}
+        </div>
+    )
+}
+
+function StatusBadge({ attended }) {
+    if (attended === true)
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700"><CheckCircle2 size={11} /> Attended</span>
+    if (attended === false)
+        return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700"><XCircle size={11} /> Absent</span>
+    return <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600"><Clock size={11} /> Pending</span>
+}
+
+// ── Shared accordion list (used for both desktop & mobile) ───────────────────
+
+function StudentAccordion({ groups, demosLoading, desktop }) {
+    const [openKeys, setOpenKeys] = useState({})
+    const toggle = (key) => setOpenKeys(prev => ({ ...prev, [key]: !prev[key] }))
+
+    if (groups.length === 0) {
+        if (demosLoading) {
+            return (
+                <div className="space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse flex items-center gap-4">
+                            <div className="w-9 h-9 rounded-full bg-gray-200 shrink-0" />
+                            <div className="flex-1 space-y-2">
+                                <div className="h-3.5 bg-gray-200 rounded w-36" />
+                                <div className="h-2.5 bg-gray-200 rounded w-20" />
+                            </div>
+                            <div className="h-5 bg-gray-200 rounded-full w-24" />
+                        </div>
+                    ))}
+                </div>
+            )
+        }
+        return (
+            <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400 text-sm">
+                No demos found for this filter.
+            </div>
+        )
+    }
+
+    return (
+        <div className="space-y-2">
+            {groups.map((group) => {
+                const key = `${group.studentName}||${group.studentClass}`
+                const isOpen = !!openKeys[key]
+
+                return (
+                    <div key={key} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+
+                        {/* ── Collapsed header ── */}
+                        <button
+                            onClick={() => toggle(key)}
+                            className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left"
+                        >
+                            {/* Avatar */}
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
+                                <User size={15} className="text-white" />
+                            </div>
+
+                            {/* Name + class */}
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-gray-900 text-sm truncate">{group.studentName}</p>
+                                <p className="text-xs text-gray-500 mt-0.5">{group.studentClass}</p>
+                            </div>
+
+                            {/* Summary badges */}
+                            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+                                <SummaryBadge demos={group.demos} />
+                            </div>
+
+                            {/* Demo count + chevron */}
+                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                                <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">
+                                    {group.demos.length}
+                                </span>
+                                <ChevronDown
+                                    size={16}
+                                    className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                                />
+                            </div>
+                        </button>
+
+                        {/* Mobile summary badges (shown below header on small screens) */}
+                        <div className="sm:hidden px-5 pb-3 flex flex-wrap gap-1.5">
+                            <SummaryBadge demos={group.demos} />
+                        </div>
+
+                        {/* ── Expanded section ── */}
+                        {isOpen && (
+                            <div className="border-t border-gray-100">
+
+                                {/* Column headers — appear only when expanded */}
+                                <div className="hidden sm:grid grid-cols-[2fr_1fr_80px_1.5fr_1.5fr_120px] px-5 py-2.5 bg-gray-50 border-b border-gray-100">
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Branch</span>
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Demo #</span>
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide"></span>
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Subject</span>
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Scheduled Date</span>
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Status</span>
+                                </div>
+
+                                {/* Demo rows */}
+                                <div className="divide-y divide-gray-100">
+                                    {group.demos.map((demo) => (
+                                        <div key={demo._id} className="px-5 py-3">
+
+                                            {/* Desktop row */}
+                                            <div className="hidden sm:grid grid-cols-[2fr_1fr_80px_1.5fr_1.5fr_120px] items-center">
+                                                <span className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 w-fit">
+                                                    {demo.branch}
+                                                </span>
+                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold text-sm w-fit">
+                                                    {demo.lectureNumber}
+                                                </span>
+                                                <span></span>
+                                                <span className="text-sm text-gray-700">{demo.subject || '—'}</span>
+                                                <span className="text-sm text-gray-700">{formatDate(demo.scheduledDate)}</span>
+                                                <span className="flex justify-end">
+                                                    <StatusBadge attended={demo.attended} />
+                                                </span>
+                                            </div>
+
+                                            {/* Mobile card */}
+                                            <div className="sm:hidden space-y-2 bg-gray-50/50 rounded-lg p-3">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs font-semibold text-blue-600">Demo #{demo.lectureNumber}</span>
+                                                    <StatusBadge attended={demo.attended} />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                                                    <div>
+                                                        <span className="text-gray-400 uppercase tracking-wide text-[10px] font-medium">Branch</span>
+                                                        <p className="mt-0.5">
+                                                            <span className="inline-block px-2 py-0.5 rounded-md font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                                                {demo.branch}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-400 uppercase tracking-wide text-[10px] font-medium">Subject</span>
+                                                        <p className="mt-0.5 text-gray-700 font-medium">{demo.subject || '—'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-gray-400 uppercase tracking-wide text-[10px] font-medium">Date</span>
+                                                        <p className="mt-0.5 text-gray-700 font-medium">{formatDate(demo.scheduledDate)}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )
+            })}
+        </div>
+    )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 
 function AdminDemoOverview() {
     const { demos, demoStats, demosLoading, fetchDemos } = useAdmin()
@@ -20,36 +227,25 @@ function AdminDemoOverview() {
         fetchDemos({ filter: activeTab, branch: branchFilter })
     }, [fetchDemos, activeTab, branchFilter])
 
-    useEffect(() => {
-        doFetch()
-    }, [doFetch])
+    useEffect(() => { doFetch() }, [doFetch])
 
-    // Auto-refresh every 30s
     useEffect(() => {
         const interval = setInterval(doFetch, 30000)
         return () => clearInterval(interval)
     }, [doFetch])
 
-    // Extract unique branches from demos
-    // Use official branches for filter dropdown
-    const officialBranches = BRANCHES
-
-    // IST date formatter
-    const IST_OFFSET = 5.5 * 60 * 60 * 1000
-    const formatDate = (d) => {
-        if (!d) return '—'
-        const ist = new Date(new Date(d).getTime() + IST_OFFSET)
-        return ist.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-    }
+    const groups = groupByStudent(demos)
 
     return (
         <div className="space-y-6">
+
+            {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { label: "Today", value: demoStats.today, color: 'bg-blue-50 text-blue-700 border-blue-100' },
-                    { label: 'Upcoming', value: demoStats.upcoming, color: 'bg-amber-50 text-amber-700 border-amber-100' },
-                    { label: 'Absent', value: demoStats.absent, color: 'bg-red-50 text-red-700 border-red-100' },
-                    { label: 'Total', value: demoStats.all, color: 'bg-gray-50 text-gray-700 border-gray-100' },
+                    { label: 'Today',    value: demoStats.today,    color: 'bg-blue-50 text-blue-700 border-blue-100' },
+                    { label: 'Upcoming', value: demoStats.upcoming,  color: 'bg-amber-50 text-amber-700 border-amber-100' },
+                    { label: 'Absent',   value: demoStats.absent,    color: 'bg-red-50 text-red-700 border-red-100' },
+                    { label: 'Total',    value: demoStats.all,       color: 'bg-gray-50 text-gray-700 border-gray-100' },
                 ].map((stat) => (
                     <div key={stat.label} className={`rounded-xl border p-4 ${stat.color}`}>
                         <p className="text-sm font-medium opacity-80">{stat.label}</p>
@@ -92,177 +288,21 @@ function AdminDemoOverview() {
                         className="w-full pl-10 pr-8 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer shadow-sm"
                     >
                         <option value="all">All Branches</option>
-                        {officialBranches.map(b => (
-                            <option key={b} value={b}>{b}</option>
-                        ))}
+                        {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
                     </select>
                 </div>
             </div>
 
-            {/* ── Mobile cards (hidden on sm+) ── */}
-            <div className="sm:hidden space-y-3">
-                {demos.length === 0 ? (
-                    demosLoading ? (
-                        Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="bg-white rounded-xl border border-gray-200 p-4 animate-pulse space-y-3">
-                                <div className="flex justify-between">
-                                    <div className="space-y-1.5">
-                                        <div className="h-3.5 bg-gray-200 rounded w-28" />
-                                        <div className="h-2.5 bg-gray-200 rounded w-16" />
-                                    </div>
-                                    <div className="h-5 bg-gray-200 rounded-full w-20" />
-                                </div>
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div className="h-3.5 bg-gray-200 rounded w-full" />
-                                    <div className="h-3.5 bg-gray-200 rounded w-full" />
-                                    <div className="h-3.5 bg-gray-200 rounded w-full" />
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400 text-sm">
-                            No demos found for this filter.
-                        </div>
-                    )
-                ) : (
-                    demos.map((demo) => (
-                        <div key={demo._id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
-                            {/* Top row: name + status */}
-                            <div className="flex items-start justify-between gap-2">
-                                <div>
-                                    <p className="font-semibold text-gray-900 text-sm">{demo.studentName}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">{demo.studentClass}</p>
-                                </div>
-                                {demo.attended === true ? (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0e6f6] text-emerald-700 shrink-0">
-                                        <CheckCircle2 size={11} /> Attended
-                                    </span>
-                                ) : demo.attended === false ? (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 shrink-0">
-                                        <XCircle size={11} /> Absent
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 shrink-0">
-                                        <Clock size={11} /> Pending
-                                    </span>
-                                )}
-                            </div>
-                            {/* Detail rows */}
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                                <div>
-                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Branch</span>
-                                    <p className="mt-0.5">
-                                        <span className="inline-block px-2 py-0.5 rounded-md font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                                            {demo.branch}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div>
-                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Demo #</span>
-                                    <p className="mt-0.5">
-                                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-bold text-sm">
-                                            {demo.lectureNumber}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div>
-                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Subject</span>
-                                    <p className="mt-0.5 text-gray-700 font-medium">{demo.subject || '—'}</p>
-                                </div>
-                                <div>
-                                    <span className="text-gray-400 font-medium uppercase tracking-wide">Date</span>
-                                    <p className="mt-0.5 text-gray-700 font-medium">{formatDate(demo.scheduledDate)}</p>
-                                </div>
-                            </div>
-                        </div>
-                    ))
-                )}
+            {/* Accordion list — shared for mobile & desktop */}
+            <StudentAccordion groups={groups} demosLoading={demosLoading} />
+
+            {/* Footer count */}
+            {groups.length > 0 && (
                 <p className="text-sm text-gray-500 px-1">
-                    Showing <span className="font-medium text-gray-900">{demos.length}</span> demos
+                    Showing <span className="font-medium text-gray-900">{groups.length}</span> student{groups.length !== 1 ? 's' : ''}{' '}
+                    <span className="text-gray-400">({demos.length} demo{demos.length !== 1 ? 's' : ''})</span>
                 </p>
-            </div>
-
-            {/* ── Desktop table (hidden on mobile) ── */}
-            <div className="hidden sm:block bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Student</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Branch</th>
-                                <th className="text-center px-6 py-4 font-semibold text-gray-700">Demo #</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Subject</th>
-                                <th className="text-left px-6 py-4 font-semibold text-gray-700">Scheduled Date</th>
-                                <th className="text-center px-6 py-4 font-semibold text-gray-700">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {demos.length === 0 ? (
-                                demosLoading ? (
-                                    Array.from({ length: 5 }).map((_, i) => (
-                                        <tr key={i} className="animate-pulse">
-                                            <td className="px-6 py-4"><div className="space-y-1.5"><div className="h-3.5 bg-gray-200 rounded w-28" /><div className="h-2.5 bg-gray-200 rounded w-16" /></div></td>
-                                            <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-md w-20" /></td>
-                                            <td className="px-6 py-4 text-center"><div className="h-8 w-8 bg-gray-200 rounded-full mx-auto" /></td>
-                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-20" /></td>
-                                            <td className="px-6 py-4"><div className="h-3.5 bg-gray-200 rounded w-24" /></td>
-                                            <td className="px-6 py-4 text-center"><div className="h-5 bg-gray-200 rounded-full w-20 mx-auto" /></td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
-                                            No demos found for this filter.
-                                        </td>
-                                    </tr>
-                                )
-                            ) : (
-                                demos.map((demo) => (
-                                    <tr key={demo._id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div>
-                                                <p className="font-semibold text-gray-900">{demo.studentName}</p>
-                                                <p className="text-xs text-gray-500">{demo.studentClass}</p>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                                                {demo.branch}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold text-sm">
-                                                {demo.lectureNumber}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-gray-700">{demo.subject || '—'}</td>
-                                        <td className="px-6 py-4 text-gray-700">{formatDate(demo.scheduledDate)}</td>
-                                        <td className="px-6 py-4 text-center">
-                                            {demo.attended === true ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0e6f6] text-emerald-700">
-                                                    <CheckCircle2 size={12} /> Attended
-                                                </span>
-                                            ) : demo.attended === false ? (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700">
-                                                    <XCircle size={12} /> Absent
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600">
-                                                    <Clock size={12} /> Pending
-                                                </span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 text-sm text-gray-500">
-                    Showing <span className="font-medium text-gray-900">{demos.length}</span> demos
-                </div>
-            </div>
+            )}
         </div>
     )
 }
