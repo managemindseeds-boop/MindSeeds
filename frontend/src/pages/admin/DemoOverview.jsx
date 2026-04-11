@@ -177,29 +177,24 @@ function StudentAccordion({ groups, demosLoading, desktop }) {
                                                 </span>
                                             </div>
 
-                                            {/* Mobile card */}
-                                            <div className="sm:hidden space-y-2 bg-gray-50/50 rounded-lg p-3">
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-xs font-semibold text-blue-600">Demo #{demo.lectureNumber}</span>
-                                                    <StatusBadge attended={demo.attended} />
+                                            {/* Mobile row — compact 2-line */}
+                                            <div className="sm:hidden flex items-center gap-3 py-1">
+                                                {/* Demo number bubble */}
+                                                <span className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {demo.lectureNumber}
+                                                </span>
+                                                {/* Subject + meta */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">{demo.subject || '—'}</p>
+                                                    <p className="text-xs text-gray-400 mt-0.5">
+                                                        <span className="font-medium text-blue-600">{demo.branch}</span>
+                                                        <span className="mx-1">·</span>
+                                                        {formatDate(demo.scheduledDate)}
+                                                    </p>
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                                                    <div>
-                                                        <span className="text-gray-400 uppercase tracking-wide text-[10px] font-medium">Branch</span>
-                                                        <p className="mt-0.5">
-                                                            <span className="inline-block px-2 py-0.5 rounded-md font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                                                                {demo.branch}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-400 uppercase tracking-wide text-[10px] font-medium">Subject</span>
-                                                        <p className="mt-0.5 text-gray-700 font-medium">{demo.subject || '—'}</p>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-400 uppercase tracking-wide text-[10px] font-medium">Date</span>
-                                                        <p className="mt-0.5 text-gray-700 font-medium">{formatDate(demo.scheduledDate)}</p>
-                                                    </div>
+                                                {/* Status */}
+                                                <div className="shrink-0">
+                                                    <StatusBadge attended={demo.attended} />
                                                 </div>
                                             </div>
 
