@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useAdmin } from '../../context/AdminContext'
 import {
     Users, BookOpen, UserCircle, TrendingUp,
-    ArrowUpRight, ArrowDownRight, RefreshCw,
+    ArrowUpRight, ArrowDownRight,
     UserPlus, CheckCircle2, XCircle, Clock
 } from 'lucide-react'
 
@@ -134,17 +134,6 @@ function AdminDashboard() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-end">
-                <button
-                    onClick={fetchDashboard}
-                    className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm cursor-pointer shadow-sm"
-                >
-                    <RefreshCw size={14} className={dashLoading ? 'animate-spin' : ''} />
-                    Refresh
-                </button>
-            </div>
-
             {/* KPI Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 {kpiCards.map((kpi, idx) => (

@@ -114,10 +114,15 @@ function StudentAccordion({ groups, demosLoading, desktop }) {
                                 <User size={15} className="text-white" />
                             </div>
 
-                            {/* Name + class */}
+                            {/* Name + class + branch */}
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-gray-900 text-sm truncate">{group.studentName}</p>
-                                <p className="text-xs text-gray-500 mt-0.5">{group.studentClass}</p>
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                    <span className="text-xs text-gray-500">{group.studentClass}</span>
+                                    {group.branch && (
+                                        <span className="inline-block px-2 py-0.5 rounded-md text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">{group.branch}</span>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Summary badges */}
@@ -147,10 +152,8 @@ function StudentAccordion({ groups, demosLoading, desktop }) {
                             <div className="border-t border-gray-100">
 
                                 {/* Column headers — appear only when expanded */}
-                                <div className="hidden sm:grid grid-cols-[2fr_1fr_80px_1.5fr_1.5fr_120px] px-5 py-2.5 bg-gray-50 border-b border-gray-100">
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Branch</span>
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Demo #</span>
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide"></span>
+                                <div className="hidden sm:grid grid-cols-[56px_1fr_1.5fr_130px] gap-4 px-5 py-2.5 bg-gray-50 border-b border-gray-100">
+                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Demo</span>
                                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Subject</span>
                                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Scheduled Date</span>
                                     <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Status</span>
@@ -162,14 +165,10 @@ function StudentAccordion({ groups, demosLoading, desktop }) {
                                         <div key={demo._id} className="px-5 py-3">
 
                                             {/* Desktop row */}
-                                            <div className="hidden sm:grid grid-cols-[2fr_1fr_80px_1.5fr_1.5fr_120px] items-center">
-                                                <span className="inline-block px-2 py-0.5 rounded-md text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 w-fit">
-                                                    {demo.branch}
-                                                </span>
-                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold text-sm w-fit">
+                                            <div className="hidden sm:grid grid-cols-[56px_1fr_1.5fr_130px] items-center gap-4">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold text-sm">
                                                     {demo.lectureNumber}
                                                 </span>
-                                                <span></span>
                                                 <span className="text-sm text-gray-700">{demo.subject || '—'}</span>
                                                 <span className="text-sm text-gray-700">{formatDate(demo.scheduledDate)}</span>
                                                 <span className="flex justify-end">
@@ -183,14 +182,10 @@ function StudentAccordion({ groups, demosLoading, desktop }) {
                                                 <span className="w-7 h-7 rounded-full bg-gray-100 text-gray-600 font-bold text-xs flex items-center justify-center shrink-0">
                                                     {demo.lectureNumber}
                                                 </span>
-                                                {/* Subject + meta */}
+                                                {/* Subject + date */}
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-900 truncate">{demo.subject || '—'}</p>
-                                                    <p className="text-xs text-gray-400 mt-0.5">
-                                                        <span className="font-medium text-blue-600">{demo.branch}</span>
-                                                        <span className="mx-1">·</span>
-                                                        {formatDate(demo.scheduledDate)}
-                                                    </p>
+                                                    <p className="text-xs text-gray-400 mt-0.5">{formatDate(demo.scheduledDate)}</p>
                                                 </div>
                                                 {/* Status */}
                                                 <div className="shrink-0">
