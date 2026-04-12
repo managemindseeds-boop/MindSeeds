@@ -98,9 +98,13 @@ function generateDemoLectures(startDateStr, subjects, times) {
     let current = nextWeekday(new Date(startDateStr))
     for (let i = 0; i < 4; i++) {
         const d = new Date(current)
+        const dateOnly = d.toISOString().split('T')[0] // "2026-04-15"
+        const time24 = times[i] || DEMO_LECTURE_TIMES_24[i] // "10:00"
+        // Combine date + time as IST so backend gets the correct time
+        const scheduledDateWithTime = `${dateOnly}T${time24}:00+05:30`
         lectures.push({
             day: i + 1,
-            scheduledDate: d.toISOString().split('T')[0],
+            scheduledDate: scheduledDateWithTime,
             date: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
             weekday: d.toLocaleDateString('en-IN', { weekday: 'long' }),
             time: to12h(times[i]) || to12h(DEMO_LECTURE_TIMES_24[i]),
