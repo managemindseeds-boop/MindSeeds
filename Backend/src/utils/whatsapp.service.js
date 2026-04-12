@@ -89,6 +89,10 @@ export const scheduleDemoReminder = async ({
     // Demo ki IST date aur time nikalo
     const demoDate = new Date(scheduledDate);
 
+    console.log(`[WhatsApp DEBUG] Raw scheduledDate received:`, scheduledDate);
+    console.log(`[WhatsApp DEBUG] Parsed demoDate:`, demoDate.toISOString());
+    console.log(`[WhatsApp DEBUG] demoDate UTC hours:`, demoDate.getUTCHours(), ':',  demoDate.getUTCMinutes());
+
     const demoDateDisplay = demoDate.toLocaleDateString("en-IN", {
         day: "numeric",
         month: "long",
@@ -103,6 +107,8 @@ export const scheduleDemoReminder = async ({
         hour12: true,
         timeZone: "Asia/Kolkata",
     });
+
+    console.log(`[WhatsApp DEBUG] demoDateDisplay: "${demoDateDisplay}", demoTimeDisplay: "${demoTimeDisplay}"`);
 
     // 1 din pehle subah 9:00 AM IST pe reminder bhejo
     const now = new Date();
