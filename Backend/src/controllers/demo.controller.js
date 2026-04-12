@@ -4,9 +4,10 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { DemoLecture } from "../models/demoLecture.model.js";
 import { Student } from "../models/student.model.js";
 import { branchFilter } from "../utils/branchFilter.js";
-import { scheduleDemoReminder } from "../utils/whatsapp.service.js";
+import { scheduleDemoReminder, sendDemoRescheduledNow, cancelScheduledReminder } from "../utils/whatsapp.service.js";
 
 // Helper: student phone fetch karke demo reminder schedule karo (fire-and-forget)
+// Used ONLY for new registrations — schedules 1 day before at 9 AM
 const scheduleReminderForDemo = async (demo) => {
     try {
         const student = await Student.findById(demo.student).select("phone parentPhone");
@@ -23,8 +24,49 @@ const scheduleReminderForDemo = async (demo) => {
             subject: demo.subject || "",
         });
     } catch (err) {
-        // reminder failure se main flow affect na ho
         console.error(`[DemoReminder] Failed to schedule reminder for ${demo.studentName}:`, err.message);
+    }
+};
+
+// Helper: student phone fetch karke TURANT (immediately) reminder bhejo
+// Used for manual reschedule AND auto-reschedule on absence.
+// Step 1: Cancel old CHDS scheduled messages (so stale reminder doesn't fire)
+// Step 2: Send immediate confirmation for new date
+// Step 3: Clear old IDs from DB
+const sendImmediateReminderForDemo = async (demo) => {
+    try {
+        const student = await Student.findById(demo.student).select("phone parentPhone");
+        if (!student?.phone || !student?.parentPhone) {
+            console.warn(`[DemoReminder] Student ${demo.studentName} ka phone/parentPhone missing — immediate reminder skip`);
+            return;
+        }
+
+        // Step 1: Cancel old scheduled CHDS messages (fire both in parallel, ignore errors)
+        const oldStudentId = demo.scheduledMsgIdStudent || null;
+        const oldParentId  = demo.scheduledMsgIdParent  || null;
+        await Promise.allSettled([
+            cancelScheduledReminder(oldStudentId),
+            cancelScheduledReminder(oldParentId),
+        ]);
+
+        // Step 2: Send immediate message for the new/rescheduled date
+        await sendDemoRescheduledNow({
+            studentName: demo.studentName,
+            studentPhone: student.phone,
+            parentPhone: student.parentPhone,
+            scheduledDate: demo.scheduledDate,
+            lectureNumber: demo.lectureNumber,
+            subject: demo.subject || "",
+        });
+
+        // Step 3: Clear old CHDS IDs from DB (no longer valid)
+        await DemoLecture.findByIdAndUpdate(demo._id, {
+            scheduledMsgIdStudent: null,
+            scheduledMsgIdParent:  null,
+        });
+
+    } catch (err) {
+        console.error(`[DemoReminder] Failed to send immediate reminder for ${demo.studentName}:`, err.message);
     }
 };
 
@@ -108,9 +150,9 @@ export const markAttendance = asyncHandler(async (req, res) => {
 
     await demo.save();
 
-    // Absent auto-reschedule ke baad naye date pe reminder schedule karo
+    // Auto-reschedule pe TURANT reminder bhejo (naya date confirm karo)
     if (attended === false) {
-        scheduleReminderForDemo(demo);
+        sendImmediateReminderForDemo(demo);
     }
 
     // When present: check if all 4 demos attended → advance student to demo_scheduled
@@ -150,8 +192,8 @@ export const rescheduleDemo = asyncHandler(async (req, res) => {
 
     if (!demo) throw new ApiError(404, "Demo not found");
 
-    // Naye date pe reminder schedule karo
-    scheduleReminderForDemo(demo);
+    // Reschedule pe TURANT reminder bhejo — naya date confirm karo
+    sendImmediateReminderForDemo(demo);
 
     return res.status(200).json(new ApiResponse(200, demo, "Demo rescheduled"));
 });

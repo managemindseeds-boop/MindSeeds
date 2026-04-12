@@ -36,6 +36,11 @@ const demoLectureSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
+
+        // CHDS scheduled-message IDs — stored so we can cancel them on reschedule
+        // Populated after scheduleDemoReminder succeeds; cleared to null after cancellation
+        scheduledMsgIdStudent: { type: String, default: null },
+        scheduledMsgIdParent:  { type: String, default: null },
     },
     { timestamps: true }
 );

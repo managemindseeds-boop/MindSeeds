@@ -103,7 +103,7 @@ export const addStudent = asyncHandler(async (req, res) => {
     // Auto-schedule 4 demo lectures (with correct class-based subjects)
     const createdDemos = await scheduleDemos(student, demoLectures);
 
-    // 📲 Schedule WhatsApp reminder for each demo (fire-and-forget — don't block response)
+    // 📲 Schedule WhatsApp reminder for each demo — save returned CHDS IDs for future cancellation
     if (student.phone && student.parentPhone) {
         createdDemos.forEach((demo) => {
             scheduleDemoReminder({
@@ -113,6 +113,17 @@ export const addStudent = asyncHandler(async (req, res) => {
                 scheduledDate: demo.scheduledDate,
                 lectureNumber: demo.lectureNumber,
                 subject: demo.subject || "",
+            }).then(async (result) => {
+                // Extract scheduled message IDs returned by CHDS
+                const studentMsgId = result?.results?.find(r => r.to === "student")?.scheduledId || null;
+                const parentMsgId  = result?.results?.find(r => r.to === "parent")?.scheduledId  || null;
+                // Save them to DB so reschedule can cancel them later
+                if (studentMsgId || parentMsgId) {
+                    await DemoLecture.findByIdAndUpdate(demo._id, {
+                        scheduledMsgIdStudent: studentMsgId,
+                        scheduledMsgIdParent:  parentMsgId,
+                    });
+                }
             }).catch((err) =>
                 console.error(`[DemoReminder] Schedule error for ${student.fullName} lecture ${demo.lectureNumber}:`, err.message)
             );
