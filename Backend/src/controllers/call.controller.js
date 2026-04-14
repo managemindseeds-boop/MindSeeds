@@ -6,33 +6,8 @@ import { FeeActivityLog } from "../models/feeActivityLog.model.js";
 import { branchFilter } from "../utils/branchFilter.js";
 import mongoose from "mongoose";
 
-// ─── Local MongoDB connection (fee_records lives here, NOT in cloud DB) ────────
-// Cloud DB (mongoose.connection) = Mindseed Enquiry → fee_call_reminders, students
-// Local DB (localConn)           = mindseedFeesLocal → fee_records
-const LOCAL_MONGO_URI = process.env.LOCAL_MONGODB_URI || "mongodb://127.0.0.1:27017/mindseed_fms";
-let localConn = null;
 
-const getLocalConn = async () => {
-    if (localConn && localConn.readyState === 1) return localConn;
-    localConn = await mongoose.createConnection(LOCAL_MONGO_URI).asPromise();
-    console.log("[localConn] Connected to local MongoDB:", localConn.name);
-    return localConn;
-};
 
-// Helper: update a fee_record document by its _id (using LOCAL connection)
-const updateFeeRecord = async (mongoFeeId, update) => {
-    if (!mongoFeeId) return;
-    try {
-        const conn = await getLocalConn();
-        const col = conn.collection("fee_records");
-        await col.updateOne(
-            { _id: new mongoose.Types.ObjectId(String(mongoFeeId)) },
-            { $set: update }
-        );
-    } catch (err) {
-        console.error("[updateFeeRecord] failed:", err.message);
-    }
-};
 
 // ─── GET /api/v1/calls?status=pending ───────────────────────────────────────
 // Fetch calls for this receptionist's branch(es)
@@ -132,26 +107,13 @@ export const updateCall = asyncHandler(async (req, res) => {
     if (status === "done" || status === "paid") {
         updates.done_at = new Date();
         updates.done_by = req.user?.username || 'Receptionist';
-
-        // ✅ Mark the linked fee_record as PAID (native collection call)
-        await updateFeeRecord(call.mongo_fee_id, {
-            status: "paid",
-            paidAt: new Date(),
-            notes: call_notes || call.call_notes || "",
-        });
     }
 
     Object.assign(call, updates);
     await call.save();
+    // Note: local fee_record is updated by FeeSync sync_service
+    // (reads fee_call_reminders from Atlas every 30s and applies to local DB)
 
-    // If rescheduled, update the underlying fee record's due_date
-    if (status === 'rescheduled' && rescheduled_to && call.mongo_fee_id) {
-        await updateFeeRecord(call.mongo_fee_id, {
-            dueDate: new Date(rescheduled_to),
-            status: "rescheduled",
-            notes: call_notes || ""
-        });
-    }
 
     // Log to activity
     await FeeActivityLog.create({
@@ -207,78 +169,11 @@ export const partialPayCall = asyncHandler(async (req, res) => {
     // ⚠️  FMS records mein 'student_mongo_id' (string) hoti hai
     //     Receptionist sync records mein 'student' (ObjectId) hoti hai
     //     Dono se query karo taake sab records milein
+
+    // Note: future installment redistribution is handled by FeeSync sync_service
+    // when it reads partial_paid status from Atlas fee_call_reminders
     let distributedCount = 0;
-    if (call.student_mongo_id && call.installment_number) {
-        try {
-            const conn = await getLocalConn();
-            const col = conn.collection("fee_records");
 
-            const studentObjId = new mongoose.Types.ObjectId(String(call.student_mongo_id));
-            const studentMongoIdStr = String(call.student_mongo_id);
-
-            // All records: student ObjectId ya student_mongo_id string dono se match karo
-            const allStudentRecords = await col.find({
-                $or: [
-                    { student: studentObjId },
-                    { student_mongo_id: studentMongoIdStr },
-                ]
-            }).toArray();
-            console.log(`[partialPay] Student ${call.student_mongo_id} ke total fee_records:`, allStudentRecords.length);
-            console.log(`[partialPay] Current installment_number:`, call.installment_number);
-
-            // Future pending installments: installmentNumber ya installment_number dono check karo
-            const futureRecords = await col.find({
-                $and: [
-                    {
-                        $or: [
-                            { student: studentObjId },
-                            { student_mongo_id: studentMongoIdStr },
-                        ]
-                    },
-                    {
-                        $or: [
-                            { installmentNumber: { $gt: Number(call.installment_number) } },
-                            { installment_number: { $gt: Number(call.installment_number) } },
-                        ]
-                    },
-                    { status: { $in: ["pending", "rescheduled"] } },
-                ]
-            }).sort({ installmentNumber: 1, installment_number: 1 }).toArray();
-
-
-            console.log(`[partialPay] Future pending installments found:`, futureRecords.length);
-
-            if (futureRecords.length > 0) {
-                // Remaining amount ko barabar divide karo
-                const perInstallment = Math.round((remainingAmount / futureRecords.length) * 100) / 100;
-                // Last installment ko rounding diff adjust karo
-                const totalDistributed = perInstallment * (futureRecords.length - 1);
-                const lastInstallmentExtra = Math.round((remainingAmount - totalDistributed) * 100) / 100;
-
-                const bulkOps = futureRecords.map((rec, idx) => {
-                    const addAmount = idx === futureRecords.length - 1 ? lastInstallmentExtra : perInstallment;
-                    return {
-                        updateOne: {
-                            filter: { _id: rec._id },
-                            update: {
-                                $inc: {
-                                    installmentAmount: addAmount,
-                                    carryForwardAmount: addAmount,
-                                },
-                            },
-                        },
-                    };
-                });
-                await col.bulkWrite(bulkOps);
-                distributedCount = futureRecords.length;
-                console.log(`[partialPay] ₹${remainingAmount} distributed across ${futureRecords.length} installments (₹${perInstallment} each)`);
-            } else {
-                console.warn(`[partialPay] Koi future pending installment nahi mila — distribution skip`);
-            }
-        } catch (err) {
-            console.error("[partialPay] future installment distribution failed:", err.message);
-        }
-    }
 
     // ─── Step 3: Call record ko update karo ──────────────────────────────────
     // ✅ status = "partial_paid" → sync_service ka partial_paid branch trigger hoga
