@@ -2,9 +2,24 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Call } from "../models/call.model.js";
+import { FeeRecord } from "../models/feeRecord.model.js";
 import { FeeActivityLog } from "../models/feeActivityLog.model.js";
 import { branchFilter } from "../utils/branchFilter.js";
 import mongoose from "mongoose";
+
+// ─── Helper: Update FeeRecord in MongoDB ─────────────────────────────────────
+// Called during partial payment to update the fee record's paid/remaining amounts.
+// Fails gracefully — call record update proceeds even if FeeRecord is not found.
+const updateFeeRecord = async (feeRecordId, data) => {
+    if (!feeRecordId) return null;
+    try {
+        const updated = await FeeRecord.findByIdAndUpdate(feeRecordId, data, { new: true });
+        return updated;
+    } catch (err) {
+        console.warn(`⚠️ updateFeeRecord(${feeRecordId}) failed:`, err.message);
+        return null;
+    }
+};
 
 
 
@@ -89,7 +104,7 @@ export const reopenCall = asyncHandler(async (req, res) => {
 // ─── PATCH /api/v1/calls/:id ─────────────────────────────────────────────────
 // Generic update for call status/notes (Called, Will Pay, No Answer, Reschedule)
 export const updateCall = asyncHandler(async (req, res) => {
-    const { status, call_notes, rescheduled_to } = req.body;
+    const { status, call_notes, rescheduled_to, payment_method } = req.body;
 
     const call = await Call.findById(req.params.id);
     if (!call) throw new ApiError(404, "Call record not found");
@@ -103,10 +118,15 @@ export const updateCall = asyncHandler(async (req, res) => {
 
     if (call_notes) updates.call_notes = call_notes;
     if (rescheduled_to) updates.rescheduled_to = rescheduled_to;
+    if (payment_method) updates.payment_method = payment_method;
 
     if (status === "done" || status === "paid") {
         updates.done_at = new Date();
         updates.done_by = req.user?.username || 'Receptionist';
+        // For full payment, store the amount so Flutter sync can read it
+        if (status === "paid" && call.installment_amount) {
+            updates.amountPaid = call.installment_amount;
+        }
     }
 
     Object.assign(call, updates);
@@ -136,7 +156,7 @@ export const updateCall = asyncHandler(async (req, res) => {
 // Body: { amountPaid: 500, notes: "Cash liya" }
 // Logic: Remaining amount baaki installments me equally divide ho jaayega
 export const partialPayCall = asyncHandler(async (req, res) => {
-    const { amountPaid, notes } = req.body;
+    const { amountPaid, notes, payment_method } = req.body;
 
     if (!amountPaid || amountPaid <= 0) {
         throw new ApiError(400, "amountPaid required aur 0 se zyada hona chahiye");
@@ -154,7 +174,7 @@ export const partialPayCall = asyncHandler(async (req, res) => {
 
     const remainingAmount = Math.round((originalAmount - paid) * 100) / 100;
 
-    // ─── Step 1: Current fee_record update karo (native collection call) ───────
+    // ─── Step 1: Update FeeRecord if linked (graceful — won't block on failure) ─
     await updateFeeRecord(call.mongo_fee_id, {
         paidAmount: paid,
         remainingAmount: remainingAmount,
@@ -164,20 +184,12 @@ export const partialPayCall = asyncHandler(async (req, res) => {
         notes: notes || "",
     });
 
-    // ─── Step 2: Student ke baaki future installments dhundho ─────────────────
-    // LOCAL DB pe query karo — fee_records wahan hai (cloud me nahi)
-    // ⚠️  FMS records mein 'student_mongo_id' (string) hoti hai
-    //     Receptionist sync records mein 'student' (ObjectId) hoti hai
-    //     Dono se query karo taake sab records milein
-
-    // Note: future installment redistribution is handled by FeeSync sync_service
+    // Note: future installment redistribution is handled by Flutter sync_service
     // when it reads partial_paid status from Atlas fee_call_reminders
-    let distributedCount = 0;
 
-
-    // ─── Step 3: Call record ko update karo ──────────────────────────────────
+    // ─── Step 2: Update Call record ──────────────────────────────────────────
     // ✅ status = "partial_paid" → sync_service ka partial_paid branch trigger hoga
-    // ✅ amountPaid field save karo → sync_service partial amount detect kar sake
+    // ✅ amountPaid + partial_amount_paid → sync_service partial amount detect kar sake
     call.status = "partial_paid";
     call.call_notes = notes || call.call_notes || "";
     call.called_by = req.user?.username || "Receptionist";
@@ -185,9 +197,9 @@ export const partialPayCall = asyncHandler(async (req, res) => {
     call.updated_at = new Date();
     call.done_at = new Date();
     call.done_by = req.user?.username || "Receptionist";
-    // Extra fields: sync_service in fields se partial amount padhega
-    call.set("amountPaid", paid, { strict: false });
-    call.set("partial_amount_paid", paid, { strict: false });
+    call.amountPaid = paid;
+    call.partial_amount_paid = paid;
+    if (payment_method) call.payment_method = payment_method;
     await call.save();
 
     // ─── Step 4: Activity log ─────────────────────────────────────────────────
@@ -203,8 +215,7 @@ export const partialPayCall = asyncHandler(async (req, res) => {
             originalAmount,
             amountPaid: paid,
             remainingAmount,
-            distributedAcrossInstallments: distributedCount > 0,
-            distributedAcrossCount: distributedCount,
+            payment_method: payment_method || '',
             notes,
         },
         timestamp: new Date(),
@@ -213,7 +224,7 @@ export const partialPayCall = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new ApiResponse(200,
             { amountPaid: paid, remainingAmount, originalAmount },
-            `✅ Partial payment recorded. ₹${paid} receive hua, ₹${remainingAmount} baaki installments me distribute kar diya.`
+            `✅ Partial payment recorded. ₹${paid} received, ₹${remainingAmount} remaining.`
         )
     );
 });

@@ -37,7 +37,7 @@ const CONTACTED_STATUSES = ['will_pay', 'no_answer', 'called'];
 /* ─── Detail Page ─────────────────────────────────────── */
 function DetailPage({ student, onBack, onMarkDone, onReschedule, onNoteChange, onPartialPay }) {
     const [noteText, setNoteText] = useState(student.note || '');
-    const [paymentMethod, setPaymentMethod] = useState('UPI');
+    const [paymentMethod, setPaymentMethod] = useState('Cash');
     const [newDate, setNewDate] = useState(student.feesDate || '');
     const [loading, setLoading] = useState(false);
     const [partialAmount, setPartialAmount] = useState('');
@@ -60,7 +60,7 @@ function DetailPage({ student, onBack, onMarkDone, onReschedule, onNoteChange, o
         setPartialLoading(true);
         try { 
             const finalNote = noteText ? `[${paymentMethod}] ${noteText}` : `Partial payment via ${paymentMethod}`;
-            await onPartialPay(student._id, amt, finalNote); 
+            await onPartialPay(student._id, amt, finalNote, paymentMethod); 
             setPartialAmount(''); 
             onBack(); 
         }
@@ -247,7 +247,7 @@ function DetailPage({ student, onBack, onMarkDone, onReschedule, onNoteChange, o
             <button
                 onClick={() => wrap(async () => { 
                     const finalNote = noteText ? `[${paymentMethod}] ${noteText}` : `Paid via ${paymentMethod}`;
-                    await onMarkDone(student._id, 'paid', finalNote); 
+                    await onMarkDone(student._id, 'paid', finalNote, paymentMethod); 
                     onBack(); 
                 })}
                 disabled={loading}
@@ -448,7 +448,7 @@ function FeeManagement() {
 
     useEffect(() => { fetchCalls(); }, [fetchCalls]);
 
-    const handleMarkDone = async (id, status, extraNotes = '') => {
+    const handleMarkDone = async (id, status, extraNotes = '', paymentMethod = '') => {
         const isPaid = ['paid', 'done'].includes(status);
         const isContact = CONTACTED_STATUSES.includes(status);
 
@@ -476,6 +476,7 @@ function FeeManagement() {
         try {
             const payload = { status };
             if (extraNotes) payload.call_notes = extraNotes;
+            if (paymentMethod) payload.payment_method = paymentMethod;
             await axios.patch(`/api/v1/calls/${id}`, payload);
             toast.success(`Marked as ${status.replace('_', ' ')}`);
             fetchCalls();
@@ -509,11 +510,12 @@ function FeeManagement() {
         }
     };
 
-    const handlePartialPay = async (id, amt, noteText) => {
+    const handlePartialPay = async (id, amt, noteText, paymentMethod = '') => {
         try {
             const res = await axios.patch(`/api/v1/calls/${id}/partial-pay`, {
                 amountPaid: amt,
                 notes: noteText || `Partial payment: ₹${amt} received`,
+                payment_method: paymentMethod,
             });
             const { remainingAmount } = res.data.data;
             toast.success(`✅ ₹${amt} recorded! Remaining ₹${remainingAmount} distributed across future installments.`, { duration: 5000 });

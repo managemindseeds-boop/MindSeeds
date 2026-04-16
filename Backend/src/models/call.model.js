@@ -38,6 +38,9 @@ const callSchema = new mongoose.Schema(
         done_by: { type: String, default: "" },
         updated_at: { type: Date, default: null },
 
+        // Payment method (UPI/Cash/Bank Transfer) — synced to Flutter via polling
+        payment_method: { type: String, default: "" },
+
         // Partial payment tracking — sync_service in fields se partial amount padhega
         amountPaid: { type: Number, default: null },
         partial_amount_paid: { type: Number, default: null },
