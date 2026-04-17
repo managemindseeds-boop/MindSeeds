@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import {
     IndianRupee, Phone, CalendarClock, CalendarDays,
     StickyNote, Check, ChevronRight, ArrowLeft,
-    RefreshCw, BadgeIndianRupee,
+    RefreshCw, BadgeIndianRupee, CheckCircle2, Clock,
+    PhoneOff, CreditCard, Banknote, Wallet,
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -38,224 +39,315 @@ const CONTACTED_STATUSES = ['will_pay', 'no_answer', 'called'];
 function DetailPage({ student, onBack, onMarkDone, onReschedule, onNoteChange, onPartialPay }) {
     const [noteText, setNoteText] = useState(student.note || '');
     const [paymentMethod, setPaymentMethod] = useState('Cash');
-    const [newDate, setNewDate] = useState(student.feesDate || '');
+    const [newDate, setNewDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [partialAmount, setPartialAmount] = useState('');
     const [partialLoading, setPartialLoading] = useState(false);
+    const [showReschedule, setShowReschedule] = useState(false);
 
     const days = getDaysUntil(student.feesDate);
     const dueBadge = getDueBadge(days);
     const isContacted = CONTACTED_STATUSES.includes(student.status);
     const contactedCfg = isContacted ? CONTACTED_CONFIG[student.status] : null;
+    const installmentAmt = student.installment ?? 0;
+    const enteredAmount = Number(partialAmount) || 0;
+    const isFullPayment = enteredAmount >= installmentAmt && enteredAmount > 0;
+    const isPartialPayment = enteredAmount > 0 && enteredAmount < installmentAmt;
+
+    const initials = student.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
     const wrap = async (fn) => { setLoading(true); try { await fn(); } finally { setLoading(false); } };
 
     const handlePartialPay = async () => {
         const amt = Number(partialAmount);
         if (!amt || amt <= 0) { toast.error('Please enter a valid amount'); return; }
-        if (amt >= (student.installment ?? 0)) {
-            toast.error('Partial amount must be less than the full installment — use "Mark as Paid" for full payment');
+        if (amt >= installmentAmt) {
+            toast.error('Use "Full Payment" for the complete installment amount');
             return;
         }
         setPartialLoading(true);
-        try { 
+        try {
             const finalNote = noteText ? `[${paymentMethod}] ${noteText}` : `Partial payment via ${paymentMethod}`;
-            await onPartialPay(student._id, amt, finalNote, paymentMethod); 
-            setPartialAmount(''); 
-            onBack(); 
+            await onPartialPay(student._id, amt, finalNote, paymentMethod);
+            setPartialAmount('');
+            onBack();
         }
         finally { setPartialLoading(false); }
     };
 
+    const handleFullPayment = async () => {
+        setLoading(true);
+        try {
+            const finalNote = noteText ? `[${paymentMethod}] ${noteText}` : `Paid via ${paymentMethod}`;
+            await onMarkDone(student._id, 'paid', finalNote, paymentMethod);
+            onBack();
+        } finally { setLoading(false); }
+    };
+
     return (
-        <div className="max-w-lg mx-auto">
-            <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-6 transition-colors cursor-pointer group">
+        <div className="max-w-4xl mx-auto">
+            {/* Back */}
+            <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition-colors cursor-pointer group">
                 <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
                 Back to Fee Reminders
             </button>
 
-            {/* Header */}
-            <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-[#f0e6f6] flex items-center justify-center text-[#5e3174] font-bold text-sm flex-shrink-0">
-                    {student.fullName.slice(0, 2).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                    <h2 className="text-base font-semibold text-gray-900">{student.fullName}</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Class {student.class} · {student.branch}</p>
-                </div>
-                <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${dueBadge.cls}`}>{dueBadge.label}</span>
-                    {isContacted && (
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${contactedCfg.cls}`}>
-                            {contactedCfg.icon} {contactedCfg.label}
+            {/* TOP ROW: Student Info + Fee Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+                {/* Student Info */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5">
+                    <div className="flex items-center gap-3.5 mb-3.5">
+                        <div className="w-12 h-12 rounded-full bg-[#5e3174] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            {initials}
+                        </div>
+                        <div>
+                            <h2 className="text-base font-bold text-gray-900">{student.fullName}</h2>
+                            <p className="text-xs text-gray-400">Class {student.class} · {student.branch}</p>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border inline-flex items-center gap-1 ${dueBadge.cls}`}>
+                            <Clock size={11} /> {dueBadge.label}
                         </span>
+                        {contactedCfg && (
+                            <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border inline-flex items-center gap-1 ${contactedCfg.cls}`}>
+                                <Phone size={11} /> {contactedCfg.label}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Fee Details */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <p className="text-[11px] font-medium text-gray-400 mb-1">Fee Date</p>
+                            <p className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                                <CalendarDays size={12} className="text-gray-400" />
+                                {formatDate(student.feesDate)}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-medium text-gray-400 mb-1">Installment Amount</p>
+                            <p className="text-lg font-bold text-[#5e3174] flex items-center gap-0.5">
+                                <IndianRupee size={15} />{installmentAmt.toLocaleString('en-IN')}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-medium text-gray-400 mb-1">Student Phone</p>
+                            <a href={`tel:${student.phone}`} className="flex items-center gap-1 text-xs font-medium text-[#5e3174] hover:underline">
+                                <Phone size={12} className="text-gray-400" />{student.phone}
+                            </a>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-medium text-gray-400 mb-1">Parent Phone</p>
+                            <a href={`tel:${student.parentPhone}`} className="flex items-center gap-1 text-xs font-medium text-[#5e3174] hover:underline">
+                                <Phone size={12} className="text-gray-400" />{student.parentPhone}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* MIDDLE ROW: Call Status + Record Payment */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+                {/* Update Call Status */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5">
+                    <p className="text-xs font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                        <Phone size={14} className="text-[#5e3174]" />
+                        Update Call Status
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-3.5">
+                        <button
+                            onClick={() => wrap(async () => { await onMarkDone(student._id, 'will_pay'); onBack(); })}
+                            disabled={loading}
+                            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-50 border ${
+                                student.status === 'will_pay'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300 ring-1 ring-emerald-200'
+                                    : 'bg-white text-emerald-600 border-emerald-300 hover:bg-emerald-50'
+                            }`}
+                        >
+                            <Wallet size={13} /> Will Pay
+                        </button>
+                        <button
+                            onClick={() => wrap(async () => { await onMarkDone(student._id, 'no_answer'); onBack(); })}
+                            disabled={loading}
+                            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-50 border ${
+                                student.status === 'no_answer'
+                                    ? 'bg-red-50 text-red-700 border-red-300 ring-1 ring-red-200'
+                                    : 'bg-white text-red-600 border-red-300 hover:bg-red-50'
+                            }`}
+                        >
+                            <PhoneOff size={13} /> No Answer
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => setShowReschedule(!showReschedule)}
+                        className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer border border-blue-300 text-blue-600 hover:bg-blue-50 mb-3.5"
+                    >
+                        <CalendarDays size={13} /> Reschedule
+                    </button>
+                    <textarea
+                        rows={2}
+                        value={noteText}
+                        onChange={e => setNoteText(e.target.value)}
+                        placeholder="Add note about the call..."
+                        className="w-full text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 resize-none outline-none focus:border-[#5e3174] focus:bg-white transition-colors"
+                    />
+                    <div className="flex justify-end mt-2.5">
+                        <button
+                            onClick={() => wrap(async () => { await onNoteChange(student._id, student.status, noteText); })}
+                            disabled={loading || !noteText.trim()}
+                            className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? <RefreshCw size={11} className="animate-spin" /> : <Check size={11} />}
+                            Save
+                        </button>
+                    </div>
+                </div>
+
+                {/* Record Payment */}
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5 border-t-[3px] border-t-[#5e3174]">
+                    <p className="text-xs font-semibold text-gray-900 flex items-center gap-2 mb-1">
+                        <CreditCard size={14} className="text-[#5e3174]" />
+                        Record Payment
+                    </p>
+                    <p className="text-[11px] text-gray-400 mb-4">
+                        Expected: <span className="font-semibold">₹{installmentAmt.toLocaleString('en-IN')}</span>
+                    </p>
+
+                    {/* Payment method toggle */}
+                    <div className="flex bg-gray-50 border border-gray-100 p-0.5 rounded-lg w-full mb-4">
+                        {['UPI', 'Cash', 'Bank Transfer'].map(mode => (
+                            <button
+                                key={mode}
+                                onClick={() => setPaymentMethod(mode)}
+                                className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer ${
+                                    paymentMethod === mode
+                                        ? 'bg-blue-600 text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                {mode}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Amount label */}
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Amount Received
+                    </p>
+
+                    {/* Amount input */}
+                    <div className="relative mb-2.5">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-gray-400">₹</span>
+                        <input
+                            type="number"
+                            min="1"
+                            value={partialAmount}
+                            onChange={e => setPartialAmount(e.target.value)}
+                            placeholder="0"
+                            className="w-full pl-8 pr-3 py-3 text-xl font-semibold text-gray-900 bg-white border-2 border-gray-200 rounded-xl outline-none focus:border-[#5e3174] transition-colors"
+                        />
+                    </div>
+
+                    {/* Amount status */}
+                    {enteredAmount > 0 && (
+                        <p className={`text-xs font-medium mb-3.5 flex items-center gap-1 ${isFullPayment ? 'text-emerald-600' : 'text-amber-600'}`}>
+                            <CheckCircle2 size={13} />
+                            {isFullPayment
+                                ? `₹${enteredAmount.toLocaleString('en-IN')} — Full Payment`
+                                : `₹${enteredAmount.toLocaleString('en-IN')} of ₹${installmentAmt.toLocaleString('en-IN')} — Partial Payment`
+                            }
+                        </p>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2.5">
+                        <button
+                            onClick={handlePartialPay}
+                            disabled={!isPartialPayment || partialLoading}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed ${
+                                isPartialPayment
+                                    ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                                    : 'bg-gray-100 text-gray-400'
+                            }`}
+                        >
+                            <Banknote size={14} /> Save Partial
+                        </button>
+                        <button
+                            onClick={handleFullPayment}
+                            disabled={!isFullPayment || loading}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-semibold rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed ${
+                                isFullPayment
+                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                    : 'bg-gray-100 text-gray-400'
+                            }`}
+                        >
+                            <CheckCircle2 size={14} /> Full Payment
+                        </button>
+                    </div>
+
+                    {isPartialPayment && (
+                        <p className="text-[11px] text-emerald-600 mt-2 text-center">
+                            Balance ₹{(installmentAmt - enteredAmount).toLocaleString('en-IN')} will be redistributed
+                        </p>
+                    )}
+                    {isFullPayment && (
+                        <p className="text-[11px] text-emerald-600 mt-2 text-center">
+                            This will mark the installment as fully paid
+                        </p>
                     )}
                 </div>
             </div>
 
-            {/* Info card */}
-            <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden mb-4">
-                <div className="divide-y divide-gray-50">
-                    <div className="flex items-center justify-between px-4 py-3">
-                        <span className="text-xs text-gray-400">Fee Date</span>
-                        <span className="text-xs font-medium text-gray-700">{formatDate(student.feesDate)}</span>
+            {/* RESCHEDULE SECTION (shown when Reschedule clicked) */}
+            {showReschedule && (
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5 mb-4 border-t-[3px] border-t-blue-600">
+                    <p className="text-xs font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                        <CalendarDays size={14} className="text-blue-600" />
+                        Reschedule Payment Date
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                                Select a new date to follow up with the parent regarding this fee installment.
+                            </p>
+                            <p className="text-[11px] font-semibold text-gray-500 mb-1.5">New Follow-up Date</p>
+                            <input
+                                type="date"
+                                value={newDate}
+                                onChange={e => setNewDate(e.target.value)}
+                                min={new Date().toISOString().split('T')[0]}
+                                className="w-full text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 outline-none focus:border-[#5e3174] focus:bg-white transition-colors"
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1.5">This will change the fee date to the selected date.</p>
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-semibold text-gray-500 mb-1.5">Reason for reschedule (Optional)</p>
+                            <textarea
+                                value={noteText}
+                                onChange={e => setNoteText(e.target.value)}
+                                placeholder="e.g. Parent requested more time..."
+                                rows={3}
+                                className="w-full text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 resize-none outline-none focus:border-[#5e3174] focus:bg-white transition-colors"
+                            />
+                            <div className="flex justify-end mt-3">
+                                <button
+                                    onClick={() => wrap(async () => { await onReschedule(student._id, newDate, noteText); onBack(); })}
+                                    disabled={loading || !newDate}
+                                    className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? <RefreshCw size={11} className="animate-spin" /> : <Check size={11} />}
+                                    Confirm Reschedule
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                        <span className="text-xs text-gray-400">Installment</span>
-                        <span className="flex items-center gap-0.5 text-sm font-bold text-emerald-700">
-                            <IndianRupee size={13} />{(student.installment ?? 0).toLocaleString('en-IN')}
-                        </span>
-                    </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                        <span className="text-xs text-gray-400">Student Phone</span>
-                        <a href={`tel:${student.phone}`} className="flex items-center gap-1 text-xs font-medium text-[#5e3174] hover:underline">
-                            <Phone size={11} />{student.phone}
-                        </a>
-                    </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                        <span className="text-xs text-gray-400">Parent Phone</span>
-                        <a href={`tel:${student.parentPhone}`} className="flex items-center gap-1 text-xs font-medium text-[#5e3174] hover:underline">
-                            <Phone size={11} />{student.parentPhone}
-                        </a>
-                    </div>
                 </div>
-            </div>
-
-            {/* Note */}
-            <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 mb-4">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 mb-2.5">
-                    <StickyNote size={12} /> Add Note
-                </label>
-                <textarea
-                    rows={3}
-                    value={noteText}
-                    onChange={e => setNoteText(e.target.value)}
-                    placeholder="e.g. Parent contacted, will pay by evening..."
-                    className="w-full text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 resize-none outline-none focus:border-[#5e3174] focus:bg-white transition-colors"
-                />
-                <div className="flex justify-end mt-2">
-                    <button
-                        onClick={() => wrap(async () => { await onNoteChange(student._id, student.status, noteText); })}
-                        disabled={loading}
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium bg-gray-800 hover:bg-gray-900 text-white rounded-lg cursor-pointer transition-colors disabled:opacity-50"
-                    >
-                        {loading ? <RefreshCw size={11} className="animate-spin" /> : <Check size={11} />}
-                        Save Note
-                    </button>
-                </div>
-            </div>
-
-            {/* Reschedule */}
-            <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 mb-4">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 mb-2.5">
-                    <CalendarDays size={12} /> Reschedule Fee Date
-                </label>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="date" value={newDate}
-                        onChange={e => setNewDate(e.target.value)}
-                        className="flex-1 text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#5e3174] focus:bg-white transition-colors"
-                    />
-                    <button
-                        onClick={() => wrap(async () => { await onReschedule(student._id, newDate, noteText); onBack(); })}
-                        disabled={loading}
-                        className="flex items-center gap-1 px-3.5 py-2 text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50"
-                    >
-                        {loading ? <RefreshCw size={11} className="animate-spin" /> : <Check size={11} />} Confirm
-                    </button>
-                </div>
-            </div>
-
-            {/* Payment Method Selector */}
-            <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4 mb-4">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 mb-2.5">
-                    <IndianRupee size={12} /> Payment Method
-                </label>
-                <div className="flex bg-gray-50 border border-gray-100 p-0.5 rounded-lg w-full">
-                    {['UPI', 'Cash', 'Bank Transfer'].map(mode => (
-                        <button
-                            key={mode}
-                            onClick={() => setPaymentMethod(mode)}
-                            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${paymentMethod === mode ? 'bg-white shadow-sm text-[#5e3174] border border-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            {mode}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {/* Partial Payment */}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl shadow-sm p-4 mb-3">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 mb-1">
-                    <IndianRupee size={12} /> Record Partial Payment
-                </label>
-                <p className="text-[11px] text-amber-600 mb-2.5">
-                    Installment: <span className="font-bold">₹{(student.installment ?? 0).toLocaleString('en-IN')}</span>
-                    &nbsp;— Received a partial amount? Enter it here.
-                </p>
-                <div className="flex items-center gap-2">
-                    <div className="relative flex-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
-                        <input
-                            type="number" min="1" max={(student.installment ?? 1) - 1}
-                            value={partialAmount}
-                            onChange={e => setPartialAmount(e.target.value)}
-                            placeholder="e.g. 500"
-                            className="w-full pl-7 pr-3 py-2 text-xs text-gray-800 bg-white border border-amber-300 rounded-lg outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-200 transition-colors"
-                        />
-                    </div>
-                    <button
-                        onClick={handlePartialPay}
-                        disabled={partialLoading || !partialAmount}
-                        className="flex items-center gap-1 px-3.5 py-2 text-xs font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg cursor-pointer transition-colors whitespace-nowrap disabled:opacity-50"
-                    >
-                        {partialLoading ? <RefreshCw size={11} className="animate-spin" /> : <Check size={11} />}
-                        Save
-                    </button>
-                </div>
-            </div>
-
-            {/* Call status buttons — marks contacted, moves card to Contacted section */}
-            <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 mb-3">
-                <p className="text-[10px] text-gray-400 text-center mb-2">Update call status — card stays visible until payment is received</p>
-                <div className="grid grid-cols-2 gap-2">
-                    <button
-                        onClick={() => wrap(async () => { await onMarkDone(student._id, 'will_pay'); onBack(); })}
-                        disabled={loading}
-                        className={`flex justify-center py-2.5 text-sm font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50 ${
-                            student.status === 'will_pay'
-                                ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-300'
-                                : 'bg-blue-50 hover:bg-blue-100 text-blue-700'
-                        }`}
-                    >
-                        📞 Will Pay
-                    </button>
-                    <button
-                        onClick={() => wrap(async () => { await onMarkDone(student._id, 'no_answer'); onBack(); })}
-                        disabled={loading}
-                        className={`flex justify-center py-2.5 text-sm font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50 ${
-                            student.status === 'no_answer'
-                                ? 'bg-gray-200 text-gray-800 ring-2 ring-gray-300'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                        }`}
-                    >
-                        📵 No Answer
-                    </button>
-                </div>
-            </div>
-
-            <button
-                onClick={() => wrap(async () => { 
-                    const finalNote = noteText ? `[${paymentMethod}] ${noteText}` : `Paid via ${paymentMethod}`;
-                    await onMarkDone(student._id, 'paid', finalNote, paymentMethod); 
-                    onBack(); 
-                })}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors cursor-pointer disabled:opacity-50"
-            >
-                <BadgeIndianRupee size={16} />
-                Mark as Paid (Full)
-            </button>
+            )}
         </div>
     );
 }

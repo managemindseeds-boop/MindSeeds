@@ -16,7 +16,7 @@ const updateFeeRecord = async (feeRecordId, data) => {
         const updated = await FeeRecord.findByIdAndUpdate(feeRecordId, data, { new: true });
         return updated;
     } catch (err) {
-        console.warn(`⚠️ updateFeeRecord(${feeRecordId}) failed:`, err.message);
+        console.warn(` updateFeeRecord(${feeRecordId}) failed:`, err.message);
         return null;
     }
 };
