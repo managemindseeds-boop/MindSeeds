@@ -116,7 +116,7 @@ export const updateCall = asyncHandler(async (req, res) => {
         updated_at: new Date(),
     };
 
-    if (call_notes) updates.call_notes = call_notes;
+    if (call_notes !== undefined) updates.call_notes = call_notes;
     if (rescheduled_to) updates.rescheduled_to = rescheduled_to;
     if (payment_method) updates.payment_method = payment_method;
 
@@ -144,7 +144,7 @@ export const updateCall = asyncHandler(async (req, res) => {
         action: `call_${status}`,
         actor: 'receptionist',
         actor_name: req.user?.username || 'Receptionist',
-        details: { call_notes, rescheduled_to },
+        details: { call_notes: req.body.reschedule_reason || call_notes, rescheduled_to },
         timestamp: new Date(),
     });
 

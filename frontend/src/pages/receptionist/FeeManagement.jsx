@@ -581,7 +581,7 @@ function FeeManagement() {
 
     const handleReschedule = async (id, date, note) => {
         try {
-            await axios.patch(`/api/v1/calls/${id}`, { status: 'rescheduled', rescheduled_to: date, call_notes: note });
+            await axios.patch(`/api/v1/calls/${id}`, { status: 'rescheduled', rescheduled_to: date, call_notes: '', reschedule_reason: note || '' });
             toast.success('Fee rescheduled');
             fetchCalls();
             refreshNotifications();
